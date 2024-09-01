@@ -1,0 +1,25 @@
+{{/* You Can Customise this code your personal use */}}
+
+{{define "Channel"}}
+    {{$ReFind := (reFind `\b\d+\b` .)}}
+    {{$Channel := getChannel $ReFind}}
+    {{if $Channel}}
+        {{if $Channel.Topic}}
+            {{$embed := cembed "color" 0xFFFFFF "fields" (cslice (sdict "name" (print "Topic of <#" $Channel.ID "> channel:") "value" (print $Channel.Topic)))}}
+            {{sendMessage nil $embed}}
+        {{else}}
+            {{sendMessage nil "Channel has not topic."}}
+        {{end}}
+    {{else}}
+        {{$embed := cembed "color" 0xFFFFFF "fields" (cslice (sdict "name" (print "Commange usage:") "value" (print "```xml\n-ChannelTopic <Channel.Mention/ID>```")))}}
+        {{sendMessage nil $embed}}
+    {{end}}
+{{end}}
+
+{{if eq (len .CmdArgs) 0}}
+{{$embed := cembed "color" 0xFFFFFF "fields" (cslice (sdict "name" (print "Topic of <#" .Channel.ID "> channel:") "value" (print .Channel.Topic)))}}
+{{sendMessage nil $embed}}
+
+{{else if eq (len .CmdArgs) 1}}
+{{$Channel := (execTemplate "Channel" (index .CmdArgs 0))}}
+{{end}}
