@@ -1,5 +1,8 @@
-{{/* You Can Customise this code your personal use */}}
-
+{{/*
+Usage: Its a CC for showing channel topic by Channel Mention or Channel ID, to use it, you can write `-channeltopic <Channel:ID/Mention` for example, if i write `-channeltopic <#1234567890>` it will give me channel-topic of that specific channel. if no channel id or channel mention is given it will show current channel by default.
+Trigger: channeltopic
+TriggerType: command
+*/}}
 {{define "Channel"}}
     {{$ReFind := (reFind `\b\d+\b` .)}}
     {{$Channel := getChannel $ReFind}}
