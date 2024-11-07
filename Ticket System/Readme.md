@@ -49,7 +49,7 @@
 #### Form / Modal, when you clicks on “⛔ Delete" button:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195700.png)
 
-#### Embed & an attachment, Have information about the deleted ticket:
+#### Embed & an attachment *With White Embed.Color*, Have information about the deleted ticket:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195740.png)
 ---
 
