@@ -1,0 +1,23 @@
+{{$ModRole := 00000}}
+{{$PingModRole := true}}
+{{$PinTopMessage := true}}
+
+{{$ID := "cticket_"}}
+{{$Content := print "Welcome " .User.Mention}}
+{{if $PingModRole}}
+    {{$Content = print "Welcome " .User.Mention "\n-# _ _\n> -# Pinging Staff so you don’t have to: <@&" $ModRole ">"}}
+{{end}}
+{{$TDB := (dbGet .User.ID "TemporaryTicketInfo").Value}}
+{{dbSet .Channel.ID "TicketInfo" (cslice .Channel.ID .User.ID "Opened" "Staff" (index $TDB 0) (index $TDB 1) "NotDeleted" .Message.ID (cslice ) (cslice ))}}
+{{$DB := (dbGet .Channel.ID "TicketInfo").Value}}
+{{$Color := (toInt64 (index (shuffle (cslice "15352629" "16497669" "3450963" "4359668")) 0))}}
+
+{{$Embed := cembed "title" (print (index $DB 4)) "description" (print (index $DB 5)) "fields" (cslice (sdict "name" "Info" "value" (print "-# " .User.Globalname ": State reason for ticket, add proof if needed. _No need to repeat details if already given._\n\n> -# Click “🔒 Close” to close ticket."))) "color" $Color "footer" (sdict "text" (print "Support will be with you shortly.") "icon_url" "https://raw.githubusercontent.com/iamcal/emoji-data/master/img-twitter-72/1f39f-fe0f.png")}}
+{{$Close := cbutton "label" "Close" "custom_id" (print $ID "close") "emoji" (sdict "name" "🔒") "style" "danger"}}
+{{$Settings := cbutton "label" "Settings" "custom_id" (print $ID "settings") "emoji" (sdict "name" "⚙️") "style" "grey"}}
+{{$Message := sendMessageNoEscapeRetID nil (complexMessage "content" $Content "embed" $Embed "buttons" (cslice $Close $Settings))}}
+{{if $PinTopMessage}}
+{{ pinMessage .Channel.ID $Message }}
+{{execAdmin "clean 1 -nopin"}}
+{{end}}
+{{dbSet .Channel.ID "TicketInfo" (cslice .Channel.ID .User.ID "Opened" "Staff" (index $TDB 0) (index $TDB 1) "NotDeleted" $Message (cslice ) (cslice ))}}
