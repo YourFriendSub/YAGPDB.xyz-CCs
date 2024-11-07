@@ -62,4 +62,4 @@ Ensure you have the following things:
 
 ### Setup
 go to:
-- ![Link](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System/Code%20Files)
+- [Link](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System/Code%20Files)
