@@ -64,7 +64,7 @@
   - Paste the code under your server's dashboard: `Tools & Utilitie > Ticket System`
   - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
     - *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
-    - 
+
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Command.yag) and copy the code.
   - Create a New Custom command with:
     - Trigger Type: `Command`
