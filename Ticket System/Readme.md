@@ -1,5 +1,7 @@
 # Interactive Ticket System 
 
+P.S. English isn't my First Language.
+---
 > This is a Ticket system but, it uses Buttons, Select Menus & Modals. This ticket system also has feature to close & re-open ticket without deleting the channel (like Ticket Tool bot).
 - [Jump To Installation](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System#Installation) or Just Scroll Down.
 
