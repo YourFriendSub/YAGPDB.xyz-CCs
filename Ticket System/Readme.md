@@ -1,6 +1,6 @@
 # Interactive Ticket System 
 
-> This is a Ticket system but, it uses Buttons, Select Menus & Modals. This ticket system also has feature to close ticket without deleting (like Ticket Tool bot).
+> This is a Ticket system but, it uses Buttons, Select Menus & Modals. This ticket system also has feature to close & re-open ticket without deleting the channel (like Ticket Tool bot).
 
 ## Features
 - ✅ Feature 1 - Is Interactive. Uses Buttons, Select Menus & Modals for almost everything.
