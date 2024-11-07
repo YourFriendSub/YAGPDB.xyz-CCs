@@ -61,4 +61,5 @@ Ensure you have the following things:
 - A channel, for logging the ticket - *post ticket-deletation logs*
 
 ### Setup
-- Wait...
+go to:
+- ![Link](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System/Code%20Files)
