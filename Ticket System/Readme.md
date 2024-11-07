@@ -31,19 +31,25 @@
 ---
 
 ## Demo
-> You can include a GIF or image showcasing the project here.
+> Setup:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_194902.png)
-> You can include a GIF or image showcasing the project here.
+
+> Creating a Ticket:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195303.png)
-> You can include a GIF or image showcasing the project here.
+
+> Bot message in the newly created ticket channel:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195345.png)
-> You can include a GIF or image showcasing the project here.
+
+> Interface of the “⚙️ Settings” button:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195434.png)
-> You can include a GIF or image showcasing the project here.
+
+> Bot message when you clicks on “🔒 Close” button:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195452.png)
-> You can include a GIF or image showcasing the project here.
+
+> Form / Modal, when you clicks on “⛔ Delete" button:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195700.png)
-> You can include a GIF or image showcasing the project here.
+
+> Embed & an attachment, Have information about the deleted ticket:
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195740.png)
 ---
 
