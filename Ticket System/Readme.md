@@ -55,13 +55,10 @@
 
 ## Installation
 
-### Prerequisites
-Ensure you have the following installed:
-- [Node.js](https://nodejs.org/) (version >= 14)
-- [Git](https://git-scm.com/)
-- Any other dependencies or tools
+### Needs
+Ensure you have the following things:
+- A dedicated Moderator-Role (Or Ticket-Moderator Role?)
+- A channel, for logging the ticket - *post ticket-deletation logs*
 
-### Clone the Repository
-```bash
-git clone https://github.com/yourusername/your-repository.git
-cd your-repository
+### Setup
+- Wait...
