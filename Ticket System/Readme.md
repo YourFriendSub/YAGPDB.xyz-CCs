@@ -61,5 +61,27 @@ Ensure you have the following things:
 - A channel, for logging the ticket - *post ticket-deletation logs*
 
 ### Setup
-go to:
-- [Link](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System/Code%20Files)
+- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Ticket.yag) and copy the code.
+  - Paste the code under your server's dashboard: `Tools & Utilitie > Ticket System`
+  - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
+    - *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
+    - 
+- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Command.yag) and copy the code.
+  - Create a New Custom command with:
+    - Trigger Type: `Command`
+    - Trigger: `cticket`
+  > *Don't forget to restrict this command only for your moderator role.*
+
+- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Component.yag) and copy the code.
+  - Create a New Custom command with and paste the code:
+    - Trigger Type: `Message Component`
+    - Trigger: `cticket_`
+  - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
+    - Again, *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
+
+- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Modal.yag) and copy the code.
+  - Create a New Custom command with and paste the code:
+    - Trigger Type: `Modal Submission`
+    - Trigger: `cticket_`
+  - Replace the `00000` in `{{$LogsChannel := 00000}}` variable with ID of your Logs-Channel
+    - *Don't know how to copy Channel-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
