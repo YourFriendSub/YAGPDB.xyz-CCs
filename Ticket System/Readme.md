@@ -87,4 +87,5 @@
 
 ---
 ### TODO
-> ○ Add an Info button in Settings
+> ● Make this folder public.
+> ○ Add an Info button in Settings.
