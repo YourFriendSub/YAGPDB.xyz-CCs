@@ -18,8 +18,8 @@
   - `{{$PDelete := false}}`: Permission For deleting the ticket. *Default=False*
 
   > NOTE:
-  > These permissions only overrides the permissions for Buttons, Select Menus & Modals. Ticket-Owner *or others* can still use inbuilt `-ticket` commands.
-  > "DELETE" Means Deleting the Ticket-Channel & "CLOSE" Means just removing the Ticket-Owner and Added Users from the Ticket-Channel.
+    - These permissions only overrides the permissions for Buttons, Select Menus & Modals. Ticket-Owner *or others* can still use inbuilt `-ticket` commands.
+    - "DELETE" Means Deleting the Ticket-Channel & "CLOSE" Means just removing the Ticket-Owner and Added Users from the Ticket-Channel.
 - ✅ Featere 3 - Additional features:
   - If you want to Pin the Top-Message (e.g. First message that was Sent by bot.) of the Ticket. *Default=True*
   - If you want to Ping Staff role or not. *Default=True*
