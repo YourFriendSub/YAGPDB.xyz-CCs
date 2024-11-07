@@ -56,7 +56,6 @@
 ## Installation
 
 ### Needs
-Ensure you have the following things:
 - A dedicated Moderator-Role (Or Ticket-Moderator Role?)
 - A channel, for logging the ticket - *post ticket-deletation logs*
 
