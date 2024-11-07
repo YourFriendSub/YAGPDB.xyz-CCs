@@ -7,7 +7,7 @@
 - ✅ Feature 1 - Is Interactive. Uses Buttons, Select Menus & Modals for almost everything.
 - ✅ Feature 2 - You can customize, what permissions you want to give to the ticket-owner (e.g. creator of the ticket):
   - `{{$PClose:= true}}`: Permission For Closing the ticket. *Default=True*
-    - It removes Ticket-Owner from ticket. If users were added *with Select-Menu*, it'll remove them too.
+    - It removes Ticket-Owner from ticket. If users were added, it'll remove them too.
   - `{{$POpen := true}}`: Permission For Re-Opening the ticket. *Default=True*
     - Added just for my own satisfaction but, can be good in some cases *maybe*.
   - `{{$PAddUser := false}}`: Permission For adding new users to the ticket. *Default=False*
@@ -16,7 +16,10 @@
   - `{{$PAdminOnly := true}}`: Permission For if Ticket-Owner can convert ticket to AdminOnly or not. *Default=True*
   - `{{$PUseSettings := true}}`: Permission For using the “⚙️ Settings” button. *Default=True*
   - `{{$PDelete := false}}`: Permission For deleting the ticket. *Default=False*
-  - > NOTE: Here, "DELETE" Means Deleting the Ticket-Channel & "CLOSE" Means just removing the Ticket-Owner and Added Users from the Ticket-Channel.
+
+  > NOTE:
+  > These permissions only overrides the permissions for Buttons, Select Menus & Modals. Ticket-Owner *or others* can still use inbuilt `-ticket` commands.
+  > "DELETE" Means Deleting the Ticket-Channel & "CLOSE" Means just removing the Ticket-Owner and Added Users from the Ticket-Channel.
 - ✅ Featere 3 - Additional features:
   - If you want to Pin the Top-Message (e.g. First message that was Sent by bot.) of the Ticket. *Default=True*
   - If you want to Ping Staff role or not. *Default=True*
@@ -65,7 +68,8 @@
   - Paste the code under your server's dashboard: `Tools & Utilitie > Ticket System`
   - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
     - *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
-
+  - Let `{{$PingModRole := true}}` If you want to ping Moderator role on ticket create.
+  - Let `{{$PinTopMessage := true}}` If you want to Pin the first message of the ticket. *Bot should've Manage Messages*
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Command.yag) and copy the code.
   - Create a New Custom command with:
     - Trigger Type: `Command`
@@ -78,6 +82,7 @@
     - Trigger: `cticket_`
   - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
     - Again, *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
+  - This is the commend, where you can customise the permission of Ticket-Owner. Adjust the variables as your needs.
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Modal.yag) and copy the code.
   - Create a New Custom command with and paste the code:
