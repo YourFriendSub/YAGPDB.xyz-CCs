@@ -1,0 +1,24 @@
+{{$ID := "whisper_"}}
+{{$DB := ""}}
+{{try}}
+    {{$DB = (dbGet .Message.ID "Whisper").Value}}
+{{catch}}
+    {{$DB = ""}}
+{{end}}
+
+{{$Color := (toInt64 (index (shuffle (cslice "15352629" "16497669" "3450963" "4359668")) 0))}}
+
+{{if eq .CustomID (print $ID .Message.ID)}}
+    {{if $DB}}
+        {{$From := (or (getMember ($DB.Get "from")) "Not Found")}}
+        {{$To := (or (getMember ($DB.Get "to")) "Not Found")}}
+        {{$Text := $DB.Get "text"}}
+        {{if eq $To.User.ID .User.ID}}
+            {{sendResponse nil (complexMessage "embed" (cembed "author" (sdict "name" (print (or $From.Nick $From.User.Globalname) "・" $From.User.ID) "icon_url" ($From.AvatarURL "256")) "description" (print $Text) "color" $Color) "ephemeral" true)}}
+        {{else}}
+            {{sendResponse nil (complexMessage "content" "This Whisper message isn't for you." "ephemeral" true)}}
+        {{end}}
+    {{else}}
+        {{sendResponse nil (complexMessage "content" "Seems like database entry was expired or deleted." "ephemeral" true)}}
+    {{end}}
+{{end}}
