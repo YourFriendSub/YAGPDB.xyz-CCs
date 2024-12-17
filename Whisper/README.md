@@ -1,5 +1,5 @@
 # Whisper Command
-> A way to talk to anyone privately, without opening Direct Messageing (DMing) them.
+> A way to talk to anyone privately, without Direct Messageing (DMing) them.
 - [Jump To Installation](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper#installation) or Just Scroll Down.
 > P.S. English isn't my First Language.
 ### Brief Description:
@@ -8,7 +8,8 @@ Let's say User-A wants to tell User-B something privately, but they don't have e
 
 ## Installation
 ### Needs
-- Channel-ID [ *Optional* ]
+- Channel-ID・*Optional* ]
+- Duration in Seconds・*Optional*
 ### Setup
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper/Code%20Files/Command.yag) and copy the code.
   - Create a New Custom command with:
@@ -21,3 +22,8 @@ Let's say User-A wants to tell User-B something privately, but they don't have e
   - Create a New Custom command with:
     - Trigger Type: `Message Component`
     - Trigger: `whisper_`
+
+### Support
+- For any assistance regarding my code, You can contact me in my testing Discord Server [Qwerty](https://discord.com/invite/2gjARJxh9V).
+- For any assistance regarding YAGPDB.xyz Bot, You can contact their support team at their Official Discord Server [YAGPDB Community & Support](https://discord.com/invite/Yagpdb).
+- 
