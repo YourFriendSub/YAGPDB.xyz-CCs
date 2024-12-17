@@ -26,4 +26,3 @@ Let's say User-A wants to tell User-B something privately, but they don't have e
 ### Support
 - For any assistance regarding my code, You can contact me in my testing Discord Server [Qwerty](https://discord.com/invite/2gjARJxh9V).
 - For any assistance regarding YAGPDB.xyz Bot, You can contact their support team at their Official Discord Server [YAGPDB Community & Support](https://discord.com/invite/Yagpdb).
-- 
