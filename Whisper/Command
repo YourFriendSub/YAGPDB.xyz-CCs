@@ -1,0 +1,18 @@
+{{$Channel := .Channel.ID}} {{/* Channel ID of the channel where the whisper message will appear. Here .Channel.ID means same channel. */}}
+{{$Expire := 900}} {{/* After how many second will be expired? */}}
+
+{{/* End Of Configuration */}}
+{{deleteTrigger 0}}
+{{$ID := "whisper_"}}
+{{$args := parseArgs 1 (print .ServerPrefix "whisper <Mention/ID> Text")
+	(carg "userid" "user")
+	(carg "string" "text")}}
+{{if not (and ($args.Get 0) ($args.Get 1))}}
+{{sendMessage nil "incorrect Usage"}}
+{{else}}
+{{$user := userArg ($args.Get 0)}}
+{{$text := $args.Get 1}}
+{{$MessageID := sendMessageNoEscapeRetID $Channel (print $user.Mention)}}
+{{editMessage $Channel $MessageID (complexMessageEdit "embed" (cembed "description" (print "-# Someone sent you a whisper message, click below button to see it.") "color" 0xFFFFFF) "buttons" (cslice (cbutton "label" "See Whisper Message" "custom_id" (print $ID $MessageID))))}}
+{{dbSetExpire $MessageID "Whisper" (sdict "from" .User.ID "to" $user.ID "text" $text) $Expire}}
+{{end}}
