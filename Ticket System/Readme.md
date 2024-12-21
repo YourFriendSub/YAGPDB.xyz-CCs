@@ -91,6 +91,7 @@
   - Replace the `00000` in `{{$LogsChannel := 00000}}` variable with ID of your Logs-Channel
     - *Don't know how to copy Channel-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
 
+- Now, use the command `-cticket setup` to send the Ticket Panel. *From where people will create tickets.*
 ---
 ### TODO
 > ● Make this folder public.
