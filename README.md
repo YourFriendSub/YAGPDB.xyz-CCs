@@ -1,7 +1,7 @@
 # YAGPDB.xyz-CCs
 Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Discord.
 <details>
-  <summary>
+  <summary>Ticket System</summary>
     <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System">Open Folder</a>
         <ul>
@@ -16,10 +16,10 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
         </ul>
       </li>
     </ul>
-</summary>
+</details>
 
 <details>
-  <summary>
+  <summary>Whisper</summary>
     <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper">Open Folder</a>
         <ul>
@@ -32,9 +32,10 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
         </ul>
       </li>
     </ul>
-  </summary>
+</details>
+  
  <details>
-   <summary>
+   <summary>Misc</summary>
      <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/misc">Open Folder</a>
         <ul>
@@ -44,7 +45,7 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
         </ul>
       </li>
      </ul>
-   </summary>
+   </details>
 
 ---
 ### Support
