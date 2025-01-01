@@ -1,8 +1,5 @@
 <details>
-  <summary>Click to expand</summary>
+  <summary><span style="color: blue">Click to expand</span></summary>
   
-  This is the content of the dropdown. You can include text, code blocks, or other markdown elements here.
-  
-  ```javascript
-  console.log("Hello, world!");
-```
+  This is the content of the dropdown.
+</details>
