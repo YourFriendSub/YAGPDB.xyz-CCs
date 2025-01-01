@@ -3,7 +3,7 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
 
 <details>
   <summary>Ticket System</summary>
-  - [Open Folder](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System)
+  <a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System">Open Folder</a>
 </details>
 <details>
   <summary>Whisper</summary>
