@@ -37,39 +37,38 @@
 ## Demo
 <details>
 <summary>Setup</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_194902.png" alt="Setup Screenshot">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_194902.png" alt="Setup Screenshot" width="600">
 </details>
 
 <details>
 <summary>Creating a Ticket</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195303.png" alt="Creating a Ticket Screenshot">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195303.png" alt="Creating a Ticket Screenshot" width="600">
 </details>
 
 <details>
 <summary>Bot message in the newly created ticket channel</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195345.png" alt="New Ticket Channel Screenshot">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195345.png" alt="New Ticket Channel Screenshot" width="600">
 </details>
 
 <details>
 <summary>Interface of the “⚙️ Settings” button</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195434.png" alt="Settings Button Screenshot">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195434.png" alt="Settings Button Screenshot" width="600">
 </details>
 
 <details>
 <summary>Bot message when you click on “🔒 Close” button</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195452.png" alt="Close Button Screenshot">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195452.png" alt="Close Button Screenshot" width="600">
 </details>
 
 <details>
 <summary>Form / Modal when you click on “⛔ Delete" button</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195700.png" alt="Delete Modal Screenshot">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195700.png" alt="Delete Modal Screenshot" width="600">
 </details>
 
 <details>
 <summary>Embed & an attachment *With White Embed.Color*, with information about the deleted ticket</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195740.png" alt="Deleted Ticket Info Screenshot">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195740.png" alt="Deleted Ticket Info Screenshot" width="600">
 </details>
-
 
 ---
 
