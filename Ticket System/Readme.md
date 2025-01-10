@@ -69,6 +69,7 @@
 <summary>Embed & an attachment *With White Embed.Color*, with information about the deleted ticket</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195740.png)
 </details>
+
 ---
 
 ## Installation
