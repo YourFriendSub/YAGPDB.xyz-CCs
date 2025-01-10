@@ -1,0 +1,53 @@
+{{/*
+Trigger Type: Command
+Trigger: Character
+What is this?: This CC gives information about Unicode Characters, e.g. 1 a B & ヽ ◎ ! ⁠д ? ⁠◎.
+*/}}
+
+{{if .StrippedMsg}}
+	{{$StrippedMessage := .StrippedMsg}}
+	{{$Symbol := urlescape $StrippedMessage}}
+	{{if ge (len $StrippedMessage) 2}}
+		{{$Symbol = urlescape (index (split $StrippedMessage "") 0)}}
+	{{end}}
+	{{$URL1 := (print `https://codepoints.net/` $Symbol)}}
+	{{$Original1 := sendMessageRetID .Channel.ID (print "[Never Gonna Give You Up]( " $URL1 " )")}}
+	{{sleep 2}}
+	{{try}}
+		{{$FollowUp1 := index (getMessage .Channel.ID $Original1).Embeds 0}}
+		{{$Embed1 := cembed 
+			"title" (print (reReplace `` $FollowUp1.Title "")) 
+			"description" $FollowUp1.Description 
+			"color" 0xFFFFFF}}
+		{{editMessage .Channel.ID $Original1 (complexMessageEdit "content" "-# This message was" "embed" $Embed1)}}
+
+		{{$Unicode := index (split $FollowUp1.Title " ") 0}}
+		{{$URL2 := (print "https://www.unicodepedia.com/unicode/miscellaneous-symbols/" $Unicode "/")}}
+		{{$Original2 := sendMessageRetID .Channel.ID (print "[Never Gonna Let You Down]( " $URL2 " )")}}
+		{{sleep 2}}
+		{{$FollowUp2 := index (getMessage .Channel.ID $Original2).Embeds 0}}
+
+		{{$Info := split $FollowUp2.Description ", "}}
+		{{$Embed1 := cembed 
+			"thumbnail" (sdict "url" (print "https://placehold.jp/96/000000/ffffff/128x128.png?text=" $Symbol)) 
+			"color" 0xFFFFFF 
+			"fields" (cslice 
+				(sdict 
+					"name" (print (reReplace ` – Unicode` $FollowUp1.Title "")) 
+					"value" $FollowUp1.Description) 
+				(sdict 
+					"name" "More Info:" 
+					"value" (print (index $Info 0) "\n" (index $Info 1) "\n" (index $Info 2) "\n" (index $Info 3) "\n" (index $Info 4))))}}
+		{{editMessage .Channel.ID $Original1 (complexMessageEdit "content" "-# This message was" "embed" $Embed1)}}
+		{{deleteMessage .Channel.ID $Original2 0}}
+	{{catch}}
+		{{.Error}}
+	{{end}}
+{{else if not .StrippedMsg}}
+	{{sendMessage .Channel.ID (complexMessage "embed" (cembed 
+		"color" 0xFFFFFF 
+		"fields" (cslice 
+			(sdict 
+				"name" "Usage:" 
+				"value" (print "`-character <CHARACTER>`\nWhere `<Character>` is a single character. If you'll use more than one character, it'll take the first one.\n\n-# **NOTE:** Because of website, it breaks when you'll use `.` (Full Stop/Dot) as your Character.")))))}}
+{{end}}
