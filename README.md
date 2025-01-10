@@ -52,7 +52,9 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
 ---
 ### About Me
 UserName: `yourfriendsub`
+<br>
 User ID: `1034691339280986132`
+<br>
 Nick/Global Name: `Your Friend, Sub`
 
 ---
