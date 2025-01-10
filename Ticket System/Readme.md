@@ -35,26 +35,40 @@
 ---
 
 ## Demo
-### Setup:
+<details>
+<summary>Setup</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_194902.png)
+</details>
 
-### Creating a Ticket:
+<details>
+<summary>Creating a Ticket</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195303.png)
+</details>
 
-### Bot message in the newly created ticket channel:
+<details>
+<summary>Bot message in the newly created ticket channel</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195345.png)
+</details>
 
-### Interface of the “⚙️ Settings” button:
+<details>
+<summary>Interface of the “⚙️ Settings” button</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195434.png)
+</details>
 
-### Bot message when you clicks on “🔒 Close” button:
+<details>
+<summary>Bot message when you click on “🔒 Close” button</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195452.png)
+</details>
 
-### Form / Modal, when you clicks on “⛔ Delete" button:
+<details>
+<summary>Form / Modal when you click on “⛔ Delete" button</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195700.png)
+</details>
 
-### Embed & an attachment *With White Embed.Color*, Have information about the deleted ticket:
+<details>
+<summary>Embed & an attachment *With White Embed.Color*, with information about the deleted ticket</summary>
 ![IMAGE](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Assets/Screenshot_2024_1107_195740.png)
+</details>
 ---
 
 ## Installation
