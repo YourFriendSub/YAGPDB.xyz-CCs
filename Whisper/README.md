@@ -8,14 +8,14 @@ Let's say User-A wants to tell User-B something privately, but they don't have e
 
 ## Installation
 ### Needs
-- Channel-ID・*Optional* ]
+- Channel-ID・*Optional*
 - Duration in Seconds・*Optional*
 ### Setup
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper/Code%20Files/Command.yag) and copy the code.
   - Create a New Custom command with:
     - Trigger Type: `Command`
     - Trigger: `whisper`
-  - If don't want to send whisper message in the same channel, You can edit the `{{$Channel := .Channel.ID}` variable and replace `.Channel.ID` with your desired Channel-ID.
+  - If don't want to send whisper message in the same channel, You can edit the `{{$Channel := .Channel.ID}}` variable and replace `.Channel.ID` with your desired Channel-ID.
   - If you want to edit the expiry of whisper message you can edit the `{{$Expire := 900}}` variable adn replace `900` with your desired duration.
     - NOTE: This should be in seconds.
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper/Code%20Files/Component.yag) and copy the code.
