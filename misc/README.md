@@ -1,35 +1,35 @@
 # Misc
-## Channel Topic
-### Usage:
-To get another current channel or mentioned channel's Topic and post guidances if forum channel.
+### Channel Topic
+**Usage:**
+> To get another current channel or mentioned channel's Topic and post guidances if forum channel.
 
-### Trigger
-Trigger Type: Command
-Trigger: ChannelTopic
-
----
-## CharacterInfo
-### Usage:
-To get some *basic* information about a unicode character.
-
-### Trigger
-Trigger Type: Command
-Trigger: CharacterInfo
+**Trigger**
+> Trigger Type: Command
+> Trigger: ChannelTopic
 
 ---
-## Icon
-### Usage:
-To get icon of the mentioned word.
+### CharacterInfo
+**Usage:**
+> To get some *basic* information about a unicode character.
 
-### Trigger
-Trigger Type: Command
-Trigger: Icon
+**Trigger**
+> Trigger Type: Command
+> Trigger: CharacterInfo
 
 ---
-## Calendar
-### Usage:
-To get current month's Calendar according to your timezone.
+### Icon
+**Usage:**
+> To get icon of the mentioned word.
 
-### Trigger
-Trigger Type: Command
-Trigger: Calendar
+**Trigger**
+> Trigger Type: Command
+> Trigger: Icon
+
+---
+### Calendar
+**Usage:**
+> To get current month's Calendar according to your timezone.
+
+**Trigger**
+> Trigger Type: Command
+> Trigger: Calendar
