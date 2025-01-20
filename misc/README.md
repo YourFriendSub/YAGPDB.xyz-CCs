@@ -4,7 +4,7 @@
 > To get another current channel or mentioned channel's Topic and post guidances if forum channel.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: Command\n
 > Trigger: ChannelTopic
 
 ---
@@ -13,7 +13,7 @@
 > To get some *basic* information about a unicode character.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: Command\n
 > Trigger: CharacterInfo
 
 ---
@@ -22,7 +22,7 @@
 > To get icon of the mentioned word.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: Command\n
 > Trigger: Icon
 
 ---
@@ -31,5 +31,5 @@
 > To get current month's Calendar according to your timezone.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: Command\n
 > Trigger: Calendar
