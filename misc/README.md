@@ -11,7 +11,7 @@
 <img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/ChannelTopic.png" alt="Channel Topic" width="400">
 
 ---
-### CharacterInfo
+### Character Info
 **Usage:**
 > To get some *basic* information about a unicode character.
 
@@ -23,7 +23,7 @@
 <img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/CharacterInfo.png" alt="Character Info" width="400">
 
 ---
-### MemberGraph
+### Member Count Graph
 **Usage:**
 > To get a graph of online & offline server members.
 **Trigger**
