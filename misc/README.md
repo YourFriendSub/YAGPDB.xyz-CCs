@@ -8,6 +8,8 @@
 > 
 > Trigger: ChannelTopic
 
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/ChannelTopic.png" alt="Channel Topic" width="400">
+
 ---
 ### CharacterInfo
 **Usage:**
@@ -17,6 +19,8 @@
 > Trigger Type: Command
 > 
 > Trigger: CharacterInfo
+
+
 
 ---
 ### Icon
