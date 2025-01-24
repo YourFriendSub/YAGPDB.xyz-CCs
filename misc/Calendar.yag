@@ -1,0 +1,96 @@
+{{$Timezone := index (reFindAllSubmatches  `\x60(.+)\x60` (exec "settimezone -u")) 0 1}}
+
+{{if eq $Timezone "Local"}}
+	{{$Timezone = "Asia/Kolkata"}}
+{{end}}
+
+{{$CurrentYear := (toInt64 (currentTime.In (loadLocation $Timezone)).Year)}}
+{{$CurrentMonthName := (toString (currentTime.In (loadLocation $Timezone)).Month)}}
+{{$CurrentMonthDay := (toInt64 (currentTime.In (loadLocation $Timezone)).Day)}}
+{{$CurrentWeekDay := (toString (currentTime.In (loadLocation $Timezone)).Weekday)}}
+
+{{$CY := $CurrentYear}}
+{{$CMN := $CurrentMonthName}}
+{{$CMD := $CurrentMonthDay}}
+    {{if lt $CMD 10}}
+        {{$CMD = print "0" $CMD}}
+    {{end}}
+{{$CWD := $CurrentWeekDay}}
+
+{{$CurrentWeekDay = print (index (split $CurrentWeekDay "") 0) (index (split $CurrentWeekDay "") 1) (index (split $CurrentWeekDay "") 2)}}
+
+{{define "LeapYear"}}
+	{{$Year := .}}
+	{{$Zero := (toFloat 0)}}
+
+	{{if and (eq (mod $Year 400) $Zero) (eq (mod $Year 100) $Zero)}}
+		{{return true}}
+	{{else if and (eq (mod $Year 4) $Zero) (ne (mod $Year 100) $Zero)}}
+		{{return true}}
+	{{else}}
+		{{return false}}
+	{{end}}
+
+{{end}}
+
+{{$MonthDays := 0}}
+
+{{$February := 28}}
+{{if (execTemplate "LeapYear" $CurrentYear)}}
+    {{$February = 29}}
+{{end}}
+
+{{$DaysInMonth := sdict "January" 31 "February" $February "March" 31 "April" 30 "May" 31 "June" 30 "July" 31 "August" 31 "September" 30 "October" 31 "November" 30 "December" 31}}
+
+{{range $Name, $Index := $DaysInMonth}}
+    {{if eq $CurrentMonthName $Name}}
+        {{$MonthDays = $Index}}
+    {{end}}
+{{end}}
+
+{{$CurrentWeekDayIndex := 0}}
+
+{{$WeekDay := sdict "Mon" 0 "Tue" 1 "Wed" 2 "Thu" 3 "Fri" 4 "Sat" 5 "Sun" 6}}
+
+{{range $Name, $Index := $WeekDay}}
+	{{if eq $CurrentWeekDay $Name}}
+		{{$CurrentWeekDayIndex = $Index}}
+	{{end}}
+{{end}}
+
+{{$FirstDayWeekDayIndex := toInt64 (mod (add (mod (sub $CurrentWeekDayIndex (sub $CurrentMonthDay 1)) 7) 7) 7)}}
+
+{{$Calendar := " "}}
+
+{{$DaysOfWeek := (cslice "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")}}
+
+{{range $Day := $DaysOfWeek}}
+	{{$Calendar = (print $Calendar $Day "   ")}}
+{{end}}
+
+{{$Calendar = (print $Calendar "\n ———   ———   ———   ———   ———   ———   ———\n ")}}
+
+{{range seq 0 $FirstDayWeekDayIndex}}
+	{{$Calendar = (print $Calendar "      ")}}
+{{end}}
+
+{{range $Day := seq 1 (add $MonthDays 1)}}
+	{{if lt (len (print $Day)) 2}}
+		{{$Day = (print "0" $Day)}}
+	{{end}}
+
+    {{if eq (toString $Day) (toString $CMD)}}
+        {{$Calendar = (print (slice $Calendar 0 (sub (len $Calendar) 1)) "<" $Day ">   ")}}
+    {{else}}
+	    {{$Calendar = (print $Calendar $Day "    ")}}
+    {{end}}
+
+	{{if eq (toInt64 (mod (add $FirstDayWeekDayIndex $Day) 7)) 0}}
+		{{$Calendar = (print $Calendar "\n ")}}
+	{{end}}
+
+{{end}}
+
+{{$Calendar := (print "```py\n" $CY "/" $CMN "/" $CMD "〡" $CWD "``````js\n" $Calendar "``````py\n" (reReplace `_` (reReplace `/` $Timezone "〡") " ") "・" (formatTime (currentTime.In (loadLocation $Timezone)) "15:04:05 MST") "```~~                                                                                                    ~~")}}
+
+{{sendMessage .Channel.ID (complexMessage "embed" (cembed "color" 0xFFFFFF "description" $Calendar))}}
