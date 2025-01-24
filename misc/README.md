@@ -20,6 +20,8 @@
 > 
 > Trigger: CharacterInfo
 
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/CharacterInfo.png" alt="Character Info" width="400">
+
 ---
 ### MemberGraph
 **Usage:**
@@ -28,6 +30,8 @@
 > Trigger Type: Command
 > 
 > Trigger: MemberGraph
+
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/MemberGraph.png" alt="Member Graph" width="400">
 
 ---
 ### Icon
@@ -39,6 +43,8 @@
 > 
 > Trigger: Icon
 
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/Icon.png" alt="Icon" width="400">
+
 ---
 ### Calendar
 **Usage:**
@@ -48,3 +54,5 @@
 > Trigger Type: Command
 > 
 > Trigger: Calendar
+
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/Calendar.png" alt="Calendar" width="400">
