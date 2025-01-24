@@ -31,7 +31,7 @@
 > 
 > Trigger: MemberGraph
 
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/MemberGraph.png" alt="Member Graph" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/MemberCountGraph.png" alt="Member Count Graph" width="400">
 
 ---
 ### Icon
