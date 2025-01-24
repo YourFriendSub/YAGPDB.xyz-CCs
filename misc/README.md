@@ -20,7 +20,14 @@
 > 
 > Trigger: CharacterInfo
 
-
+---
+### MemberGraph
+**Usage:**
+> To get a graph of online & offline server members.
+**Trigger**
+> Trigger Type: Command
+> 
+> Trigger: MemberGraph
 
 ---
 ### Icon
