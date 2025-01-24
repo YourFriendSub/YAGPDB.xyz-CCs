@@ -26,6 +26,7 @@
 ### Member Count Graph
 **Usage:**
 > To get a graph of online & offline server members.
+
 **Trigger**
 > Trigger Type: Command
 > 
