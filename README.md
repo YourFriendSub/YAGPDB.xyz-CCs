@@ -56,6 +56,23 @@ UserName: `yourfriendsub`
 User ID: `1034691339280986132`
 <br>
 Nick/Global Name: `Your Friend, Sub`
+<br>
+Age: `PRIVATE`
+<br>
+Gender: `MALE`
+
+---
+### F&Q
+- What should i call you?
+  - Sub
+- What time are you usually online?
+  - Flexible | Night
+- What's your timezone?
+  - IST | asia/kolkata
+- Where are you from?
+  - India | New Delhi
+- What languages can you speak/understand?
+  - Hindi, English & some others: `PRIVATE`
 
 ---
 ### Support
