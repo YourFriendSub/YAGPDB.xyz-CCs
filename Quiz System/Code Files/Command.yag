@@ -1,0 +1,223 @@
+{{$ModeratorRoleID := 1333685486245511229}}
+{{$DefaultEmoji := "Digit"}}
+{{$PingQuiz := "1334516503936237628"}}
+{{$YesQuiz := ""}}
+{{$NoQuiz := ""}}
+
+{{/* DO NOT CHANGE ANYTHING BELOW THIS */}}
+{{deleteTrigger 10}}
+{{$ID := "quiz_"}}
+
+{{if eq (len .CmdArgs) 0}}
+	{{sendMessage .Channel.ID (complexMessage "embed" (cembed "color" 0xFFFFFF "fields" (cslice
+		(sdict "name" "INFO:" "value" (print "For anything related to this quiz Custom Command, take a look at [YourFriendSub: Github](https://github.com/YourFriendSub/YAGPDB.xyz-CCs).")))))}}
+
+{{else if in (cslice "setup" "update" "re" "setupdb" "updatedb" "redb") (lower (index .CmdArgs 0))}}
+	{{$QuizEmojis := (sdict
+		"B" "1273150366711812149"
+		"D" "1273316850566172776"
+		"M" "1273151978985488387"
+		"P" "1273316757498499122"
+		"Q" "1326114400343425084"
+		"R" "1272655570901667973"
+		"S" "1273316408356245569"
+		"ID" "1334896977154146345"
+		"PP" "1272652974979678249"
+		"EC" "1273316552812396545"
+		"CT" "1287423284400357491"
+		"OT" "1287423261130625138"
+		"WR" "1326114379912970330"
+		"MO" "1333698233683410954"
+		"PQ" "1333695375390937099"
+		"YQ" "1333695329102725203"
+		"NQ" "1333695355451342878")}}
+
+	{{$EmojiPack := (cslice
+		(sdict "name" "Star" "rs" "1247908395793780757" "ys" "1247908428052172941" "gs" "1247908469030522983" "bs" "1247908362834804787"
+			"rb" "1247908274557161634" "yb" "1247908301358891079" "gb" "1247908330366828564" "bb" "1247908239681785968")
+		(sdict "name" "Digit" "rs" "1247918209923813397" "ys" "1247918241914028154" "gs" "1247918271248863252" "bs" "1247918179045605506"
+			"rb" "1247918067296636989" "yb" "1247918112603373620" "gb" "1247918143662456843" "bb" "1247918037374599230")
+		(sdict "name" "Dot" "rs" "1247908693912322098" "ys" "1247908977631825970" "gs" "1247909042114789497" "bs" "1247908627185139742"
+			"rb" "1247908530539991151" "yb" "1247908565092667454" "gb" "1247908596344422511" "bb" "1247908501880049704"))}}
+
+	{{range $EmojiPack}}
+		{{if eq $DefaultEmoji (.Get "name")}}
+			{{$DefaultEmoji = .}}
+			{{break}}
+		{{end}}
+	{{end}}
+
+	{{dbSet .Guild.ID "Quiz" (sdict "moderator" $ModeratorRoleID "qemoji" $QuizEmojis "demoji" $DefaultEmoji "handler" (sdict
+		"000" "You do not have the required roles or sufficient permissions to use this."
+
+		"001" "Please wait, updating message..."
+		"002" "Preview Question"
+		"003" "Preview Option 1"
+		"004" "Preview Option 2"
+		"005" "Preview Option 3"
+		"006" "Preview Option 4"
+		"007" "https://placehold.jp/56/000000/ffffff/720x120.png?text=Preview%20Image"
+		"008" "Quiz UID: "
+		"009" "Select the option you want to edit."
+		"010" "Question & Options"
+		"011" "Modify the Question or Options."
+		"012" "Hint, Answer, Explanation, Duration, or Image"
+		"013" "Modify the Hint, Answer, Explanation, Duration, or Image."
+		"014" "Select the channel where you want to send the quiz."
+		"015" "PingQuiz Role: "
+		"016" "Role to mention when sending."
+		"017" "YesQuiz Role: "
+		"018" "Allowed to participate in the quiz."
+		"019" "NoQuiz Role: "
+		"020" "Not allowed to participate in the quiz."
+		"021" "Ping Quiz"
+		"022" "Yes Quiz"
+		"023" "No Quiz"
+
+		"024" "Questions & Options"
+		"025" "Question"
+		"026" "Who created this quiz command?"
+		"027" "Option 1"
+		"028" "Our Friend, Sub"
+		"029" "Option 2"
+		"030" "Your Friend, Sub"
+		"031" "Option 3"
+		"032" "My Friend"
+		"033" "Option 4"
+		"034" "Not Friend, Sub"
+		"035" "Answer & Other Details"
+		"036" "Hint"
+		"037" "Who's 'Your Friend'?"
+		"038" "Answer"
+		"039" "2"
+		"040" "Explanation"
+		"041" "This quiz command was created by 'Your Friend, Sub'."
+		"042" "Duration (Not Working)"
+		"043" "24"
+		"044" "Image"
+		"045" "https://placehold.jp/56/000000/ffffff/720x120.png?text=YourFriend%20Sub"
+
+		"046" "- **Missing Required Arguments:**"
+		"047" "> `Question:` "
+		"048" "> `Option 1:` "
+		"049" "> `Option 2:` "
+		"050" "> `Option 3:` "
+		"051" "> `Option 4:` "
+		"052" "> `& Answer:` "
+		"053" "Empty"
+
+		"054" "Please use `1`, `2`, `3`, or `4`, not: "
+		"055" "The provided image URL is invalid."
+		"056" "Please select a valid channel and try again."
+
+		"057" "No Quiz set to `N/A` & "
+		"058" "Yes Quiz set to `N/A` & "
+
+		"059" "Successfully updated the question & options."
+		"060" "Successfully updated the answer & other details."
+		"061" "Successfully selected the channel: "
+		"062" "Sent the quiz to the selected channel: "
+		"063" "Ping Quiz Role set to: "
+		"064" "Yes Quiz Role set to: "
+		"065" "No Quiz Role set to: "
+		"066" "Refreshed the Quiz Builder. See Quiz Builder components."
+
+		"067" "Quiz Information: "
+		"068" "Moderator: "
+		"069" "Builder Channel: "
+		"070" "Builder Message: "
+		"071" "Quiz Channel: "
+		"072" "Quiz Message: "
+		"073" "Made By: "
+		"074" "Made On: "
+		"075" "Default Emoji: "
+		"076" "Sent By: "
+		"077" "Sent On: "
+		"078" "PingQuiz: "
+		"079" "Yes Quiz: "
+		"080" "No Quiz: "
+		"081" "Hint: "
+		"082" "Answer: "
+		"083" "Explanation: "
+		"084" "Duration: "
+		"085" "Has Image: "
+
+		"086" "Quiz Has Started: "
+
+		"087" "You cannot participate in this quiz. You **DO NOT HAVE** the required role: "
+		"088" "You cannot participate in this quiz. You **HAVE** a restricted role: "
+
+		"089" "☑〡Correct Answer!"
+		"090" "☒〡Wrong Answer!"
+		"091" "Hint → "
+		"092" "Hint not provided."
+		"093" "Explanation not provided."
+
+		"094" "Important Notes"
+		"095" "-# You Are Awesome!"
+
+		"096" "Quiz Statistics: "
+		"097" "`Total Clicks:` "
+		"098" "> `Answered 1:` "
+		"099" "> `Answered 2:` "
+		"100" "> `Answered 3:` "
+		"101" "> `Answered 4:` "
+		"102" "> `Viewed Hint:` "
+		"103" "Here's a chart: "
+		"104" "Answered One"
+		"105" "Answered Two"
+		"106" "Answered Three"
+		"107" "Answered Four"
+		"108" "Viewed Hint"
+
+		"109" "Confirmation Panel"
+		"110" "This will delete the quiz and its database."
+		"111" "Type \"CONFIRM\" to proceed."
+
+		"112" "Please type \"`CONFIRM`\".\n-# Note: Case-sensitive.\nYou entered: "
+		"113" "Deleted the quiz and its entire database.\n-# NOTE: Buttons, select menus, and modals will no longer function. This QuizBuilder will also stop working as the database has been deleted."
+
+		"114" "Correct Answer Was: "
+		"115" "Quiz ended and was successfully edited. All related databases have been deleted.\n-# NOTE: Buttons, select menus, and modals will no longer function. This QuizBuilder will also stop working as the database has been deleted."
+		"116" "The database for this quiz could not be found or has already been deleted."))}}
+
+	{{deleteMessage .Channel.ID (sendMessageNoEscapeRetID .Channel.ID (complexMessage "reply" .Message.ID "content" "Set Databases - Done")) 10}}
+
+{{else if eq (index .CmdArgs 0) "create"}}
+	{{if $DB := (dbGet .Guild.ID "Quiz").Value}}
+		{{$ModeratorRole := ($DB.Get "moderator")}}
+		{{$HC := $DB.Get "handler"}}
+		{{$DEmoji := $DB.Get "demoji"}}
+		{{$QEmoji := $DB.Get "qemoji"}}
+		{{$MR := hasRoleID $ModeratorRole}}
+
+		{{$NotAllowed := complexMessage "embed" (cembed "description" ($HC.Get "000") "color" 0xFFFFFF) "reply" .Message.ID}}
+
+		{{if $MR}}
+			{{$BuilderMessage := sendMessageRetID nil ($HC.Get "001")}}
+
+			{{$QuizEditMenu := cmenu "type" "text" "placeholder" ($HC.Get "009") "custom_id" (print $ID "build") "options" (cslice
+				(sdict "label" ($HC.Get "010") "value" (print $ID "QuestionAndOptions") "description" ($HC.Get "011") "emoji" (sdict "id" ($QEmoji.Get "Q")))
+				(sdict "label" ($HC.Get "012") "value" (print $ID "haedi") "description" ($HC.Get "013") "emoji" (sdict "id" ($QEmoji.Get "WR"))))}}
+
+			{{$QuizChannelMenu := cmenu "type" "channel" "placeholder" ($HC.Get "014") "custom_id" (print $ID "channel") "channel_types" (cslice 0 2 5 10 11 12 13)}}
+
+			{{$DataButton := cbutton "emoji" (sdict "id" ($QEmoji.Get "ID")) "custom_id" (print $ID "data") "style" "grey" "disabled" true}}
+			{{$MoreButton := cbutton "emoji" (sdict "id" ($QEmoji.Get "MO")) "custom_id" (print $ID "more") "style" "grey"}}
+			{{$RenewButton := cbutton "emoji" (sdict "id" ($QEmoji.Get "R")) "custom_id" (print $ID "renew") "style" "green"}}
+			{{$SendButton := cbutton "emoji" (sdict "id" ($QEmoji.Get "PP")) "custom_id" (print $ID "sendquiz") "style" "blurple"}}
+
+			{{$QuizEmbed := cembed "title" ($HC.Get "002") "description" (print "<:_:" ($DEmoji.Get "rs") ">" ($HC.Get "003") "\n<:_:" ($DEmoji.Get "ys") ">" ($HC.Get "004") "\n<:_:" ($DEmoji.Get "gs") ">" ($HC.Get "005") "\n<:_:" ($DEmoji.Get "bs") ">" ($HC.Get "006")) "color" 0xFFFFFF "image" (sdict "url" ($HC.Get "007")) "footer" (sdict "text" (print ($HC.Get "008") $BuilderMessage))}}
+
+			{{editMessage nil $BuilderMessage (complexMessageEdit "content" "" "menus" (cslice $QuizEditMenu $QuizChannelMenu) "buttons" (cslice $DataButton  $RenewButton $MoreButton $SendButton) "embed" $QuizEmbed)}}
+
+			{{$MadeBy := .User.ID}}
+			{{$MadeOn := currentTime.Unix}}
+			{{$BuilderChannel := .Channel.ID}}
+
+			{{dbSet $BuilderMessage "quiz" (sdict "quop" (sdict "Q" "" "O1" "" "O2" "" "O3" "" "O4" "") "haedi" (sdict "H" "" "A" "" "E" "" "D" "" "I" (sdict "URL" "" "Has" false)) "stats" (sdict "O1" "0" "O2" "0" "O3" "0" "O4" "0" "H" "0") "info" (sdict "MR" $ModeratorRole "BC" $BuilderChannel "BM" $BuilderMessage "QC" "" "QM" "" "MB" $MadeBy "MO" $MadeOn "DE" ($DEmoji.Get "name") "SB" "" "SO" "" "PQ" $PingQuiz "YQ" $YesQuiz "NQ" $NoQuiz))}}
+		{{else}}
+			{{deleteMessage nil (sendMessageRetID nil $NotAllowed) 10}}
+		{{end}}
+	{{end}}
+{{end}}
