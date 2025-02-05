@@ -53,13 +53,13 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
     </ul>
 </details>
   
- <details>
+<details>
    <summary>Misc</summary>
      <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/misc">Open Folder</a>
         <ul>
           <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/ChannelTopic.yag">ChannelTopic</a></li>
-<li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Calendar.yag">ChannelTopic</a></li>
+<li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Calendar.yag">Calendar</a></li>
           <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Icon.yag">Icon</a></li>
           <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/CharacterInfo.yag">CharacterInfo</a></li>
           <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/MemberCountGraph.yag">MemberCount</a></li>
