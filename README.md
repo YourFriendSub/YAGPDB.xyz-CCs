@@ -20,14 +20,14 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
 </details>
 
 <details>
-  <summary>Whisper</summary>
+  <summary>Whisper System</summary>
     <ul>
-      <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper">Open Folder</a>
+      <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper%20System">Open Folder</a>
         <ul>
-          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper/Code%20Files">Code</a>
+          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper%20System/Code%20Files">Code</a>
             <ul>
-              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper/Code%20Files/Command.yag">Command</a></li>
-              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper/Code%20Files/Component.yag">Component</a></li>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/Code%20Files/Command.yag">Command</a></li>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/Code%20Files/Component.yag">Component</a></li>
             </ul>
           </li>
         </ul>
