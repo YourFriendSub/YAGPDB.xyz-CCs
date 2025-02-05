@@ -19,6 +19,23 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
     </ul>
 </details>
 
+  <summary>Quiz System</summary>
+    <ul>
+      <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Quiz%20System">Open Folder</a>
+        <ul>
+          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Quiz%20System/Code%20Files">Code</a>
+            <ul>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Command.yag">Command</a></li>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component1.yag">Component</a></li>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component2.yag">Component</a></li>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Modal.yag">Modal</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+</details>
+
 <details>
   <summary>Whisper System</summary>
     <ul>
