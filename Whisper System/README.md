@@ -1,6 +1,6 @@
 # Whisper Command
 > A way to talk to anyone privately, without Direct Messageing (DMing) them.
-- [Jump To Installation](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper#installation) or Just Scroll Down.
+- [Jump To Installation](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/WhisperSystem#installation) or Just Scroll Down.
 
 ### Brief Description:
 Let's say User-A wants to tell User-B something privately, but they don't have enough time to send a direct message. So, User-A can use the command `-whisper @User-B || Private message ||`. The bot will delete User-A's message and will send its own message with a button. If User-B clicks on the button, they can see the private text. However, if someone else, like User-C, clicks the button, the bot will prevent them from seeing the message and will show a message saying "This message is not for you." Also, the private message will expire 15 minutes later, whether User-B has seen it or not.
