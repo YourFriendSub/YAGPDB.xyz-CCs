@@ -6,7 +6,7 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
     <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System">Open Folder</a>
         <ul>
-          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System/Code%20Files">Code</a>
+          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Ticket%20System/Code%20Files">Code Files</a>
             <ul>
               <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Command.yag">Command</a></li>
               <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Component.yag">Component</a></li>
@@ -24,11 +24,11 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
     <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Quiz%20System">Open Folder</a>
         <ul>
-          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Quiz%20System/Code%20Files">Code</a>
+          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Quiz%20System/Code%20Files">Code Files</a>
             <ul>
               <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Command.yag">Command</a></li>
-              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component1.yag">Component</a></li>
-              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component2.yag">Component</a></li>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-1.yag">Component</a></li>
+              <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-2.yag">Component</a></li>
               <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Modal.yag">Modal</a></li>
             </ul>
           </li>
@@ -42,7 +42,7 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
     <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper%20System">Open Folder</a>
         <ul>
-          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper%20System/Code%20Files">Code</a>
+          <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Whisper%20System/Code%20Files">Code Files</a>
             <ul>
               <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/Code%20Files/Command.yag">Command</a></li>
               <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/Code%20Files/Component.yag">Component</a></li>
