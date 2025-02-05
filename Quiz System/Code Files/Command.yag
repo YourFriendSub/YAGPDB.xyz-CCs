@@ -1,6 +1,6 @@
-{{$ModeratorRoleID := 1333685486245511229}}
+{{$ModeratorRoleID := 00000}}
 {{$DefaultEmoji := "Digit"}}
-{{$PingQuiz := "1334516503936237628"}}
+{{$PingQuiz := ""}}
 {{$YesQuiz := ""}}
 {{$NoQuiz := ""}}
 
