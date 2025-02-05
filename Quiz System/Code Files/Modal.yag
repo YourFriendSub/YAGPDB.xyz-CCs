@@ -1,0 +1,158 @@
+{{define "ToInt"}}
+	{{return (toInt64 (reFind `\b\d+\b` .))}}
+{{end}}
+
+{{define "UpDB"}}
+	{{$QID := .Get "ID"}}
+	{{$SDB := .Get "SDB"}}
+	{{$Key := .Get "Key"}}
+	{{$Value := .Get "Value"}}
+	{{$QDB := (dbGet $QID "quiz").Value}}
+	{{$Q := $QDB.Get "quop"}}
+	{{$H := $QDB.Get "haedi"}}
+	{{$S := $QDB.Get "stats"}}
+	{{$I := $QDB.Get "info"}}
+
+	{{if eq $SDB "Q"}}
+		{{range $K, $V := $Q}}
+			{{if eq $Key $K}}
+				{{$Q.Set $K $Value}}
+			{{end}}
+		{{end}}
+	{{end}}
+	{{if eq $SDB "H"}}
+		{{range $K, $V := $H}}
+			{{if eq $Key $K}}
+				{{$H.Set $K $Value}}
+			{{end}}
+		{{end}}
+	{{end}}
+	{{if eq $SDB "S"}}
+		{{range $K, $V := $S}}
+			{{if eq $Key $K}}
+				{{$S.Set $K $Value}}
+			{{end}}
+		{{end}}
+	{{end}}
+	{{if eq $SDB "I"}}
+		{{range $K, $V := $I}}
+			{{if eq $Key $K}}
+				{{$I.Set $K $Value}}
+			{{end}}
+		{{end}}
+	{{end}}
+
+	{{dbSet $QID "quiz" (sdict "quop" $Q "haedi" $H "stats" $S "info" $I)}}
+{{end}}
+
+{{$ID := "quiz_"}}
+{{$NVHandler := ""}}
+
+{{$DQDB := (dbGet .Guild.ID "Quiz").Value}}
+{{$HC := $DQDB.Get "handler"}}
+{{$DE := $DQDB.Get "demoji"}}
+{{$QE := $DQDB.Get "qemoji"}}
+
+{{$QID := execTemplate "ToInt" ((index .Message.Embeds 0).Footer).Text}}
+{{$QDB := (dbGet $QID "quiz").Value}}
+
+{{$Q := $QDB.Get "quop"}}
+{{$H := $QDB.Get "haedi"}}
+{{$S := $QDB.Get "stats"}}
+{{$I := $QDB.Get "info"}}
+
+{{if eq .CustomID (print $ID "haedi")}}
+	{{$Value := index .Values 1}}
+	{{range (cslice "1" "2" "3" "4")}}
+		{{if eq $Value .}}
+			{{$correctAnswer := .}}
+		{{end}}
+	{{end}}
+{{end}}
+
+{{if eq .CustomID (print $ID "QuestionAndOptions")}}
+
+	{{dbSet $QID "quiz" (sdict "quop" (sdict "Q" (index .Values 0) "O1" (index .Values 1) "O2" (index .Values 2) "O3" (index .Values 3) "O4" (index .Values 4)) "haedi" $H "info" $I "stats" $S)}}
+
+	{{/*
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "Q" "Key" "Q" "Value" (index .Values 0))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "Q" "Key" "O1" "Value" (index .Values 1))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "Q" "Key" "O2" "Value" (index .Values 2))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "Q" "Key" "O3" "Value" (index .Values 3))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "Q" "Key" "O4" "Value" (index .Values 4))}}
+	*/}}
+
+	{{$Q = ((dbGet $QID "quiz").Value).Get "quop"}}
+	{{$Question := $Q.Get "Q"}}
+	{{$Option1 := $Q.Get "O1"}}
+	{{$Option2 := $Q.Get "O2"}}
+	{{$Option3 := $Q.Get "O3"}}
+	{{$Option4 := $Q.Get "O4"}}
+
+	{{if .Message.Embeds}}
+		{{$QuizEmbedQuizPreview := structToSdict (index .Message.Embeds 0)}}
+			{{$QuizEmbedQuizPreview.Set "title" (print $Question)}}
+			{{$QuizEmbedQuizPreview.Set "description" (print "<:_:" ($DE.Get "rs") ">" $Option1 "\n<:_:" ($DE.Get "ys") ">" $Option2 "\n<:_:" ($DE.Get "gs") ">" $Option3 "\n<:_:" ($DE.Get "bs") ">" $Option4)}}
+		{{editMessage nil .Message.ID (complexMessageEdit "embed" (cslice $QuizEmbedQuizPreview))}}
+	{{end}}
+
+	{{sendResponse nil (complexMessage "content" (print ($HC.Get "059")) "ephemeral" true)}}
+
+{{else if eq .CustomID (print $ID "haedi")}}
+	{{$CheckImage := (sdict "URL" (index .Values 4) "Has" false)}}
+	{{if (reFindAllSubmatches `(https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\.[a-zA-Z]{2,}(?:\/\S*)?)|(\s)` ($CheckImage.Get "URL"))}}
+		{{$CheckImage = (sdict "URL" ($CheckImage.Get "URL") "Has" true)}}
+	{{else if eq ($CheckImage.Get "URL") ""}}
+		{{$CheckImage = (sdict "URL" "" "Has" false)}}
+	{{else}}
+		{{$CheckImage = (sdict "URL" "" "Has" false)}}
+		{{deleteMessage .Channel.ID (sendResponseRetID nil (complexMessage "content" ($HC.Get "055") "ephemeral" true)) 10}}
+	{{end}}
+
+	{{dbSet $QID "quiz" (sdict "quop" $Q "haedi" (sdict "H" (or (index .Values 0) ($HC.Get "092")) "A" (index .Values 1) "E" (or (index .Values 2) ($HC.Get "093")) "D" (index .Values 3) "I" $CheckImage) "info" $I "stats" $S)}}
+
+	{{/*
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "H" "Key" "H" "Value" (or (index .Values 0) ($HC.Get "77")))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "H" "Key" "A" "Value" (index .Values 1))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "H" "Key" "E" "Value" (or (index .Values 2) ($HC.Get "78")))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "H" "Key" "D" "Value" (index .Values 3))}}
+	{{$NVHandler = execTemplate "UpDB" (sdict "ID" $QID "SDB" "H" "Key" "I" "Value" $CheckImage)}}
+	*/}}
+
+	{{$H = ((dbGet $QID "quiz").Value).Get "haedi"}}
+	{{$Hint := $H.Get "H"}}
+	{{$Answer := $H.Get "A"}}
+	{{$Explanation := $H.Get "E"}}
+	{{$Duration := (mult ($H.Get "D") 60)}}
+	{{$Image := ($H.Get "I")}}
+
+	{{if or (eq $Answer "1") (eq $Answer "2") (eq $Answer "3") (eq $Answer "4")}}
+		{{if .Message.Embeds}}
+			{{$QuizEmbedQuizPreview := structToSdict (index .Message.Embeds 0)}}
+
+			{{if ($Image.Get "Has")}}
+				{{$QuizEmbedQuizPreview.Set "image" (sdict "url" ($Image.Get "URL"))}}
+			{{else}}
+				{{$QuizEmbedQuizPreview.Set "image" (sdict "url" "")}}
+			{{end}}
+
+			{{editMessage nil .Message.ID (complexMessageEdit "embed" (cslice $QuizEmbedQuizPreview))}}
+			{{sendResponse nil (complexMessage "content" (print ($HC.Get "060")) "ephemeral" true)}}
+		{{end}}
+	{{else}}
+		{{sendResponse nil (complexMessage "content" (print ($HC.Get "054") "` " $Answer " `") "ephemeral" true)}}
+	{{end}}
+
+{{else if eq .CustomID (print $ID "confirmation")}}
+	{{if eq (index .Values 0) "CONFIRM"}}
+		{{if $QDB}}
+			{{dbDel $QID "quiz"}}
+			{{deleteMessage ($I.Get "QC") ($I.Get "QM") 0}}
+			{{sendResponse nil (complexMessage "content" ($HC.Get "113") "ephemeral" true)}}
+		{{else}}
+			{{sendResponse nil (complexMessage "content" ($HC.Get "116") "ephemeral" true)}}
+		{{end}}
+	{{else}}
+		{{sendResponse nil (complexMessage "content" (print ($HC.Get "112") (index .Values 0)) "ephemeral" true)}}
+	{{end}}
+{{end}}
