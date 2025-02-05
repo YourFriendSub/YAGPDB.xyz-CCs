@@ -19,6 +19,7 @@ Custom Commands, I Made In YAGPDB.xyz Discord bot for my community server on Dis
     </ul>
 </details>
 
+<details>
   <summary>Quiz System</summary>
     <ul>
       <li><a href="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/tree/main/Quiz%20System">Open Folder</a>
