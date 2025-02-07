@@ -219,5 +219,7 @@
 		{{else}}
 			{{deleteMessage nil (sendMessageRetID nil $NotAllowed) 10}}
 		{{end}}
+	{{else}}
+		{{deleteMessage nil (sendMessageNoEscapeRetID nil (complexMessage "content" "I wasn't able to fetch the Database, Maybe you forgot to use `-quiz setup` command?" "reply" .Message.ID)) 20}}
 	{{end}}
 {{end}}
