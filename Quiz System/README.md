@@ -69,7 +69,7 @@ TO-DO: ADD DEMO IMAGES
     - Trigger Type: `Modal Submission`
     - Trigger: `quiz_`
 
-> [!INFO]
+> [!IMPORTANT]
 > Now, use the command `-quiz setup` to create a Database for this Quiz-System's "Strings" without this... Why the heck am i even writing this line!!!
 ---
 ### TODO
