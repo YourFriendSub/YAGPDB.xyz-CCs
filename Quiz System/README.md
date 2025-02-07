@@ -48,9 +48,9 @@ TO-DO: ADD DEMO IMAGES
   - Replace the `""` in `{{$PingQuiz := ""}}` variable with ID of your PingQuiz role.
     - This is the role that'll be pinged when you click on Send-Quiz button in Quiz-Builder. It's Optional.
   - Replace the `""` in `{{$YesQuiz := ""}}` variable with ID of your YesQuiz role.
-    - If user **DON'T HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase.
+    - If user **DON'T HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase. It's Optional.
   - Replace the `""` in `{{$NoQuiz := ""}}` variable with ID of your NoQuiz role.
-    - If user **HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase.
+    - If user **HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase. It's Optional.
 > [!CAUTION]
 > Do not give arguments to both `{{$YesQuiz := ""}}` & `{{$NoQuiz := ""}}`. One must be empty, else it could produce unwanted errors.
 
