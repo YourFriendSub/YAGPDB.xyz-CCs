@@ -51,7 +51,7 @@ TO-DO: ADD DEMO IMAGES
     - If user **DON'T HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase.
   - Replace the `""` in `{{$NoQuiz := ""}}` variable with ID of your NoQuiz role.
     - If user **HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase.
-  > [!CAUTION] Do not give arguments to both `{{$YesQuiz := ""}}` & `{{$NoQuiz := ""}}`. One must be empty, else it could produce unwanted errors.
+[!CAUTION] Do not give arguments to both `{{$YesQuiz := ""}}` & `{{$NoQuiz := ""}}`. One must be empty, else it could produce unwanted errors.
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-1.yag) and copy the code.
   - Create a New Custom command with:
