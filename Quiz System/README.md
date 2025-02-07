@@ -37,21 +37,22 @@ TO-DO: ADD DEMO IMAGES
 - Role for who **WILL NOT BE** able to participate in the quiz. *OPTIONAL*
 
 ### Setup
-
-**TO-DO:** EDIT THIS SETUP ONE
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Command.yag) and copy the code.
-  - Paste the code under your server's dashboard: `Tools & Utilitie > Ticket System`
-  - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
-    - *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
-  - Let `{{$PingModRole := true}}` If you want to ping Moderator role on ticket create.
-  - Let `{{$PinTopMessage := true}}` If you want to Pin the first message of the ticket. *Bot should've Manage Messages*
-- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Command.yag) and copy the code.
+  - Create a New Custom command with and paste the code:
+    - Trigger Type: `Command`
+    - Trigger: `quiz`
+  - Replace the `00000` in `{{$ModeratorRoleID := 00000}}` variable with ID of your Moderator-Role / Quiz-MOD role.
+  - Replace the `""` in `{{$PingQuizRole := ""}}` variable with ID of your PingQuiz role.
+  - Replace the `""` in `{{$YesQuiz := ""}}` variable with ID of your YesQuiz role.
+  - Replace the `""` in `{{$NoQuiz := ""}}` variable with ID of your NoQuiz role.
+  - This is the commend, where you can customise the permission of Ticket-Owner. Adjust the variables as your needs.
+- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-1.yag) and copy the code.
   - Create a New Custom command with:
     - Trigger Type: `Command`
     - Trigger: `cticket`
   > *Don't forget to restrict this command only for your moderator role.*
 
-- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Component.yag) and copy the code.
+- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-2.yag) and copy the code.
   - Create a New Custom command with and paste the code:
     - Trigger Type: `Message Component`
     - Trigger: `cticket_`
@@ -59,7 +60,7 @@ TO-DO: ADD DEMO IMAGES
     - Again, *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
   - This is the commend, where you can customise the permission of Ticket-Owner. Adjust the variables as your needs.
 
-- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Modal.yag) and copy the code.
+- [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Modal.yag) and copy the code.
   - Create a New Custom command with and paste the code:
     - Trigger Type: `Modal Submission`
     - Trigger: `cticket_`
