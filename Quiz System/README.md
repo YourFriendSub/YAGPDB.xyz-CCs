@@ -42,9 +42,16 @@ TO-DO: ADD DEMO IMAGES
     - Trigger Type: `Command`
     - Trigger: `quiz`
   - Replace the `00000` in `{{$ModeratorRoleID := 00000}}` variable with ID of your Moderator-Role / Quiz-MOD role.
-  - Replace the `""` in `{{$PingQuizRole := ""}}` variable with ID of your PingQuiz role.
+    - If someone will have this role, They'll be able to Create, End, Delete, See Stats, See Info and do anything related to the Quiz-System.
+  - Replace the `"Digit"` in `{{$DefaultEmoji := "Digit"}}` variable with your preferred Emoji-Pack.
+    - There are three Emoji-Packs in This Quiz System. `Digit`, `Dot`, `Star`.
+  - Replace the `""` in `{{$PingQuiz := ""}}` variable with ID of your PingQuiz role.
+    - This is the role that'll be pinged when you click on Send-Quiz button in Quiz-Builder. It's Optional.
   - Replace the `""` in `{{$YesQuiz := ""}}` variable with ID of your YesQuiz role.
+    - If user **DON'T HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase.
   - Replace the `""` in `{{$NoQuiz := ""}}` variable with ID of your NoQuiz role.
+    - If user **HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase.
+  - ![Caution] What
   - This is the commend, where you can customise the permission of Ticket-Owner. Adjust the variables as your needs.
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-1.yag) and copy the code.
   - Create a New Custom command with:
