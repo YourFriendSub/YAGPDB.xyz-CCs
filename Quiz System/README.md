@@ -38,7 +38,7 @@ TO-DO: ADD DEMO IMAGES
 
 ### Setup
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Command.yag) and copy the code.
-  - Create a New Custom command with and paste the code:
+  - Create a New Custom command and paste the code:
     - Trigger Type: `Command`
     - Trigger: `quiz`
   - Replace the `00000` in `{{$ModeratorRoleID := 00000}}` variable with ID of your Moderator-Role / Quiz-MOD role.
@@ -55,30 +55,24 @@ TO-DO: ADD DEMO IMAGES
 > Do not give arguments to both `{{$YesQuiz := ""}}` & `{{$NoQuiz := ""}}`. One must be empty, else it could produce unwanted errors.
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-1.yag) and copy the code.
-  - Create a New Custom command with:
-    - Trigger Type: `Command`
-    - Trigger: `cticket`
-  > *Don't forget to restrict this command only for your moderator role.*
+  - Create a New Custom command and paste the code:
+    - Trigger Type: `Message Component`
+    - Trigger: `quiz_`
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Component-2.yag) and copy the code.
-  - Create a New Custom command with and paste the code:
+  - Create a New Custom command and paste the code:
     - Trigger Type: `Message Component`
-    - Trigger: `cticket_`
-  - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
-    - Again, *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
-  - This is the commend, where you can customise the permission of Ticket-Owner. Adjust the variables as your needs.
+    - Trigger: `quiz_`
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Modal.yag) and copy the code.
-  - Create a New Custom command with and paste the code:
+  - Create a New Custom command and paste the code:
     - Trigger Type: `Modal Submission`
-    - Trigger: `cticket_`
-  - Replace the `00000` in `{{$LogsChannel := 00000}}` variable with ID of your Logs-Channel
-    - *Don't know how to copy Channel-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
+    - Trigger: `quiz_`
 
-- Now, use the command `-cticket setup` to send the Ticket Panel. *From where people will create tickets.*
+- Now, use the command `-quiz setup` to create a Database for this Quiz-System's "Strings" without this... Why the heck am i even writing this line!!!
 ---
 ### TODO
-> ● Make this folder public.
+> ● All Completed!
 
 ### Support
 - For any assistance regarding my code, You can contact me in my testing Discord Server [Qwerty](https://discord.com/invite/2gjARJxh9V).
