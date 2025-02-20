@@ -37,6 +37,8 @@ TO-DO: ADD DEMO IMAGES
 - Role for who **WILL NOT BE** able to participate in the quiz. *OPTIONAL*
 
 ### Setup
+> [!TIP]
+> Create a **C**ustom **Commands** Group for better setup!
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Command.yag) and copy the code.
   - Create a New Custom command and paste the code:
     - Trigger Type: `Command`
