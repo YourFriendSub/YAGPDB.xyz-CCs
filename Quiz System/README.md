@@ -38,7 +38,7 @@ TO-DO: ADD DEMO IMAGES
 
 ### Setup
 > [!TIP]
-> Create a **_C_**ustom **_C_**ommands Group for better setup!
+> Create a __**C**__ustom __**C**__ommands Group for better setup!
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Quiz%20System/Code%20Files/Command.yag) and copy the code.
   - Create a New Custom command and paste the code:
     - Trigger Type: `Command`
