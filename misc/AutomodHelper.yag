@@ -1,0 +1,44 @@
+{{/* Change the $Channel with your log channel's ChannelID */}}
+{{/*
+Usage: Its a CC that triggers on discord's Inbuilt Automod. Then why this exists? Because it's helpful when you're not on desktop.
+Trigger: .* or \A
+TriggerType: Regex
+*/}}
+
+
+{{$Channel := 00000}}
+
+{{if eq .Message.Type 24}}
+    {{$Timestamp := .Message.Timestamp.Parse.Unix}}
+    {{$CurrentTimestamp := print "<t:" $Timestamp ":d>" "` `" "<t:" $Timestamp ":T>" "・" "<t:" $Timestamp ":R>"}}
+    {{$Automod := index .Message.Embeds 0}}
+    {{$Author := or (getMember .Message.Author.ID) (getMember 204255221017214977)}}
+    {{if eq (len $Automod.Fields) 6}}
+    {{$Embed := cembed 
+      "author" (sdict "name" (print (or $Author.Nick $Author.User.Globalname) "・" $Author.User.ID) "url" (print "https://discord.com/users/" $Author.User.ID) "icon_url" ($Author.AvatarURL "256"))
+      "color" 0xFFFFFF
+      "description" (print $Automod.Description)
+      "fields" (cslice
+        (sdict "name" "Matched Content:" "value" (print (index $Automod.Fields 4).Value))
+        (sdict "name" "Keyword:" "value" (print "```\n" (index $Automod.Fields 3).Value "\n```"))
+        (sdict "name" "Rule Name:" "value" (print (index $Automod.Fields 0).Value))
+        (sdict "name" "Outcome:" "value" (print (index $Automod.Fields 5).Value))
+        (sdict "name" "Channel:" "value" (print "<#" (index $Automod.Fields 1).Value ">・" (index $Automod.Fields 1).Value))
+        (sdict "name" "Decision:" "value" (print (index $Automod.Fields 2).Value))
+        (sdict "name" "Timestamp:" "value" (print $CurrentTimestamp)) )}}
+{{sendMessage $Channel $Embed}}
+    {{end}}
+    {{if eq (len $Automod.Fields) 4}}
+    {{$Embed := cembed 
+      "author" (sdict "name" (print (or $Author.Nick $Author.User.Globalname) "・" $Author.User.ID) "url" (print "https://discord.com/users/" $Author.User.ID) "icon_url" ($Author.AvatarURL "256"))
+      "color" 0xFFFFFF
+      "description" (print $Automod.Description)
+      "fields" (cslice
+      (sdict "name" "Rule Name:" "value" (print (index $Automod.Fields 0).Value))
+      (sdict "name" "Outcome:" "value" (print (index $Automod.Fields 3).Value))
+      (sdict "name" "Channel" "value" (print "<#" (index $Automod.Fields 1).Value ">・" (index $Automod.Fields 1).Value))
+      (sdict "name" "Decision:" "value" (print (index $Automod.Fields 2).Value))
+      (sdict "name" "Timestamp:" "value" (print $CurrentTimestamp)) )}}
+    {{sendMessage $Channel $Embed}}
+    {{end}}
+{{end}}
