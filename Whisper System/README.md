@@ -1,6 +1,10 @@
-# Whisper Command
+# Whisper System
 > A way to talk to anyone privately, without Direct Messageing (DMing) them.
 - [Jump To Installation](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/README.md#installation) or Just Scroll Down.
+
+There are Three Versions for now, i'd suggest to use the the 3rd version, because people with modded discord will not be abale to see the message since i'll be sent via modal. 
+
+I WILL UPDATE THESE DOCS LATER, IF YOU NEED SETUPING ANY OF THESE CONTACT ME ON MY TESTING DISCORD SERVER: [Qwerty](https://discord.com/invite/2gjARJxh9V)
 
 ### Brief Description:
 Let's say User-A wants to tell User-B something privately, but they don't have enough time to send a direct message. So, User-A can use the command `-whisper @User-B || Private message ||`. The bot will delete User-A's message and will send its own message with a button. If User-B clicks on the button, they can see the private text. However, if someone else, like User-C, clicks the button, the bot will prevent them from seeing the message and will show a message saying "This message is not for you." Also, the private message will expire 15 minutes later, whether User-B has seen it or not.
