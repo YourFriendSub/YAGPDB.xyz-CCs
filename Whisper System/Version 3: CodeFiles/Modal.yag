@@ -1,0 +1,112 @@
+{{$ID := "whispersystem_"}}
+{{$CID := .CustomID}}
+
+{{/* Check if the interaction is for the whisper panel */}}
+{{if eq $CID (print $ID "panel")}}
+
+	{{/* Get temporary data from DB (set during modal trigger) */}}
+	{{$DB := (dbGet .User.ID "WhisperData").Value}}
+
+	{{/* If DB is missing, user took too long typing (expired) */}}
+	{{if not $DB}}
+		Your Typing speed is so slow, that I forgot the userIDs of selected users.
+		{{ephemeralResponse}}
+		{{return}}
+	{{end}}
+
+	{{/* Extract stored settings from DB */}}
+	{{$SChannelID := $DB.Settings.ChannelID}}
+	{{$SMessageID := $DB.Settings.MessageID}}
+	{{$SExpiry := sub (currentTime.Add (toDuration ($DB.Settings.Expiry))).Unix currentTime.Unix}}
+	{{$SCCID := $DB.Settings.CCID}}
+	{{$SRemoveInvites := $DB.Settings.RemoveInvites}}
+	{{$SMaxViews := $DB.Settings.MaxViews}}
+
+	{{/* Extract user IDs from stored data */}}
+	{{$DFrom := $DB.Data.From}}
+	{{$DToUsersID := $DB.Data.To}}
+
+	{{/* Extract values submitted via modal */}}
+	{{$MWhisperText := index .Values 0}}                            {{/* Message content */}}
+	{{$MMediaLinks := split (trimSpace (index .Values 1)) " "}}    {{/* Links separated by space */}}
+	{{$MMaxViews := index .Values 2}}                              {{/* Custom max views */}}
+	{{$MExpiry := sub (currentTime.Add (toDuration (index .Values 3))).Unix currentTime.Unix}}  {{/* Custom expiry in seconds */}}
+
+	{{/* Handle expiry value — use default if not provided or invalid */}}
+	{{$Expiry := ""}}
+	{{if $MExpiry}}
+		{{$Expiry = toInt $MExpiry}}
+	{{else}}
+		{{$Expiry = toInt $SExpiry}}
+	{{end}}
+	{{if le $Expiry 0}}
+		{{$Expiry = $SExpiry}}
+	{{end}}
+
+	{{/* Handle max views — use default if not provided or invalid */}}
+	{{$ViewsContent := ""}}
+	{{$Views := ""}}
+	{{if $MMaxViews}}
+		{{$Views = toInt $MMaxViews}}
+		{{$ViewsContent = $MMaxViews}}
+	{{else}}
+		{{$Views = toInt $SMaxViews}}
+		{{$ViewsContent = $SMaxViews}}
+	{{end}}
+	{{if le $Views 0}}
+		{{$Views = 1}}                       {{/* Fallback to minimum 1 */}}
+		{{$ViewsContent = $Views}}
+	{{end}}
+
+	{{/* Build the 'To' data structure with view limits for each user */}}
+	{{$DTo := sdict}}
+	{{range $ToUserID := $DToUsersID}}
+		{{$DTo.Set (toString $ToUserID) (sdict "UserID" $ToUserID "MaxViews" $Views)}}
+	{{end}}
+
+	{{/* Build user mentions for message content */}}
+	{{$MentionUsers := ""}}
+	{{range $DToUsersID}}
+		{{$MentionUsers = print $MentionUsers "<@" . ">"}}
+	{{end}}
+
+	{{/* Send base message with mentions and get its ID */}}
+	{{$MessageID := sendMessageNoEscapeRetID $SChannelID $MentionUsers}}
+
+	{{/* Construct message UI components */}}
+	{{$CB := componentBuilder}}
+		{{$CB.Add "text" $MentionUsers}}
+		{{$CB.Add "separator" true}}
+		{{$CB.Add "text" "-# Someone sent you a whisper message, click below button to see it."}}
+		{{$CB.Add "text" (print "-# Expiry: <t:" (add currentTime.Unix $Expiry) ":R>")}}
+		{{$CB.Add "buttons" (cslice (cbutton "emoji" (sdict "id" "1347138028820365374") "custom_id" (print $ID "message_" $MessageID)))}}
+
+	{{/* Add UI components into a styled container */}}
+	{{$CCB := componentBuilder}}
+		{{$CCB.Add "container" (sdict "color" 0xFFFFFF "components" $CB)}}
+
+	{{/* Edit original message with rich whisper card UI */}}
+	{{editComponentMessage $SChannelID $MessageID $CCB}}
+
+	{{/* Rerun original command (likely a refresh or interface command) */}}
+	{{execCC $SCCID nil 0 ""}}
+
+	{{/* Delete the original panel message shown to the user */}}
+	{{deleteMessage nil $SMessageID 0}}
+
+	{{/* Store final whisper message data to DB using new message ID */}}
+	{{dbSetExpire $MessageID "WhisperData" (sdict
+		"Settings" (sdict "ChannelID" $SChannelID "MessageID" $MessageID "Expiry" $Expiry "CCID" $SCCID "RemoveInvites" $SRemoveInvites "MaxViews" $Views)
+		"Data" (sdict "WhisperText" $MWhisperText "MediaLinks" (cslice $MMediaLinks) "From" $DFrom "To" $DTo))
+		$Expiry}}
+
+	{{/* Clean up temporary data for this user */}}
+	{{dbDel .User.ID "WhisperData"}}
+
+	{{/* Confirm to the sender that the whisper was sent */}}
+	{{sendResponse nil (complexMessage
+		"embed" (sdict
+			"color" 0xFFFFFF
+			"description" (print "Sent the Whisper Message to: " $MentionUsers "\nChannel: <#" $SChannelID ">\nRemove Invites: " $SRemoveInvites "\nMaxViews: " $ViewsContent "\nExpiry: <t:" (add currentTime.Unix $Expiry) ":R>"))
+		"ephemeral" true)}}
+{{end}}
