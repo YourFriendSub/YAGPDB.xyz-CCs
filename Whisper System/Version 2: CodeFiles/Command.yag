@@ -1,0 +1,34 @@
+{{$Channel := .Channel.ID}}
+{{$Expire := 900}}
+
+{{/* End Of Configuration */}}
+{{deleteTrigger 0}}
+{{$ID := "whisper_"}}
+{{try}}
+{{$User := (index (reSplit "&" .StrippedMsg 2) 0)}}
+{{if not $User}}
+    {{deleteMessage nil (sendMessageRetID nil (print "No User found.")) 5}}
+    {{return}}
+{{end}}
+{{$Users := reFindAll `\b\d+\b` $User}}
+{{$Text := trimSpace (index (reSplit "&" .StrippedMsg 2) 1)}}
+{{if not $Text}}
+    {{deleteMessage nil (sendMessageRetID nil (print "No Text found.")) 5}}
+    {{return}}
+{{end}}
+{{$TotalUsers := ""}}
+{{range $Users}}
+    {{$TotalUsers = (print $TotalUsers " " .)}}
+{{end}}
+{{$Users = split (trimSpace $TotalUsers) " "}}
+
+{{$MentionUsers := ""}}
+{{range $Users}}
+    {{$MentionUsers = (print $MentionUsers " <@" . ">")}}
+{{end}}
+{{$MessageID := sendMessageNoEscapeRetID $Channel (print $MentionUsers)}}
+{{editMessage $Channel $MessageID (complexMessageEdit "embed" (cembed "description" (print "-# Someone sent you a whisper message, click below button to see it.\n-# Expires: <t:" (add currentTime.Unix $Expire) ":R>") "color" 0xFFFFFF) "buttons" (cslice (cbutton "label" "See Whisper Message" "custom_id" (print $ID $MessageID))))}}
+{{dbSetExpire $MessageID "Whisper" (sdict "from" .User.ID "to" $Users "text" $Text) $Expire}}
+{{catch}}
+    {{deleteMessage nil (sendMessageRetID nil (print "Something went wrong:\n`" .Error "`")) 5}}
+{{end}}
