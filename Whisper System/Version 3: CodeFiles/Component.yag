@@ -1,0 +1,159 @@
+{{/* Configuration variables */}}
+{{$WritingTime := 900}}                            {{/* Time (in seconds) the whisper data stays in DB */}}
+{{$Expiry := "15m"}}                               {{/* Default expiration duration for a whisper */}}
+{{$ChannelID := .Channel.ID}}                      {{/* ID of the current Discord channel */}}
+{{$CCID := 164}}                                   {{/* Command ID, Needed for Sticky Whisper Sender */}}
+{{$RemoveInvites := true}}                         {{/* Whether to remove Discord invite links */}}
+{{$MaxViews := 100}}                               {{/* Default maximum views allowed per message */}}
+
+{{/* Custom ID and Message ID used to track context */}}
+{{$ID := "whispersystem_"}}
+{{$CID := .CustomID}}
+{{$MessageID := .Message.ID}}
+
+{{/* Handle the modal interaction trigger */}}
+{{if eq $CID (print $ID "panel")}}
+
+    {{/* Send the user a modal form to input a whisper */}}
+    {{sendModal (sdict
+        "title" "We all have Secret..."
+        "custom_id" (print $ID "panel")
+        "fields" (cslice
+            (sdict "label" "Message; Max: 4000 [Letters]" "placeholder" (exec "advice") "max_length" 4000 "style" 2 "required" true)
+            (sdict "label" "MediaLink; Max: 4 [Links]" "placeholder" "Seperated by Spaces" "max_length" 4000 "style" 2 "required" false)
+            (sdict "label" "Max Views; Min: 1 [Int]" "placeholder" "18" "max_length" 2 "style" 1 "required" false)
+            (sdict "label" "Expiry; In: Humanize [Duration]" "placeholder" "03h27m9s" "max_length" 32 "style" 1 "required" false)
+        )
+    )}}
+
+    {{/* Temporarily store user input settings and recipient placeholder */}}
+    {{dbSetExpire .User.ID "WhisperData" (sdict
+        "Settings" (sdict "ChannelID" $ChannelID "MessageID" $MessageID "Expiry" $Expiry "CCID" $CCID "RemoveInvites" $RemoveInvites "MaxViews" $MaxViews)
+        "Data" (sdict "From" .User.ID "To" .Values))
+        $WritingTime}}
+
+{{else if eq $CID (print $ID "message_" $MessageID)}}
+    {{/* If the user is accessing a whisper message */}}
+    {{if ($DB := (dbGet $MessageID "WhisperData"))}} {{/* Get DB data if exists */}}
+        {{$DBExpiry := sub $DB.ExpiresAt.Unix currentTime.Unix}}  {{/* Time remaining before data expires */}}
+        {{$DB = $DB.Value}}
+
+        {{if eq (kindOf $DB) "ptr"}}
+            {{if and ($DB.HasKey "Settings") ($DB.HasKey "Data")}}
+
+                {{/* Extract Settings */}}
+                {{$SChannelID := $DB.Settings.ChannelID}}
+                {{$SMessageID := $DB.Settings.MessageID}}
+                {{$SExpiry := $DB.Settings.Expiry}}
+                {{$SCCID := $DB.Settings.CCID}}
+                {{$SRemoveInvites := $DB.Settings.RemoveInvites}}
+                {{$SMaxViews := $DB.Settings.MaxViews}}
+
+                {{/* Extract Data */}}
+                {{$DWhisperText := $DB.Data.WhisperText}}
+                {{$DFrom := $DB.Data.From}}
+                {{$DTo := $DB.Data.To}}
+                {{$DMediaLinks := $DB.Data.MediaLinks}}
+
+                {{$WU := getMember $DFrom}}                     {{/* Fetch sender info */}}
+                {{$WT := $DWhisperText}}                        {{/* Whisper text */}}
+                {{$IL := index $DMediaLinks 0}}                 {{/* Media links */}}
+
+                {{$UserID := .User.ID}}
+
+                {{/* Optional: Remove Discord invite links */}}
+                {{if $SRemoveInvites}}
+                    {{$WT = reReplace `(?:https?://)?(?:www\.)?(discord(?:app)?\.gg(?:/|\\+/+)|discord(?:app)?\.com(?:/|\\+/+)(?:invite/))\w{2,}|(?:https?://)?(?:www\.)?(?:discord(?:app)?\.(?:io|me|li)|invite\.gg|dsc\.gg|top\.gg\/servers|discordservers\.com\/(?:server|bump))(?:/|\\+/+)[A-z+0-9]{2,}` $WT "[Invite Removed](https://example.com/)"}}
+                {{end}}
+
+                {{/* Create embed message for the whisper */}}
+                {{$WE := (sdict
+                    "url" "https://discord.com/"
+                    "author" (sdict
+                        "name" (print (or $WU.Nick $WU.User.Globalname) "・" $WU.User.ID)
+                        "icon_url" ($WU.AvatarURL "256"))
+                    "description" (print $WT)
+                    "color" 0xFFFFFF)}}
+
+                {{$Es := cslice}} {{/* Slice to store embeds */}}
+
+                {{/* Handle media links if any */}}
+                {{if $IL}}
+                    {{if eq (len $IL) 1}}
+                        {{$WE.Set "image" (sdict "url" (index $IL 0))}}
+                        {{$Es = $Es.Append $WE}}
+                    {{else}}
+                        {{$IC := 0}}
+                        {{range $IL}}
+                            {{if eq $IC 0}}
+                                {{$WE.Set "image" (sdict "url" (index $IL $IC))}}
+                                {{$Es = $Es.Append $WE}}
+                            {{else}}
+                                {{$Es = $Es.Append (sdict
+                                    "url" "https://discord.com/"
+                                    "image" (sdict "url" (index $IL $IC)))}}
+                            {{end}}
+                            {{$IC = add $IC 1}}
+                            {{if eq $IC 4}} {{break}} {{end}} {{/* Limit to 4 media items */}}
+                        {{end}}
+                    {{end}}
+                {{else}}
+                    {{$Es = $Es.Append $WE}} {{/* No media: just show text embed */}}
+                {{end}}
+
+                {{/* Handle if user is the sender */}}
+                {{if eq $DFrom .User.ID}}
+                    {{sendResponse nil (complexMessage "embed" ($Es = $Es.Append (sdict "color" 0xFFFFFF "description" "This Whisper Message was sent by You.")) "ephemeral" true)}}
+                    {{return}}
+                {{end}}
+
+                {{/* Check if the user is a valid recipient */}}
+                {{$IsToUser := false}}
+                {{if (index $DTo (toString $UserID))}}
+                    {{$IsToUser = true}}
+                {{end}}
+
+                {{if $IsToUser}}
+                    {{$HasViews := 0}}
+                    {{if gt (index $DTo (toString $UserID)).MaxViews 0}}
+                        {{$HasViews = (index $DTo (toString $UserID)).MaxViews}}
+                    {{end}}
+
+                    {{if ge $HasViews 1}}
+                        {{sendResponse nil (complexMessage "embed" $Es "ephemeral" true)}}
+
+                        {{/* Decrease remaining views */}}
+                        {{$DTo.Set (toString $UserID) (sdict "UserID" $UserID "MaxViews" (sub $HasViews 1))}}
+
+                        {{/* Update DB with new view count */}}
+                        {{dbSetExpire $SMessageID "WhisperData" (sdict
+                            "Settings" (sdict "ChannelID" $SChannelID "MessageID" $SMessageID "Expiry" $SExpiry "CCID" $SCCID "RemoveInvites" $SRemoveInvites "MaxViews" $SMaxViews)
+                            "Data" (sdict "WhisperText" $DWhisperText "MediaLinks" $DMediaLinks "From" $DFrom "To" $DTo))
+                            $DBExpiry}}
+                    {{else}}
+                        {{/* No views left */}}
+                        You've no views left for this whisper, you had {{$SMaxViews}}.
+                        {{ephemeralResponse}}
+                    {{end}}
+                {{else}}
+                    {{/* Message was not for this user */}}
+                    Message is not for you.
+                    {{ephemeralResponse}}
+                {{end}}
+
+            {{else}}
+                {{/* DB structure corrupted */}}
+                Database entry was corrupted.
+                {{ephemeralResponse}}
+            {{end}}
+        {{else}}
+            {{/* DB value was unexpectedly not a pointer */}}
+            Database entry was corrupted, Really hard.
+            {{ephemeralResponse}}
+        {{end}}
+    {{else}}
+        {{/* DB record not found or expired */}}
+        Database entry was expired / deleted.
+        {{ephemeralResponse}}
+    {{end}}
+{{end}}
