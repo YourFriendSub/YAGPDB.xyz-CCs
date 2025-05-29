@@ -1,0 +1,25 @@
+{{$ID := "whispersystem_"}}                     {{/* Base custom ID prefix used for component actions */}}
+{{$MaxSelections := 5}}                         {{/* Maximum number of users that can be selected */}}
+
+{{/* Create main component builder (holds UI elements) */}}
+{{$CB := componentBuilder}}
+
+	{{/* Add instructional text to the component */}}
+	{{$CB.Add "text" (cslice
+		"-# Click the select menu below and choose the users you want to send the whisper message to."
+		"-# After selecting the users, a modal will appear where you will have to write the message you want to send to the selected users.")}}
+
+	{{/* Add a visual separator line */}}
+	{{$CB.Add "separator" true}}
+
+	{{/* Add a user selection menu with placeholder text and ID; allows up to $MaxSelections */}}
+	{{$CB.Add "menus" (sdict
+		"type" "user" "placeholder" "Send Whisper To..." "custom_id" (print $ID "panel") "max_values" $MaxSelections)}}
+
+{{/* Create a container to wrap and style the component group */}}
+{{$Container := componentBuilder}}
+	{{$Container.Add "container" (sdict
+		"color" 0x87CEFF "components" $CB)}}
+
+{{/* Send the component message to the current channel or interaction */}}
+{{sendComponentMessage nil $Container}}
