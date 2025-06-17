@@ -1,4 +1,4 @@
-{{$ModRoleID := 00000}}
+{{$ModRoleID := cslice 00000}}
 
 {{$PClose:= true}}
 {{$POpen := true}}
@@ -86,7 +86,8 @@
 {{end}}
 
 {{$ID := "cticket_"}}
-{{$NVHandler := ""}}
+{{$X := ""}}
+{{$Y := ""}}
 {{$DB := ""}}
 {{$TChannel := ""}}
 {{$TOwner := ""}}
@@ -98,7 +99,7 @@
 {{$TTopMessage := ""}}
 {{$TUsers := (cslice )}}
 {{$THadUsers := (cslice )}}
-{{$IsMod := ""}}
+{{$IsMod := false}}
 {{$IsOwner := ""}}
 
 {{try}}
@@ -114,16 +115,21 @@
     {{$TUsers = $DB.TUsers}}
     {{$THadUsers = $DB.THadUsers}}
     
-	{{$IsMod = (hasRoleID $ModRoleID)}}
+	{{range .Member.Roles}}
+		{{if in $ModRoleID .}}
+			{{$IsMod = true}}
+		{{end}}
+	{{end}}
+
 	{{$IsOwner = (eq .User.ID $TOwner)}}
 {{catch}}
     {{/* Do Nothing */}}
 {{end}}
 
 {{$Create:= cbutton "label" "Create" "custom_id" (print $ID "create") "emoji" (sdict "name" "🛑")}}
-{{$Delete := cbutton "label" "Delete" "custom_id" (print $ID "delete") "emoji" (sdict "name" "⛔") "style" "red"}}
-{{$Open := cbutton "label" "Open" "custom_id" (print $ID "open") "emoji" (sdict "name" "🔓") "style" "green"}}
-{{$Close := cbutton "label" "Close" "custom_id" (print $ID "close") "emoji" (sdict "name" "🔒") "style" "red"}}
+{{$Delete := cbutton "label" "Delete" "custom_id" (print $ID "delete") "emoji" (sdict "name" "⛔")}}
+{{$Open := cbutton "label" "Open" "custom_id" (print $ID "open") "emoji" (sdict "name" "🔓")}}
+{{$Close := cbutton "label" "Close" "custom_id" (print $ID "close") "emoji" (sdict "name" "🔒")}}
 {{$Rename := cbutton "label" "Rename" "custom_id" (print $ID "rename") "emoji" (sdict "name" "📝")}}
 {{$AdminOnly := cbutton "label" "AdminOnly" "custom_id" (print $ID "adminonly") "emoji" (sdict "name" "👑")}}
 
@@ -170,8 +176,8 @@
 
 {{else if eq .CustomID (print $ID "adminonly")}}
 	{{if or $IsMod (and $IsOwner $PAdminOnly)}}
-		{{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket adminonly")) 0}}
-		{{$NVHandler = (execTemplate "UpdateDB" (cslice .Channel.ID "Power" "AdminOnly"))}}
+		{{$X := exec "ticket adminonly"}}
+		{{$Y = (execTemplate "UpdateDB" (cslice .Channel.ID "Power" "AdminOnly"))}}
 		{{sendResponse nil (complexMessage "content" (print "Converted to AdminOnly.") "ephemeral" true)}}
 	{{else}}
 		{{sendResponse nil $NoPermission}}
@@ -180,20 +186,14 @@
 {{else if eq .CustomID (print $ID "close")}}
 	{{if or $IsMod (and $IsOwner $PClose)}}
 		{{if ne $TState "Closed"}}
-			{{try}}
-                {{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket removeuser" $TOwner)) 0}}
-            {{catch}}
-            {{end}}
+			{{$X = exec "ticket removeuser" $TOwner}}
 			{{range $TUsers}}
-                {{try}}
-				    {{deleteMessage $TChannel (sendMessageRetID nil (exec "ticket removeuser" .)) 0}}
-                {{catch}}
-                {{end}}
+				{{$X = exec "ticket removeuser" .}}
 			{{end}}
-			{{$NVHandler = (execTemplate "UpdateDB" (cslice $TChannel "HadUsers" $TUsers))}}
-			{{$NVHandler = (execTemplate "UpdateDB" (cslice $TChannel "Users" (cslice)))}}
-			{{$NVHandler = (execTemplate "UpdateDB" (cslice $TChannel "State" "Closed"))}}
-			{{sendResponse nil (complexMessage "buttons" (cslice $Open $Delete) "embed" (cembed "color" 15352629 "fields" (cslice (sdict "name" "Info" "value" (print "> -# Click “🔓 Open” to Open ticket.")))))}}
+			{{$Y = (execTemplate "UpdateDB" (cslice $TChannel "HadUsers" $TUsers))}}
+			{{$Y = (execTemplate "UpdateDB" (cslice $TChannel "Users" (cslice)))}}
+			{{$Y = (execTemplate "UpdateDB" (cslice $TChannel "State" "Closed"))}}
+			{{sendResponse nil (complexMessage "buttons" (cslice $Open $Delete) "embed" (cembed "fields" (cslice (sdict "name" "Info" "value" (print "> -# Click “🔓 Open” to Open ticket.")))))}}
 		{{else}}
 			{{sendResponse nil (complexMessage "content" (print "Ticket has already been closed.") "ephemeral" true)}}
 		{{end}}
@@ -204,17 +204,14 @@
 {{else if eq .CustomID (print $ID "open")}}
 	{{if or $IsMod (and $IsOwner $POpen)}}
 		{{if ne $TState "Opened"}}
-			{{try}}
-                {{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket adduser" $TOwner)) 0}}
-            {{catch}}{{end}}
+			{{$X = exec "ticket adduser" $TOwner}}
 			{{range $THadUsers}}
-                {{try}}
-				{{deleteMessage $TChannel (sendMessageRetID nil (exec "ticket adduser" .)) 0}}
-                {{catch}}{{end}}			{{end}}
-			{{$NVHandler = (execTemplate "UpdateDB" (cslice $TChannel "Users" $THadUsers))}}
-			{{$NVHandler = (execTemplate "UpdateDB" (cslice $TChannel "HadUsers" (cslice)))}}
-			{{$NVHandler = (execTemplate "UpdateDB" (cslice $TChannel "State" "Opened"))}}
-			{{sendResponse nil (complexMessage "buttons" (cslice $Close) "embed" (cembed "color" 3450963 "fields" (cslice (sdict "name" "Info" "value" (print "> -# Click “🔒 Close” to Close ticket.")))))}}
+				{{$X = exec "ticket adduser" .}}
+			{{end}}
+			{{$Y = (execTemplate "UpdateDB" (cslice $TChannel "Users" $THadUsers))}}
+			{{$Y = (execTemplate "UpdateDB" (cslice $TChannel "HadUsers" (cslice)))}}
+			{{$Y = (execTemplate "UpdateDB" (cslice $TChannel "State" "Opened"))}}
+			{{sendResponse nil (complexMessage "buttons" (cslice $Close) "embed" (cembed "fields" (cslice (sdict "name" "Info" "value" (print "> -# Click “🔒 Close” to Close ticket.")))))}}
 		{{else}}
 			{{sendResponse nil (complexMessage "content" (print "Ticket has already been opened.") "ephemeral" true)}}
 		{{end}}
@@ -226,8 +223,8 @@
 {{else if .IsMenu}}
 	{{if eq .CustomID (print $ID "removeuserMenu")}}
 		{{if or $IsMod (and $IsOwner $PRemoveUser)}}
-			{{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket removeuser" (index .Values 0))) 0}}
-			{{$NVHandler = execTemplate "UpdateDB" (cslice $TChannel "Users" (execTemplate "UpdateList" (cslice (index .Values 0) "Remove" $TUsers)))}}
+			{{$X = exec "ticket removeuser" (index .Values 0)}}
+			{{$Y = execTemplate "UpdateDB" (cslice $TChannel "Users" (execTemplate "UpdateList" (cslice (index .Values 0) "Remove" $TUsers)))}}
 			{{sendResponse nil (complexMessage "content" (print "User <@" (index .Values 0) "> was removed from ticket") "ephemeral" true)}}
 		{{else}}
 			{{sendResponse nil $NoPermission}}
@@ -235,8 +232,8 @@
 
 	{{else if eq .CustomID (print $ID "adduserMenu")}}
 		{{if or $IsMod (and $IsOwner $PAddUser)}}
-			{{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket adduser" (index .Values 0))) 0}}
-			{{$NVHandler = execTemplate "UpdateDB" (cslice $TChannel "Users" (execTemplate "UpdateList" (cslice (index .Values 0) "Add" $TUsers)))}}
+			{{$X = exec "ticket adduser" (index .Values 0)}}
+			{{$Y = execTemplate "UpdateDB" (cslice $TChannel "Users" (execTemplate "UpdateList" (cslice (index .Values 0) "Add" $TUsers)))}}
 			{{sendResponse nil (complexMessage "content" (print "User <@" (index .Values 0) "> was added to ticket") "ephemeral" true)}}
 		{{else}}
 			{{sendResponse nil $NoPermission}}
