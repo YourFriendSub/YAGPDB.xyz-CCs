@@ -13,19 +13,20 @@
 
 {{try}}
 	{{$DB = (dbGet .Channel.ID "TicketInfo").Value}}
-	{{$TChannel = index $DB 0}}
-	{{$TOwner = index $DB 1}}
-	{{$TState = index $DB 2}}
-	{{$TPower = index $DB 3}}
-	{{$TSubject = index $DB 4}}
-	{{$TCompose = index $DB 5}}
-	{{$TLastReason = index $DB 6}}
-	{{$TTopMessage = index $DB 7}}
-	{{$TUsers = index $DB 8}}
-	{{$THadUsers = index $DB 9}}
+	{{$TChannel = $DB.TChannel}}
+	{{$TOwner = $DB.TOwner}}
+	{{$TState = $DB.TState}}
+	{{$TPower = $DB.TPower}}
+	{{$TSubject = $DB.TSubject}}
+	{{$TCompose = $DB.TCompose}}
+	{{$TLastReason = $DB.TLastReason}}
+	{{$TTopMessage = $DB.TTopMessage}}
+	{{$TUsers = $DB.TUsers}}
+	{{$THadUsers = $DB.THadUsers}}
 {{catch}}
 	{{/* Do Nothing */}}
 {{end}}
+
 
 {{$Flag := ""}}
 {{ $Args := (len .CmdArgs) }}
