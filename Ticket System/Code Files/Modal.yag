@@ -8,16 +8,16 @@
 	{{$DB := ""}}
 	{{$DB = (dbGet $TChannel "TicketInfo").Value}}
 
-	{{$TChannel = index $DB 0}}
-	{{$TOwner := index $DB 1}}
-	{{$TState := index $DB 2}}
-	{{$TPower := index $DB 3}}
-	{{$TSubject := index $DB 4}}
-	{{$TCompose := index $DB 5}}
-	{{$TLastReason := index $DB 6}}
-	{{$TTopMessage := index $DB 7}}
-	{{$TUsers := index $DB 8}}
-	{{$THadUsers := index $DB 9}}
+	{{$TChannel = $DB.TChannel}}
+	{{$TOwner := $DB.TOwner}}
+	{{$TState := $DB.TState}}
+	{{$TPower := $DB.TPower}}
+	{{$TSubject := $DB.TSubject}}
+	{{$TCompose := $DB.TCompose}}
+	{{$TLastReason := $DB.TLastReason}}
+	{{$TTopMessage := $DB.TTopMessage}}
+	{{$TUsers := $DB.TUsers}}
+	{{$THadUsers := $DB.THadUsers}}
 
 	{{if eq $Action "Channel"}}
 		{{$TChannel = $Value}}
@@ -41,12 +41,13 @@
 		{{$THadUsers = $Value}}
 	{{end}}
 	
-	{{$Data := cslice $TChannel $TOwner $TState $TPower $TSubject $TCompose $TLastReason $TTopMessage $TUsers $THadUsers}}
+	{{$Data := sdict "TChannel" $TChannel "TOwner" $TOwner "TState" $TState "TPower" $TPower "TSubject" $TSubject "TCompose" $TCompose "TLastReason" $TLastReason "TTopMessage" $TTopMessage "TUsers" $TUsers "THadUsers" $THadUsers}}
 	{{dbSet $TChannel "TicketInfo" $Data}}
 {{end}}
 
 {{$ID := "cticket_"}}
-{{$NVHandler := ""}}
+{{$X := ""}}
+{{$Y := ""}}
 {{$DB := ""}}
 {{$TChannel := ""}}
 {{$TOwner := ""}}
@@ -56,21 +57,21 @@
 {{$TCompose := ""}}
 {{$TLastReason := ""}}
 {{$TTopMessage := ""}}
-{{$TUsers := (cslice )}}
-{{$THadUsers := (cslice )}}
+{{$TUsers := cslice}}
+{{$THadUsers := cslice}}
 
 {{try}}
 	{{$DB = (dbGet .Channel.ID "TicketInfo").Value}}
-	{{$TChannel = index $DB 0}}
-	{{$TOwner = index $DB 1}}
-	{{$TState = index $DB 2}}
-	{{$TPower = index $DB 3}}
-	{{$TSubject = index $DB 4}}
-	{{$TCompose = index $DB 5}}
-	{{$TLastReason = index $DB 6}}
-	{{$TTopMessage = index $DB 7}}
-	{{$TUsers = index $DB 8}}
-	{{$THadUsers = index $DB 9}}
+	{{$TChannel = $DB.TChannel}}
+	{{$TOwner = $DB.TOwner}}
+	{{$TState = $DB.TState}}
+	{{$TPower = $DB.TPower}}
+	{{$TSubject = $DB.TSubject}}
+	{{$TCompose = $DB.TCompose}}
+	{{$TLastReason = $DB.TLastReason}}
+	{{$TTopMessage = $DB.TTopMessage}}
+	{{$TUsers = $DB.TUsers}}
+	{{$THadUsers = $DB.THadUsers}}
 {{catch}}
 	{{/* Do Nothing */}}
 {{end}}
@@ -80,7 +81,7 @@
         {{$Subject := (or (index .Values 0) "`No Subject`")}}
         {{$Compose := (or (index .Values 1) "`No Compose`")}}
         {{dbSetExpire .User.ID "TemporaryTicketInfo" (cslice $Subject $Compose) 10}}
-        {{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket create" $Subject)) 0}}
+        {{$X := exec "ticket create" $Subject}}
         {{sendResponse nil (complexMessage "content" "Your Ticket was created." "ephemeral" true)}}
     {{catch}}
         {{sendMessage nil (print "Something was wrong, Please tell this to the Moderators of this Server.\n> `" .Error "`")}}
@@ -89,23 +90,23 @@
 
 {{if eq .CustomID (print $ID "delete")}}
 	{{sendResponse nil (complexMessage "content" (print "Ticket will be deleted <t:" (add currentTime.Unix 5) ":R>.") "ephemeral" true)}}
-	{{$NVHandler = (execTemplate "UpdateDB" (cslice .Channel.ID "LastReason" (index .Values 0)))}}
+	{{$Y = (execTemplate "UpdateDB" (cslice .Channel.ID "LastReason" (index .Values 0)))}}
 	{{if $LogsChannel}}
 		{{$LogUsers := "Added Users, When ticket was closed:\n"}}
 		{{range $THadUsers}}
 			{{$User := (getMember .).User}}
 			{{$LogUsers = (print $LogUsers $User.Username " (" $User.ID ")\n")}}
 		{{end}}
-		{{$LogEmbed := cembed "title" (print $TSubject) "description" (print $TCompose) "fields" (cslice (sdict "name" "Reason" "value" (index (dbGet $TChannel "TicketInfo").Value 6)) (sdict "name" "Information" "value" (print "Channel: " $TChannel "\nOwner: <@" $TOwner ">\nDeleted By: <@" .User.ID ">"))) "color" 0xFFFFFF}}
+		{{$LogEmbed := cembed "title" (print $TSubject) "description" (print $TCompose) "fields" (cslice (sdict "name" "Reason" "value" ((dbGet $TChannel "TicketInfo").Value).TLastReason) (sdict "name" "Information" "value" (print "Channel: " $TChannel "\nOwner: <@" $TOwner ">\nDeleted By: <@" .User.ID ">"))) "color" 0xFFFFFF}}
 		{{sendMessage $LogsChannel (complexMessage "embed" $LogEmbed "file" $LogUsers)}}
 	{{end}}
 	{{sleep 3}}
-	{{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket delete" (index .Values 0))) 0}}
+	{{$X = exec "ticket delete" (index .Values 0)}}
 	{{dbDel $TChannel "TicketInfo"}}
 {{end}}
 
 {{if eq .CustomID (print $ID "rename")}}
-	{{deleteMessage .Channel.ID (sendMessageRetID nil (exec "ticket rename" (index .Values 0))) 0}}
+	{{$X = exec "ticket rename" (index .Values 0)}}
 	{{$TopMessage := getMessage $TChannel $TTopMessage}}
 	{{$EditEmbed := cembed "title" (index .Values 0) "description" (or (index .Values 1) (index $TopMessage.Embeds 0).Description) "fields" (cslice (sdict "name" (index (index $TopMessage.Embeds 0).Fields 0).Name "value" (index (index $TopMessage.Embeds 0).Fields 0).Value)) "color" (index $TopMessage.Embeds 0).Color "footer" (sdict "icon_url" (index $TopMessage.Embeds 0).Footer.IconURL "text" (index $TopMessage.Embeds 0).Footer.Text)}}
 	{{editMessage nil $TTopMessage (complexMessageEdit "embed" $EditEmbed)}}
