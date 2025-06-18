@@ -19,7 +19,9 @@
 
   > NOTE:
     - These permissions only overrides the permissions for Buttons, Select Menus & Modals. Ticket-Owner *or others* can still use inbuilt `-ticket` commands.
+      - Use Command Override to disable them.
     - "DELETE" Means Deleting the Ticket-Channel & "CLOSE" Means just removing the Ticket-Owner and Added Users from the Ticket-Channel.
+    - Because Of the Limit of `exec`, You can not remove more than 5 members. *By remove, this also includes the closing of ticket. Just be careful.*
 - ✅ Featere 3 - Additional features:
   - If you want to Pin the Top-Message (e.g. First message that was Sent by bot.) of the Ticket. *Default=True*
   - If you want to Ping Staff role or not. *Default=True*
