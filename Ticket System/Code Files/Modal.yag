@@ -40,7 +40,7 @@
 	{{else if eq $Action "HadUsers"}}
 		{{$THadUsers = $Value}}
 	{{end}}
-	
+
 	{{$Data := sdict "TChannel" $TChannel "TOwner" $TOwner "TState" $TState "TPower" $TPower "TSubject" $TSubject "TCompose" $TCompose "TLastReason" $TLastReason "TTopMessage" $TTopMessage "TUsers" $TUsers "THadUsers" $THadUsers}}
 	{{dbSet $TChannel "TicketInfo" $Data}}
 {{end}}
@@ -77,15 +77,15 @@
 {{end}}
 
 {{if eq .CustomID (print $ID "create")}}
-    {{try}}
-        {{$Subject := (or (index .Values 0) "`No Subject`")}}
-        {{$Compose := (or (index .Values 1) "`No Compose`")}}
-        {{dbSetExpire .User.ID "TemporaryTicketInfo" (cslice $Subject $Compose) 10}}
-        {{$X := exec "ticket create" $Subject}}
-        {{sendResponse nil (complexMessage "content" "Your Ticket was created." "ephemeral" true)}}
-    {{catch}}
-        {{sendMessage nil (print "Something was wrong, Please tell this to the Moderators of this Server.\n> `" .Error "`")}}
-    {{end}}
+	{{try}}
+		{{$Subject := (or (index .Values 0) "`No Subject`")}}
+		{{$Compose := (or (index .Values 1) "`No Compose`")}}
+		{{dbSetExpire .User.ID "TemporaryTicketInfo" (cslice $Subject $Compose) 10}}
+		{{$X = exec "ticket create" $Subject}}
+		{{sendResponse nil (complexMessage "content" "Your Ticket was created." "buttons" (cbutton "label" "Jump To Ticket" "style" "url" "url" (print "https://discord.com/channels/" .Guild.ID "/" (slice ($X = (index (split $X " ") 4)) 2 (sub (len $X) 1)) )) "ephemeral" true)}}
+	{{catch}}
+		{{sendMessage nil (print "Something was wrong, Please tell this to the Moderators of this Server.\n> `" .Error "`")}}
+	{{end}}
 {{end}}
 
 {{if eq .CustomID (print $ID "delete")}}
