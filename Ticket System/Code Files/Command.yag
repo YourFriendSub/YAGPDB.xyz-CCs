@@ -27,66 +27,69 @@
 	{{/* Do Nothing */}}
 {{end}}
 
-
 {{$Flag := ""}}
 {{ $Args := (len .CmdArgs) }}
 {{ if eq $Args 1}}
-    {{ $Flag = (lower (index .CmdArgs 0))}}
+	{{ $Flag = (lower (index .CmdArgs 0))}}
 {{ end }}
+
+{{$NoDBFound := print "I wasn't able to find any Database for this channel!"}}
 
 {{$TicketEmbed := cembed "description" "-# To create a ticket, Click the “📝 Create Ticket” button below. It'll open a private channel for you with server staff." "author" (sdict "name" "Contact Staff - Privately") "color" 0xFFFFFF}}
 {{$Create := cbutton "label" "Create Ticket" "custom_id" (print $ID "create") "emoji" (sdict "name" "📝") "style" "blue"}}
 {{if eq $Flag "setup"}}
-    {{sendMessage nil (complexMessage "embed" $TicketEmbed "buttons" (cslice $Create))}}
+	{{sendMessage nil (complexMessage "embed" $TicketEmbed "buttons" (cslice $Create))}}
 {{else if eq $Flag "top"}}
-    {{if $TChannel}}
-        {{sendMessage nil (complexMessage "embed" (cembed "description" (print "Here You Go: [" .Channel.Name "](<https://discord.com/channels/" .Guild.ID "/" $TChannel "/" $TTopMessage ">)") "color" 0xFFFFFF))}}
-    {{else}}
-        {{(print "It's not a ticket channel!")}}
-    {{end}}
+	{{if $TChannel}}
+		{{sendMessage nil (complexMessage "embed" (cembed "description" (print "Here You Go: [" .Channel.Name "](<https://discord.com/channels/" .Guild.ID "/" $TChannel "/" $TTopMessage ">)") "color" 0xFFFFFF))}}
+	{{else}}
+		{{$NoDBFound}}
+	{{end}}
 {{else if eq $Flag "owner"}}
-    {{if $TChannel}}
-{{sendMessage nil (complexMessage "embed" (cembed "description" (print "This ticket's Owner is <@" $TOwner ">.\n\n> -# You can copy UserID from footer.") "footer" (sdict "text" (print $TOwner)) "color" 0xFFFFFF))}}
-    {{else}}
-        {{(print "It's not a ticket channel!")}}
-    {{end}}
+	{{if $TChannel}}
+		{{sendMessage nil (complexMessage "embed" (cembed "description" (print "This ticket's Owner is <@" $TOwner ">.\n\n> -# You can copy UserID from footer.") "footer" (sdict "text" (print $TOwner)) "color" 0xFFFFFF))}}
+	{{else}}
+		{{$NoDBFound}}
+	{{end}}
 {{else if eq $Flag "state"}}
-    {{if $TChannel}}
-{{sendMessage nil (complexMessage "embed" (cembed "description" (print "This ticket is in “" $TState "” state.") "color" 0xFFFFFF))}}
-    {{else}}
-        {{(print "It's not a ticket channel!")}}
-    {{end}}
+	{{if $TChannel}}
+		{{sendMessage nil (complexMessage "embed" (cembed "description" (print "This ticket is in “" $TState "” state.") "color" 0xFFFFFF))}}
+	{{else}}
+		{{$NoDBFound}}
+	{{end}}
 {{else if eq $Flag "power"}}
-    {{if $TChannel}}
-{{sendMessage nil (complexMessage "embed" (cembed "description" (print "This ticket is in under “" $TPower "” rule.") "color" 0xFFFFFF))}}
-    {{else}}
-        {{(print "It's not a ticket channel!")}}
-    {{end}}
+	{{if $TChannel}}
+		{{sendMessage nil (complexMessage "embed" (cembed "description" (print "This ticket is in under “" $TPower "” rule.") "color" 0xFFFFFF))}}
+	{{else}}
+		{{$NoDBFound}}
+	{{end}}
 {{else if eq $Flag "subject"}}
-    {{if $TChannel}}
-        {{sendMessage nil (complexMessage "embed" (cembed "description" (print "Please read here: [" .Channel.Name "](<https://discord.com/channels/" .Guild.ID "/" $TChannel "/" $TTopMessage ">)") "color" 0xFFFFFF))}}
-    {{else}}
-        {{(print "It's not a ticket channel!")}}
-    {{end}}
+	{{if $TChannel}}
+		{{$TTopEmbed := index (getMessage $TChannel $TTopMessage).Embeds 0}}
+		{{sendMessage nil (complexMessage "embed" (cembed "title" $TTopEmbed.Title "description"  $TTopEmbed.Description "color"  $TTopEmbed.Color))}}
+	{{else}}
+		{{$NoDBFound}}
+	{{end}}
 {{else if eq $Flag "compose"}}
-    {{if $TChannel}}
-        {{sendMessage nil (complexMessage "embed" (cembed "description" (print "Please read here: [" .Channel.Name "](<https://discord.com/channels/" .Guild.ID "/" $TChannel "/" $TTopMessage ">)") "color" 0xFFFFFF))}}
-    {{else}}
-        {{(print "It's not a ticket channel!")}}
-    {{end}}
+	{{if $TChannel}}
+		{{$TTopEmbed := index (getMessage $TChannel $TTopMessage).Embeds 0}}
+		{{sendMessage nil (complexMessage "embed" (cembed "title" $TTopEmbed.Title "description"  $TTopEmbed.Description "color"  $TTopEmbed.Color))}}
+	{{else}}
+		{{$NoDBFound}}
+	{{end}}
 {{else if eq $Flag "users"}}
-    {{if $TChannel}}
-{{$Users := ""}}
-{{try}}
-{{range $TUsers}}
-{{$Users = (print $Users "<@" . ">\n")}}
-{{end}}
-{{catch}}
-{{end}}
-        {{sendMessage nil (complexMessage "embed" (cembed "description" (print "Users who were added to this ticket:\n" $Users "-# Count: " (len $TUsers)) "color" 0xFFFFFF))}}
-    {{else}}
-        {{(print "It's not a ticket channel!")}}
-    {{end}}
+	{{if $TChannel}}
+		{{$Users := ""}}
+		{{try}}
+			{{range $TUsers}}
+				{{$Users = (print $Users "<@" . ">\n")}}
+			{{end}}
+		{{catch}}
+		{{end}}
+		{{sendMessage nil (complexMessage "embed" (cembed "description" (print "Users who were added to this ticket:\n" $Users "-# Count: " (len $TUsers)) "color" 0xFFFFFF))}}
+	{{else}}
+		{{$NoDBFound}}
+	{{end}}
 {{else}}
-    {{sendMessage nil (complexMessage "embed" (cembed "fields" (cslice (sdict "name" "Ticket Usage" "value" "> `setup`: To send Ticket Creator to current channel.") (sdict "name" "Ticket Only Commands:" "value" "- `top`: To get the link of top message.\n- `owner`: To get the ticket owner.\n- `state`: To get the ticket's state (Open/Close).\n- `power`: To see if ticket is AdminOnly, *staff=~~AdminOnly~~*.\n- `subject`:  To get the link of top message.\n- `compose`:  To get the link of top message.\n- `users`: How many users were added to ticket.")) "color" 0xFF0000))}}
+	{{sendMessage nil (complexMessage "embed" (cembed "fields" (cslice (sdict "name" "Ticket Usage" "value" "> `setup`: To send Ticket Creator to current channel.") (sdict "name" "Ticket Only Commands:" "value" "- `top`: To get the link of top message.\n- `owner`: To get the ticket owner.\n- `state`: To get the ticket's state (Open/Close).\n- `power`: To see if ticket is AdminOnly, *staff=~~AdminOnly~~*.\n- `subject`:  To get the link of top message.\n- `compose`:  To get the link of top message.\n- `users`: How many users were added to ticket.")) "color" 0xFF0000))}}
 {{end}}
