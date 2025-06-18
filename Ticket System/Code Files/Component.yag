@@ -241,6 +241,10 @@
 
 	{{else if eq .CustomID (print $ID "adduserMenu")}}
 		{{if or $IsMod (and $IsOwner $PAddUser)}}
+			{{if ge (len $TUsers) 4}}
+				{{sendResponse nil (complexMessage "content" (print "Can Not Add More than 4 Members, It's a limit of `exec` function.") "ephemeral" true)}}
+				{{return}}
+			{{end}}
 			{{$X = exec "ticket adduser" (index .Values 0)}}
 			{{$Y = execTemplate "UpdateDB" (cslice $TChannel "Users" (execTemplate "UpdateList" (cslice (index .Values 0) "Add" $TUsers)))}}
 			{{sendResponse nil (complexMessage "content" (print "User <@" (index .Values 0) "> was added to ticket") "ephemeral" true)}}
