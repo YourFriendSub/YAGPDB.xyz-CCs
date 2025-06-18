@@ -1,23 +1,30 @@
-{{$ModRole := 00000}}
+{{$PingModRoleID := 00000}}
 {{$PingModRole := true}}
 {{$PinTopMessage := true}}
 
 {{$ID := "cticket_"}}
-{{$Content := print "Welcome " .User.Mention}}
-{{if $PingModRole}}
-    {{$Content = print "Welcome " .User.Mention "\n-# _ _\n> -# Pinging Staff so you don’t have to: <@&" $ModRole ">"}}
-{{end}}
-{{$TDB := (dbGet .User.ID "TemporaryTicketInfo").Value}}
-{{dbSet .Channel.ID "TicketInfo" (sdict "TChannel" .Channel.ID "TOwner" .User.ID "TState" "Opened" "TPower" "Staff" "TSubject" (index $TDB 0) "TCompose" (index $TDB 1) "TLastReason" "NotDeleted" "TTopMessage" .Message.ID "TUsers" (cslice ) "THadUsers" (cslice ))}}
-{{$DB := (dbGet .Channel.ID "TicketInfo").Value}}
-{{$Color := (toInt64 (index (shuffle (cslice "15352629" "16497669" "3450963" "4359668")) 0))}}
 
-{{$Embed := cembed "title" $DB.TSubject "description" $DB.TCompose "fields" (cslice (sdict "name" "Info" "value" (print "-# " .User.Globalname ": State reason for ticket, add proof if needed. _No need to repeat details if already given._\n\n> -# Click “🔒 Close” to close ticket."))) "color" $Color "footer" (sdict "text" (print "Support will be with you shortly.") "icon_url" "https://raw.githubusercontent.com/iamcal/emoji-data/master/img-twitter-72/1f39f-fe0f.png")}}
-{{$Close := cbutton "label" "Close" "custom_id" (print $ID "close") "emoji" (sdict "name" "🔒") "style" "danger"}}
-{{$Settings := cbutton "label" "Settings" "custom_id" (print $ID "settings") "emoji" (sdict "name" "⚙️") "style" "grey"}}
-{{$Message := sendMessageNoEscapeRetID nil (complexMessage "content" $Content "embed" $Embed "buttons" (cslice $Close $Settings))}}
-{{if $PinTopMessage}}
-{{ pinMessage .Channel.ID $Message }}
-{{execAdmin "clean 1 -nopin"}}
+{{$Member := .Member}}
+{{try}}
+	{{$Content := print "Welcome " $Member.User.Mention}}
+	{{if $PingModRole}}
+		{{$Content = print $Content "\n-# _ _\n> -# Pinging Staff so you don’t have to: <@&" $PingModRoleID ">"}}
+	{{end}}
+	{{$TDB := (dbGet $Member.User.ID "TemporaryTicketInfo").Value}}
+	{{dbSet .Channel.ID "TicketInfo" (sdict "TChannel" .Channel.ID "TOwner" $Member.User.ID "TState" "Opened" "TPower" "Staff" "TSubject" (index $TDB 0) "TCompose" (index $TDB 1) "TLastReason" "NotDeleted" "TTopMessage" .Message.ID "TUsers" (cslice ) "THadUsers" (cslice ))}}
+	{{$DB := (dbGet .Channel.ID "TicketInfo").Value}}
+	{{$Color := (toInt64 (index (shuffle (cslice "15352629" "16497669" "3450963" "4359668")) 0))}}
+
+	{{$Embed := cembed "title" $DB.TSubject "description" $DB.TCompose "fields" (cslice (sdict "name" "Info" "value" (print "-# " (or $Member.Nick $Member.User.Globalname $Member.User.Username) ": State reason for ticket, add proof if needed. _No need to repeat details if already given._\n\n> -# Click “🔒 Close” to close ticket."))) "color" $Color "footer" (sdict "text" (print "Support will be with you shortly.") "icon_url" "https://raw.githubusercontent.com/iamcal/emoji-data/master/img-twitter-72/1f39f-fe0f.png")}}
+	{{$Close := cbutton "label" "Close" "custom_id" (print $ID "close") "emoji" (sdict "name" "🔒") "style" "danger"}}
+	{{$Settings := cbutton "label" "Settings" "custom_id" (print $ID "settings") "emoji" (sdict "name" "⚙️") "style" "grey"}}
+	{{$Message := sendMessageNoEscapeRetID nil (complexMessage "content" $Content "embed" $Embed "buttons" (cslice $Close $Settings))}}
+	{{if $PinTopMessage}}
+		{{ pinMessage .Channel.ID $Message }}
+		{{execAdmin "clean 1 -nopin"}}
+	{{end}}
+	{{dbSet .Channel.ID "TicketInfo" (sdict "TChannel" .Channel.ID "TOwner" $Member.User.ID "TState" "Opened" "TPower" "Staff" "TSubject" (index $TDB 0) "TCompose" (index $TDB 1) "TLastReason" "NotDeleted" "TTopMessage" $Message "TUsers" (cslice ) "THadUsers" (cslice ))}}
+{{catch}}
+	{{$embed := cembed "description" (print "Welcome <@" $Member.User.ID ">\n\nPlease describe the reasoning for opening this ticket, include any information you think may be relevant such as proof, other third parties and so on.\n\nuse the following command to close the ticket\n`-ticket close reason for closing here`\n\nuse the following command to add users to the ticket\n`-ticket adduser @user`")}}
+	{{sendMessage nil $embed}}
 {{end}}
-{{dbSet .Channel.ID "TicketInfo" (sdict "TChannel" .Channel.ID "TOwner" .User.ID "TState" "Opened" "TPower" "Staff" "TSubject" (index $TDB 0) "TCompose" (index $TDB 1) "TLastReason" "NotDeleted" "TTopMessage" $Message "TUsers" (cslice ) "THadUsers" (cslice ))}}
