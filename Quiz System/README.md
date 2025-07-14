@@ -54,7 +54,7 @@
     - If user **DON'T HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase. It's Optional.
   - Replace the `""` in `{{$NoQuiz := ""}}` variable with ID of your NoQuiz role.
     - If user **HAVE** this role, they **WILL NOT** be able to participate in the quiz, also the stats wouldn't increase. It's Optional.
-  - Replace the `0` in `$EndCCID` variable with ID of the Component-2.yag CC.
+  - Replace the `0` in `{{$EndCCID := 0}}` variable with ID of the Component-2.yag CC.
 > [!CAUTION]
 > Do not give arguments to both `{{$YesQuiz := ""}}` & `{{$NoQuiz := ""}}`. One must be empty, else it could produce unwanted errors.
 
