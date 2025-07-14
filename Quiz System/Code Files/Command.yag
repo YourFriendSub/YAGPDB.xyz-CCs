@@ -1,4 +1,4 @@
-{{$ModeratorRoleID := 0000}}
+{{$ModeratorRoleID := 00000}}
 {{$DefaultEmoji := "Digit"}}
 {{$PingQuiz := ""}}
 {{$YesQuiz := ""}}
