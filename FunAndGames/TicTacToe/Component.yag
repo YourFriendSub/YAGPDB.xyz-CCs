@@ -1,0 +1,215 @@
+{{define "WhoseTurn"}}
+	{{$X := .}}
+	{{$TurnEmoji  := (index (index $X 4).Components 0).Emoji.Name}} {{/* Cslice >> Sdict >> Cslice > Sdict > ActionRow > CButton > Emoji.Name */}}
+	{{$TurnUser := (index $X 5).Content}} {{/* Cslice >> Sdict >> Cslice >> Text */}}
+	{{return (sdict "TurnEmoji" $TurnEmoji "TurnUser" $TurnUser)}}
+{{end}}
+
+{{define "GameState"}}
+	{{$State := cslice}}
+	{{$X := .}}
+	{{range $I := (seq 0 3)}}
+		{{range $Y := (index $X $I).Components}}
+			{{if $Y.Emoji}}
+				{{$State = $State.Append $Y.Emoji.Name}}
+			{{end}}
+		{{end}}
+	{{end}}
+	{{return $State}}
+{{end}}
+
+{{define "ChangeState"}}
+	{{$X := .}}
+	{{$NewGS := cslice}}
+	{{range $i, $v := $X.GS}}
+		{{if eq $i $X.Index}}
+			{{if eq $v "⬜"}}
+				{{$NewGS = $NewGS.Append $X.Turn}}
+			{{else}}
+				{{return}}
+			{{end}}
+		{{else}}
+			{{$NewGS = $NewGS.Append $v}}
+		{{end}}
+	{{end}}
+	{{return $NewGS}}
+{{end}}
+
+{{define "AreYouWinningSon"}}
+	{{$GS := .}}
+	{{$O := ""}}
+
+	{{if and (eq (index $GS 0) (index $GS 1)) (eq (index $GS 0) (index $GS 2)) (ne (index $GS 0) "⬜")}}
+		{{$O = print (index $GS 0)}}
+	{{else if and (eq (index $GS 3) (index $GS 4)) (eq (index $GS 3) (index $GS 5)) (ne (index $GS 3) "⬜")}}
+		{{$O = print (index $GS 3)}}
+	{{else if and (eq (index $GS 6) (index $GS 7)) (eq (index $GS 6) (index $GS 8)) (ne (index $GS 6) "⬜")}}
+		{{$O = print (index $GS 6)}}
+	{{else if and (eq (index $GS 0) (index $GS 3)) (eq (index $GS 0) (index $GS 6)) (ne (index $GS 0) "⬜")}}
+		{{$O = print (index $GS 0)}}
+	{{else if and (eq (index $GS 1) (index $GS 4)) (eq (index $GS 1) (index $GS 7)) (ne (index $GS 1) "⬜")}}
+		{{$O = print (index $GS 1)}}
+	{{else if and (eq (index $GS 2) (index $GS 5)) (eq (index $GS 2) (index $GS 8)) (ne (index $GS 2) "⬜")}}
+		{{$O = print (index $GS 2)}}
+	{{else if and (eq (index $GS 0) (index $GS 4)) (eq (index $GS 0) (index $GS 8)) (ne (index $GS 0) "⬜")}}
+		{{$O = print (index $GS 0)}}
+	{{else if and (eq (index $GS 2) (index $GS 4)) (eq (index $GS 2) (index $GS 6)) (ne (index $GS 2) "⬜")}}
+		{{$O = print (index $GS 2)}}
+	{{else if not (in $GS "⬜")}}
+		{{$O = "⬜"}}
+	{{end}}
+
+	{{return $O}}
+{{end}}
+
+{{$CID := .CustomID}}
+{{$SplitCID := split $CID "_"}}
+
+{{$ID := index $SplitCID 0}}
+{{$Clicked := index $SplitCID 1}}
+{{$P1 := index $SplitCID 2}}
+{{$P2 := index $SplitCID 3}}
+
+{{$Player := .User}}
+
+{{$GS := execTemplate "GameState" (index .Message.Components 0).Components}}
+{{$GW := execTemplate "AreYouWinningSon" $GS}}
+{{$WT := execTemplate "WhoseTurn" (index .Message.Components 0).Components}}
+{{$TurnEmoji := $WT.TurnEmoji}}
+{{$TurnUser := $WT.TurnUser}}
+
+{{$CIndex := ""}}
+{{if eq .CustomID (print $ID "_" 1 "_" $P1 "_" $P2)}}
+	{{$CIndex = 0}}
+{{else if eq .CustomID (print $ID "_" 2 "_" $P1 "_" $P2)}}
+	{{$CIndex = 1}}
+{{else if eq .CustomID (print $ID "_" 3 "_" $P1 "_" $P2)}}
+	{{$CIndex = 2}}
+{{else if eq .CustomID (print $ID "_" 4 "_" $P1 "_" $P2)}}
+	{{$CIndex = 3}}
+{{else if eq .CustomID (print $ID "_" 5 "_" $P1 "_" $P2)}}
+	{{$CIndex = 4}}
+{{else if eq .CustomID (print $ID "_" 6 "_" $P1 "_" $P2)}}
+	{{$CIndex = 5}}
+{{else if eq .CustomID (print $ID "_" 7 "_" $P1 "_" $P2)}}
+	{{$CIndex = 6}}
+{{else if eq .CustomID (print $ID "_" 8 "_" $P1 "_" $P2)}}
+	{{$CIndex = 7}}
+{{else if eq .CustomID (print $ID "_" 9 "_" $P1 "_" $P2)}}
+	{{$CIndex = 8}}
+{{end}}
+
+{{$IsPlayer := false}}
+{{if in (cslice $P1 $P2) (toString $Player.ID)}}
+	{{$IsPlayer = true}}
+{{end}}
+{{if not $IsPlayer}}
+	You're not a player in this game.
+	{{ephemeralResponse}}
+	{{return}}
+{{end}}
+
+{{if ne $Player.Mention $TurnUser}}
+	It's Not Your Turn.
+	{{ephemeralResponse}}
+	{{return}}
+{{end}}
+
+{{$GS = execTemplate "ChangeState" (sdict "GS" $GS "Index" $CIndex "Turn" $TurnEmoji)}}
+{{if not $GS}}
+	Already Occupied, Can't choose That.{{ephemeralResponse}}{{return}}
+{{end}}
+{{$GW = execTemplate "AreYouWinningSon" $GS}}
+
+{{if eq $TurnEmoji "❌"}}
+	{{$TurnEmoji = "⭕"}}
+{{else if eq $TurnEmoji "⭕"}}
+	{{$TurnEmoji = "❌"}}
+{{end}}
+
+
+{{define "GetComponents"}}
+{{$X := .}}
+{{$TurnEmoji := $X.TurnEmoji}}
+{{$TurnUser := $X.TurnUser}}
+{{$GW := $X.GW}}
+{{$GS := $X.GS}}
+{{$ID := $X.ID}}
+
+{{$P1 := $X.P1}}
+{{$P2 := $X.P2}}
+
+{{$Player := $X.Player}}
+{{$Guild := $X.Guild}}
+
+{{$Win := sdict "Disable" false "TurnEmoji" $TurnEmoji}}
+{{if eq $GW "❌"}}
+	{{$Win = sdict "Disable" true "TurnEmoji" "❌" "Title" "Winner" "Winner" $Player.Mention "WinEmoji" "`❌`" "WinText" " Won The Match!" "Avatar" ($Player.AvatarURL "256")}}
+{{else if eq $GW "⭕"}}
+	{{$Win = sdict "Disable" true "TurnEmoji" "⭕" "Title" "Winner" "Winner" $Player.Mention "WinEmoji" "`⭕`"  "WinText" " Won The Match!" "Avatar" ($Player.AvatarURL "256")}}
+{{else if eq $GW "⬜"}}
+	{{$Win = sdict "Disable" true "TurnEmoji" "⬜" "Title" "Draw" "Winner" "`Nobody Won...`" "WinEmoji" "`⬜`" "WinText" " Draw Match!" "Avatar" ($Guild.IconURL "256")}}
+{{end}}
+
+{{/* Row 0 to 2 */}}
+{{$R1 := cslice
+  (cbutton "emoji" (sdict "name" (index $GS 0)) "custom_id" (print $ID "_" 1 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+  (cbutton "emoji" (sdict "name" (index $GS 1)) "custom_id" (print $ID "_" 2 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+  (cbutton "emoji" (sdict "name" (index $GS 2)) "custom_id" (print $ID "_" 3 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+}}
+{{$R2 := cslice
+  (cbutton "emoji" (sdict "name" (index $GS 3)) "custom_id" (print $ID "_" 4 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+  (cbutton "emoji" (sdict "name" (index $GS 4)) "custom_id" (print $ID "_" 5 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+  (cbutton "emoji" (sdict "name" (index $GS 5)) "custom_id" (print $ID "_" 6 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+}}
+{{$R3 := cslice
+  (cbutton "emoji" (sdict "name" (index $GS 6)) "custom_id" (print $ID "_" 7 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+  (cbutton "emoji" (sdict "name" (index $GS 7)) "custom_id" (print $ID "_" 8 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+  (cbutton "emoji" (sdict "name" (index $GS 8)) "custom_id" (print $ID "_" 9 "_" $P1 "_" $P2) "style" "grey" "disabled" $Win.Disable)
+}}
+
+{{$Color := ""}}
+{{if eq $Win.TurnEmoji "❌"}}
+	{{$Color = sdict "Style" "blurple" "Color" 0x5865F2}}
+{{else if eq $Win.TurnEmoji "⭕"}}
+	{{$Color = sdict "Style" "green" "Color" 0x3BA55C}}
+{{else if eq $Win.TurnEmoji "⬜"}}
+	{{$Color = sdict "Style" "red" "Color" 0xFFFFFF}}
+{{end}}
+
+{{$R4 := cslice
+  (cbutton "emoji" (sdict "name" $Win.TurnEmoji) "style" $Color.Style "disabled" true)
+  (cbutton "emoji" (sdict "name" "🔄") "style" "grey" "disabled" true)
+  (cbutton "emoji" (sdict "name" "✨") "style" "grey" "disabled" true)
+}}
+
+{{$CB := componentBuilder "buttons" $R1 "buttons" $R2 "buttons" $R3 "separator" true "buttons" $R4}}
+
+{{if $GW}}
+{{if eq $TurnEmoji "❌"}}
+	{{$TurnEmoji = "⭕"}}
+{{else if eq $TurnEmoji "⭕"}}
+	{{$TurnEmoji = "❌"}}
+{{end}}
+
+{{$Section := cslice (sdict "text" (cslice (print "# " $Win.Title) $Win.Winner (print $Win.WinEmoji $Win.WinText)) "thumbnail" (sdict "media" $Win.Avatar))}}
+{{$CB.Add "section" $Section}}
+{{else}}
+	{{if eq $TurnUser (print "<@" $P1 ">")}}
+		{{$TurnUser = (print "<@" $P2 ">")}}
+	{{else if eq $TurnUser (print "<@" $P2 ">")}}
+		{{$TurnUser = (print "<@" $P1 ">")}}
+	{{end}}
+	{{$Text := cslice $TurnUser}}
+	{{$CB.Add "text" $Text}}
+{{end}}
+
+{{$CB = sdict "color" $Color.Color "components" $CB}} 
+{{return $CB}}
+{{end}}
+
+{{/* sendResponse nil (complexMessage "content" "Sending this, because i'm dum..." "ephemeral" true) */}}
+
+{{$Components := execTemplate "GetComponents" (sdict "TurnEmoji" $TurnEmoji "TurnUser" $TurnUser "GW" $GW "GS" $GS "ID" $ID "P1" $P1 "P2" $P2 "Player" $Player "Guild" .Guild)}}
+
+{{editComponentMessage .Channel.ID .Message.ID (componentBuilder "container" $Components)}}
