@@ -1,18 +1,18 @@
 {{define "ToInt"}}
 	{{return (toInt64 (reFind `\b\d+\b` .))}}
 {{end}}
-
+ 
 {{define "UpDB"}}
-	{{$QID := .Get "ID"}}
-	{{$SDB := .Get "SDB"}}
-	{{$Key := .Get "Key"}}
-	{{$Value := .Get "Value"}}
+	{{$QID := .ID}}
+	{{$SDB := .SDB}}
+	{{$Key := .Key}}
+	{{$Value := .Value}}
 	{{$QDB := (dbGet $QID "quiz").Value}}
-	{{$Q := $QDB.Get "quop"}}
-	{{$H := $QDB.Get "haedi"}}
-	{{$S := $QDB.Get "stats"}}
-	{{$I := $QDB.Get "info"}}
-
+	{{$Q := $QDB.quop}}
+	{{$H := $QDB.haedi}}
+	{{$S := $QDB.stats}}
+	{{$I := $QDB.info}}
+ 
 	{{if eq $SDB "Q"}}
 		{{range $K, $V := $Q}}
 			{{if eq $Key $K}}
@@ -41,10 +41,10 @@
 			{{end}}
 		{{end}}
 	{{end}}
-
+ 
 	{{dbSet $QID "quiz" (sdict "quop" $Q "haedi" $H "stats" $S "info" $I)}}
 {{end}}
-
+ 
 {{define "GetComponents"}}
 	{{$C := cslice}}
 	{{range .}}
@@ -52,36 +52,37 @@
 	{{end}}
 	{{return $C}}
 {{end}}
-
+ 
 {{$ID := "quiz_"}}
 {{$Modal := ""}}
 {{$NVH := ""}}
-
+ 
 {{$QID := execTemplate "ToInt" ((index .Message.Embeds 0).Footer).Text}}
-
+ 
 {{$QDB := (dbGet $QID "quiz").Value}}
-{{$Q := $QDB.Get "quop"}}
-{{$H := $QDB.Get "haedi"}}
-{{$S := $QDB.Get "stats"}}
-{{$I := $QDB.Get "info"}}
-{{$MR := hasRoleID ($I.Get "MR")}}
-
+{{$Q := $QDB.quop}}
+{{$H := $QDB.haedi}}
+{{$S := $QDB.stats}}
+{{$I := $QDB.info}}
+{{$MR := hasRoleID $I.MR}}
+ 
 {{$DQDB := (dbGet .Guild.ID "Quiz").Value}}
-{{$HC := $DQDB.Get "handler"}}
-{{$DE := $DQDB.Get "demoji"}}
-{{$QE := $DQDB.Get "qemoji"}}
-
+{{$EndCCID := $DQDB.endCCID}}
+{{$HC := $DQDB.handler}}
+{{$DE := $DQDB.demoji}}
+{{$QE := $DQDB.qemoji}}
+ 
 {{$NA := complexMessage "embed" (cembed "description" ($HC.Get "000") "color" 0xFFFFFF) "ephemeral" true}}
-
-{{$O1 := cbutton "emoji" (sdict "id" ($DE.Get "rb")) "style" "grey" "custom_id" (print $ID "answer_1")}}
-{{$O2 := cbutton "emoji" (sdict "id" ($DE.Get "yb")) "style" "grey" "custom_id" (print $ID "answer_2")}}
-{{$O3 := cbutton "emoji" (sdict "id" ($DE.Get "gb")) "style" "grey" "custom_id" (print $ID "answer_3")}}
-{{$O4 := cbutton "emoji" (sdict "id" ($DE.Get "bb")) "style" "grey" "custom_id" (print $ID "answer_4")}}
-{{$Hint := cbutton "emoji" (sdict "id" ($QE.Get "B")) "style" "blurple" "custom_id" (print $ID "hint")}}
-{{$Settings := cbutton "emoji" (sdict "id" ($QE.Get "M")) "style" "red" "custom_id" (print $ID "settings")}}
-
+ 
+{{$O1 := cbutton "emoji" (sdict "id" $DE.rb) "style" "grey" "custom_id" (print $ID "answer_1")}}
+{{$O2 := cbutton "emoji" (sdict "id" $DE.yb) "style" "grey" "custom_id" (print $ID "answer_2")}}
+{{$O3 := cbutton "emoji" (sdict "id" $DE.gb) "style" "grey" "custom_id" (print $ID "answer_3")}}
+{{$O4 := cbutton "emoji" (sdict "id" $DE.bb) "style" "grey" "custom_id" (print $ID "answer_4")}}
+{{$Hint := cbutton "emoji" (sdict "id" $QE.B) "style" "blurple" "custom_id" (print $ID "hint")}}
+{{$Settings := cbutton "emoji" (sdict "id" $QE.M) "style" "red" "custom_id" (print $ID "settings")}}
+ 
 {{$IsHere := false}}
-
+ 
 {{if not $QDB}}
 	{{if .IsMenu}}
 		{{if in (cslice (print $ID "build") (print $ID "channel") (print $ID "pingquiz") (print $ID "yesquiz") (print $ID "noquiz")) .CustomID}}
@@ -92,42 +93,42 @@
 			{{$IsHere = true}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if $IsHere}}
 		{{sendResponse nil (complexMessage "content" ($HC.Get "116") "ephemeral" true)}}
 		{{return}}
 	{{end}}
 {{end}}
-
+ 
 {{if .IsMenu}}
 	{{if eq (index .Values 0) (print $ID "QuestionAndOptions")}}
 		{{if $MR}}
 			{{$Modal = sdict "title" ($HC.Get "024") "custom_id" (print $ID "QuestionAndOptions") "fields" (cslice
-				(sdict "label" ($HC.Get "025") "placeholder" ($HC.Get "026") "required" true "max_length" 128 "min_length" 0 "value" (print (or ($Q.Get "Q") "")))
-				(sdict "label" ($HC.Get "027") "placeholder" ($HC.Get "028") "required" true "max_length" 256 "min_length" 0 "value" (print (or ($Q.Get "O1") "")))
-				(sdict "label" ($HC.Get "029") "placeholder" ($HC.Get "030") "required" true "max_length" 256 "min_length" 0 "value" (print (or ($Q.Get "O2") "")))
-				(sdict "label" ($HC.Get "031") "placeholder" ($HC.Get "032") "required" true "max_length" 256 "min_length" 0 "value" (print (or ($Q.Get "O3") "")))
-				(sdict "label" ($HC.Get "033") "placeholder" ($HC.Get "034") "required" true "max_length" 256 "min_length" 0 "value" (print (or ($Q.Get "O4") "")))) }}
+				(sdict "label" ($HC.Get "025") "placeholder" ($HC.Get "026") "required" true "max_length" 128 "min_length" 0 "value" (print (or $Q.Q "")))
+				(sdict "label" ($HC.Get "027") "placeholder" ($HC.Get "028") "required" true "max_length" 256 "min_length" 0 "value" (print (or $Q.O1 "")))
+				(sdict "label" ($HC.Get "029") "placeholder" ($HC.Get "030") "required" true "max_length" 256 "min_length" 0 "value" (print (or $Q.O2 "")))
+				(sdict "label" ($HC.Get "031") "placeholder" ($HC.Get "032") "required" true "max_length" 256 "min_length" 0 "value" (print (or $Q.O3 "")))
+				(sdict "label" ($HC.Get "033") "placeholder" ($HC.Get "034") "required" true "max_length" 256 "min_length" 0 "value" (print (or $Q.O4 "")))) }}
 			{{sendModal $Modal}}
 		{{else}}
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq (index .Values 0) (print $ID "haedi")}}
 		{{if $MR}}
 			{{$Modal = sdict "title" ($HC.Get "035") "custom_id" (print $ID "haedi") "fields" (cslice
-				(sdict "label" ($HC.Get "036") "placeholder" ($HC.Get "037") "required" false "max_length" 256 "min_length" 1 "value" (print (or ($H.Get "H") "")))
-				(sdict "label" ($HC.Get "038") "placeholder" ($HC.Get "039") "required" true "max_length" 1 "min_length" 1 "value" (print (or ($H.Get "A") "")))
-				(sdict "label" ($HC.Get "040") "placeholder" ($HC.Get "041") "required" false "max_length" 512 "min_length" 1 "value" (print (or ($H.Get "E") "")))
-				(sdict "label" ($HC.Get "042") "placeholder" ($HC.Get "043") "required" false "max_length" 256 "min_length" 1 "value" (print (or ($H.Get "D") "")))
-				(sdict "label" ($HC.Get "044") "placeholder" ($HC.Get "045") "required" false "max_length" 256 "min_length" 1 "value" (print (or (($H.Get "I").Get "URL") ""))))}}
+				(sdict "label" ($HC.Get "036") "placeholder" ($HC.Get "037") "required" false "max_length" 256 "min_length" 1 "value" (print (or $H.H "")))
+				(sdict "label" ($HC.Get "038") "placeholder" ($HC.Get "039") "required" true "max_length" 1 "min_length" 1 "value" (print (or $H.A "")))
+				(sdict "label" ($HC.Get "040") "placeholder" ($HC.Get "041") "required" false "max_length" 512 "min_length" 1 "value" (print (or $H.E "")))
+				(sdict "label" ($HC.Get "042") "placeholder" ($HC.Get "043") "required" false "max_length" 256 "min_length" 1 "value" (print (or $H.D "")))
+				(sdict "label" ($HC.Get "044") "placeholder" ($HC.Get "045") "required" false "max_length" 256 "min_length" 1 "value" (print (or ($H.I).URL) "")))}}
 			{{sendModal $Modal}}
 		{{else}}
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "channel")}}
 		{{if $MR}}
 			{{$NVH = execTemplate "UpDB" (sdict "ID" $QID "SDB" "I" "Key" "QC" "Value" (index .Values 0))}}
@@ -136,7 +137,7 @@
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "pingquiz")}}
 		{{if $MR}}
 			{{$NVH = execTemplate "UpDB" (sdict "ID" $QID "SDB" "I" "Key" "PQ" "Value" (index .Values 0))}}
@@ -145,7 +146,7 @@
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "yesquiz")}}
 		{{if $MR}}
 			{{$NVH = execTemplate "UpDB" (sdict "ID" $QID "SDB" "I" "Key" "YQ" "Value" (index .Values 0))}}
@@ -155,7 +156,7 @@
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "noquiz")}}
 		{{if $MR}}
 			{{$NVH = execTemplate "UpDB" (sdict "ID" $QID "SDB" "I" "Key" "NQ" "Value" (index .Values 0))}}
@@ -166,7 +167,7 @@
 		{{end}}
 	{{end}}
 {{end}}
-
+ 
 {{if .IsButton}}
 	{{if eq .CustomID (print $ID "renew")}}
 		{{if $MR}}
@@ -176,11 +177,11 @@
 		{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "more")}}
 		{{if $MR}}
 			{{$MoreEmbed := cembed "color" 0xFFFFFF "description" (print ($HC.Get "016") "\n" ($HC.Get "018") "\n" ($HC.Get "020")) "footer" (sdict "text" (print ($HC.Get "008") $QID))}}
-
+ 
 			{{$PingquizMenu := cmenu "type" "role" "placeholder" ($HC.Get "021") "custom_id" (print $ID "pingquiz")}}
 			{{$YesquizMenu := cmenu "type" "role" "placeholder" ($HC.Get "022") "custom_id" (print $ID "yesquiz")}}
 			{{$NoquizMenu := cmenu "type" "role" "placeholder" ($HC.Get "023") "custom_id" (print $ID "noquiz")}}
@@ -189,31 +190,34 @@
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "sendquiz")}}
 		{{if $MR}}
-			{{if and ($Q.Get "Q") ($Q.Get "O1") ($Q.Get "O2") ($Q.Get "O3") ($Q.Get "O4") ($H.Get "A")}}
-				{{if eq ($I.Get "QC") ""}}
+			{{if and $Q.Q $Q.O1 $Q.O2 $Q.O3 $Q.O4 $H.A}}
+				{{if eq $I.QC ""}}
 					{{sendResponse nil (complexMessage "content" ($HC.Get "056") "ephemeral" true)}}
 				{{else}}
-					{{if or (eq ($H.Get "A") "1") (eq ($H.Get "A") "2") (eq ($H.Get "A") "3") (eq ($H.Get "A") "4")}}
+					{{if or (eq $H.A "1") (eq $H.A "2") (eq $H.A "3") (eq $H.A "4")}}
 						{{$Interact := (cslice $O1 $O2 $O3 $O4 $Hint $Settings)}}
-
+ 
 						{{$Ping := ""}}
-						{{if ($I.Get "PQ")}}
-							{{$Ping = print "<@&" ($I.Get "PQ") ">" }}
+						{{if $I.PQ}}
+							{{$Ping = print "<@&" $I.PQ ">"}}
 						{{end}}
-
-						{{$QM := sendMessageNoEscapeRetID ($I.Get "QC") (complexMessage "content" (print ($HC.Get "086") $Ping) "embed" (cembed "color" 0xFFFFFF "image" (sdict "url" (($H.Get "I").Get "URL")) "title" ($Q.Get "Q") "description" (print "<:_:" ($DE.Get "rs") ">" ($Q.Get "O1") "\n<:_:" ($DE.Get "ys") ">" ($Q.Get "O2") "\n<:_:" ($DE.Get "gs") ">" ($Q.Get "O3") "\n<:_:" ($DE.Get "bs") ">" ($Q.Get "O4")) "footer" (sdict "text" (print ($HC.Get "008") ($I.Get "BM")))) "buttons" $Interact)}}
+ 
+						{{$QM := sendMessageNoEscapeRetID $I.QC (complexMessage "content" (print ($HC.Get "086") $Ping) "embed" (cembed "color" 0xFFFFFF "image" (sdict "url" (($H.I).URL)) "title" $Q.Q "description" (print "<:_:" $DE.rs ">" $Q.O1 "\n<:_:" $DE.ys ">" $Q.O2 "\n<:_:" $DE.gs ">" $Q.O3 "\n<:_:" $DE.bs ">" $Q.O4) "footer" (sdict "text" (print ($HC.Get "008") $I.BM))) "buttons" $Interact)}}
 						{{$NVH = execTemplate "UpDB" (sdict "ID" $QID "SDB" "I" "Key" "QM" "Value" $QM)}}
 						{{$NVH = execTemplate "UpDB" (sdict "ID" $QID "SDB" "I" "Key" "SB" "Value" .User.ID)}}
 						{{$NVH = execTemplate "UpDB" (sdict "ID" $QID "SDB" "I" "Key" "SO" "Value" currentTime.Unix)}}
-
-						{{sendResponse nil (complexMessage "content" (print ($HC.Get "062") "<#" ($I.Get "QC") ">") "ephemeral" true)}}
+ 
+						{{sendResponse nil (complexMessage "content" (print ($HC.Get "062") "<#" $I.QC ">") "ephemeral" true)}}
+						{{if and $H.D (ne $EndCCID 0)}}
+							{{execCC $EndCCID $I.QC $H.D true}}
+						{{end}}
 					{{end}}
 				{{end}}
 			{{else}}
-				{{sendResponse nil (complexMessage "embed" (cembed "description" (print ($HC.Get "046") "\n" ($HC.Get "047") (or ($Q.Get "Q") ($HC.Get "053")) "\n" ($HC.Get "048") (or ($Q.Get "O1") ($HC.Get "053")) "\n" ($HC.Get "049") (or ($Q.Get "O2") ($HC.Get "053")) "\n" ($HC.Get "050") (or ($Q.Get "O3") ($HC.Get "053")) "\n" ($HC.Get "051") (or ($Q.Get "O4") ($HC.Get "053")) "\n" ($HC.Get "052") (or ($H.Get "A") ($HC.Get "053"))) "color" 0xFF0000) "ephemeral" true)}}
+				{{sendResponse nil (complexMessage "embed" (cembed "description" (print ($HC.Get "046") "\n" ($HC.Get "047") (or $Q.Q ($HC.Get "053")) "\n" ($HC.Get "048") (or $Q.O1 ($HC.Get "053")) "\n" ($HC.Get "049") (or $Q.O2 ($HC.Get "053")) "\n" ($HC.Get "050") (or $Q.O3 ($HC.Get "053")) "\n" ($HC.Get "051") (or $Q.O4 ($HC.Get "053")) "\n" ($HC.Get "052") (or $H.A ($HC.Get "053"))) "color" 0xFF0000) "ephemeral" true)}}
 			{{end}}
 		{{else}}
 			{{sendResponse nil $NA}}
