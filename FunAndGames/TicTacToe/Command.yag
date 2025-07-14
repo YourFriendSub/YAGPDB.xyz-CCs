@@ -1,0 +1,58 @@
+{{$ID := "tictactoe_"}}
+{{$P1 := ""}}
+{{$P2 := ""}}
+
+{{if eq (len .CmdArgs) 0}}
+	{{sendMessage .Channel.ID (complexMessage "reply" .Message.ID "content" "Required argument missing: User")}}
+{{else if (index .CmdArgs 0)}}
+    {{if $Member := (getMember (index .CmdArgs 0))}}
+		{{$P1 = .Member.User}}
+		{{$P2 = $Member.User}}
+        {{if eq $P1.ID $P2.ID}}
+            You Should Not Be A Opponent.
+            {{return}}
+        {{else if $P2.Bot}}
+            Opponent Should Be A Real User.
+            {{return}}
+        {{end}}
+
+		{{$blankEmoji := sdict "name" "⬜"}}
+		{{$Turn := index (shuffle (cslice "⭕" "❌")) 0}}
+
+		{{$R1 := cslice
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "1_" $P1.ID "_" $P2.ID) "style" "grey")
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "2_" $P1.ID "_" $P2.ID) "style" "grey")
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "3_" $P1.ID "_" $P2.ID) "style" "grey")
+		}}
+
+		{{$R2 := cslice
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "4_" $P1.ID "_" $P2.ID) "style" "grey")
+ 			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "5_" $P1.ID "_" $P2.ID) "style" "grey")
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "6_" $P1.ID "_" $P2.ID) "style" "grey")
+		}}
+
+		{{$R3 := cslice
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "7_" $P1.ID "_" $P2.ID) "style" "grey")
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "8_" $P1.ID "_" $P2.ID) "style" "grey")
+			(cbutton "emoji" $blankEmoji "custom_id" (print $ID "9_" $P1.ID "_" $P2.ID) "style" "grey")
+		}}
+
+		{{$Color := ""}}
+		{{if eq $Turn "❌"}}
+			{{$Color = sdict "Style" "blurple" "Color" 0x5865F2}}
+		{{else if eq $Turn "⭕"}}
+			{{$Color = sdict "Style" "green" "Color" 0x3BA55C}}
+		{{end}}
+
+		{{$R4 := cslice
+			(cbutton "emoji" (sdict "name" $Turn) "style" $Color.Style "disabled" true)
+			(cbutton "emoji" (sdict "name" "🔄") "style" "grey" "disabled" true)
+			(cbutton "emoji" (sdict "name" "✨") "style" "grey" "disabled" true)
+		}}
+		{{$CB := componentBuilder "buttons" $R1 "buttons" $R2 "buttons" $R3 "separator" true "buttons" $R4}}
+		{{$CB.Add "text" (cslice (index (shuffle (cslice $P1.Mention $P2.Mention)) 0))}}
+		{{sendComponentMessage nil (componentBuilder "container" (sdict "color" $Color.Color "components" $CB))}}
+    {{else}}
+		User Is Incorrect / Not in Server.
+	{{end}}
+{{end}}
