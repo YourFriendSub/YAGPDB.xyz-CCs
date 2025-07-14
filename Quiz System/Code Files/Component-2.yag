@@ -1,18 +1,18 @@
 {{define "ToInt"}}
 	{{return (toInt64 (reFind `\b\d+\b` .))}}
 {{end}}
-
+ 
 {{define "UpDB"}}
-	{{$QID := .Get "ID"}}
-	{{$SDB := .Get "SDB"}}
-	{{$Key := .Get "Key"}}
-	{{$Value := .Get "Value"}}
+	{{$QID := .ID}}
+	{{$SDB := .SDB}}
+	{{$Key := .Key}}
+	{{$Value := .Value}}
 	{{$QDB := (dbGet $QID "quiz").Value}}
-	{{$Q := $QDB.Get "quop"}}
-	{{$H := $QDB.Get "haedi"}}
-	{{$S := $QDB.Get "stats"}}
-	{{$I := $QDB.Get "info"}}
-
+	{{$Q := $QDB.quop}}
+	{{$H := $QDB.haedi}}
+	{{$S := $QDB.stats}}
+	{{$I := $QDB.info}}
+ 
 	{{if eq $SDB "Q"}}
 		{{range $K, $V := $Q}}
 			{{if eq $Key $K}}
@@ -41,10 +41,20 @@
 			{{end}}
 		{{end}}
 	{{end}}
-
+ 
 	{{dbSet $QID "quiz" (sdict "quop" $Q "haedi" $H "stats" $S "info" $I)}}
 {{end}}
-
+ 
+{{define "DDB"}}
+    {{$HC := .HC}}
+    {{$QID := .QID}}
+    {{try}}
+        {{dbDel $QID "quiz"}}
+        {{sendResponse nil (complexMessage "content" ($HC.Get "115") "ephemeral" true)}}
+    {{catch}}
+    {{end}}
+{{end}}
+ 
 {{define "DisableComponents"}}
 	{{$Cs := cslice}}
 	{{range (index . 0).Components}}
@@ -54,33 +64,48 @@
 	{{end}}
 	{{return $Cs}}
 {{end}}
-
+ 
+{{define "EndQ"}}
+    {{$QID := .QID}}{{$Q := .Q}}{{$H := .H}}{{$I := .I}}
+    {{$DE := .DE}}{{$HC := .HC}}
+    {{$Fields := cslice (sdict "name" $Q.Q "value" (print "<:_:" $DE.rs ">" $Q.O1 "\n<:_:" $DE.ys ">" $Q.O2 "\n<:_:" $DE.gs ">" $Q.O3 "\n<:_:" $DE.bs ">" $Q.O4)) (sdict "name" ($HC.Get "114") "value" (print $H.A))}}
+    {{$QuizEmbeds := cslice}}
+    {{if ($H.I).Has}}
+        {{$QuizEmbeds = $QuizEmbeds.Append (cembed "footer" (sdict "text" (print ($HC.Get "008") $I.BM)) "color" 0xFFFFFF "image" (sdict "url" ($H.I).URL) "fields" $Fields)}}
+        {{$QuizEmbeds = $QuizEmbeds.Append (cembed "color" 0xFFFFFF "image" (sdict "url" .Chart))}}
+    {{else}}
+        {{$QuizEmbeds = $QuizEmbeds.Append (cembed "footer" (sdict "text" (print ($HC.Get "008") $I.BM)) "color" 0xFFFFFF "image" (sdict "url" .Chart) "fields" $Fields)}}
+    {{end}}
+    {{editMessage $I.QC $I.QM (complexMessageEdit "buttons" (execTemplate "DisableComponents" (getMessage $I.QC $I.QM).Components) "embed" $QuizEmbeds)}}
+    {{$NV := execTemplate "DDB" (sdict "HC" $HC "QID" $QID)}}
+{{end}}
+ 
 {{$ID := "quiz_"}}
 {{$Modal := ""}}
 {{$NV := ""}}
 {{$QID := execTemplate "ToInt" ((index .Message.Embeds 0).Footer).Text}}
-
+ 
 {{$QDB := (dbGet $QID "quiz").Value}}
-{{$Q := $QDB.Get "quop"}}
-{{$H := $QDB.Get "haedi"}}
-{{$S := $QDB.Get "stats"}}
-{{$I := $QDB.Get "info"}}
-{{$MR := hasRoleID ($I.Get "MR")}}
-
+{{$Q := $QDB.quop}}
+{{$H := $QDB.haedi}}
+{{$S := $QDB.stats}}
+{{$I := $QDB.info}}
+{{$MR := hasRoleID $I.MR}}
+ 
 {{$DQDB := (dbGet .Guild.ID "Quiz").Value}}
-{{$HC := $DQDB.Get "handler"}}
-{{$DE := $DQDB.Get "demoji"}}
-{{$QE := $DQDB.Get "qemoji"}}
-
+{{$HC := $DQDB.handler}}
+{{$DE := $DQDB.demoji}}
+{{$QE := $DQDB.qemoji}}
+ 
 {{$NA := complexMessage "content" (print ($HC.Get "000")) "ephemeral" true}}
-
-{{$QuizInfo := cbutton "emoji" (sdict "id" ($QE.Get "P")) "style" "blurple" "custom_id" (print $ID "info")}}
-{{$QuizStats := cbutton "emoji" (sdict "id" ($QE.Get "S")) "style" "blurple" "custom_id" (print $ID "stats")}}
-{{$delete_quiz := cbutton "emoji" (sdict "id" ($QE.Get "D")) "style" "red" "custom_id" (print $ID "delete_quiz")}}
-{{$EndQuiz := cbutton "emoji" (sdict "id" ($QE.Get "EC")) "style" "red" "custom_id" (print $ID "endquiz")}}
-
-{{$Chart := (print "https://quickchart.io/chart?v=2.9.4&c=%0A%7B%0A%20%20type%3A%20%27outlabeledPie%27%2C%0A%20%20data%3A%20%7B%0A%20%20%20%20labels%3A%20%5B%27" (urlescape ($HC.Get "104")) "%27%2C%20%27" (urlescape ($HC.Get "105")) "%27%2C%20%27" (urlescape ($HC.Get "106")) "%27%2C%20%27" (urlescape ($HC.Get "107")) "%27%2C%20%27" (urlescape ($HC.Get "108")) "%27%5D%2C%0A%20%20%20%20datasets%3A%20%5B%0A%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20backgroundColor%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%27%23E23A2E%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%23FCC31E%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%23259645%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%231A73E8%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%239966FF%27%2C%2C%0A%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20data%3A%20%5B" ($S.Get "O1") "%2C%20" ($S.Get "O2") "%2C%20" ($S.Get "O3") "%2C%20" ($S.Get "O4") "%2C%20" ($S.Get "H") "%5D%2C%0A%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%5D%2C%0A%20%20%7D%2C%0A%20%20options%3A%20%7B%0A%20%20%20%20plugins%3A%20%7B%0A%20%20%20%20%20%20legend%3A%20false%2C%0A%20%20%20%20%20%20outlabels%3A%20%7B%0A%20%20%20%20%20%20%20%20text%3A%20%27%25l%20%25p%27%2C%0A%20%20%20%20%20%20%20%20color%3A%20%27white%27%2C%0A%20%20%20%20%20%20%20%20stretch%3A%2035%2C%0A%20%20%20%20%20%20%20%20font%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20resizable%3A%20true%2C%0A%20%20%20%20%20%20%20%20%20%20minSize%3A%2012%2C%0A%20%20%20%20%20%20%20%20%20%20maxSize%3A%2018%2C%0A%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%7D%2C%0A%20%20%7D%2C%0A%7D")}}
-
+ 
+{{$QuizInfo := cbutton "emoji" (sdict "id" $QE.P) "style" "blurple" "custom_id" (print $ID "info")}}
+{{$QuizStats := cbutton "emoji" (sdict "id" $QE.S) "style" "blurple" "custom_id" (print $ID "stats")}}
+{{$delete_quiz := cbutton "emoji" (sdict "id" $QE.D) "style" "red" "custom_id" (print $ID "delete_quiz")}}
+{{$EndQuiz := cbutton "emoji" (sdict "id" $QE.EC) "style" "red" "custom_id" (print $ID "endquiz")}}
+ 
+{{$Chart := (print "https://quickchart.io/chart?v=2.9.4&c=%0A%7B%0A%20%20type%3A%20%27outlabeledPie%27%2C%0A%20%20data%3A%20%7B%0A%20%20%20%20labels%3A%20%5B%27" (urlescape ($HC.Get "104")) "%27%2C%20%27" (urlescape ($HC.Get "105")) "%27%2C%20%27" (urlescape ($HC.Get "106")) "%27%2C%20%27" (urlescape ($HC.Get "107")) "%27%2C%20%27" (urlescape ($HC.Get "108")) "%27%5D%2C%0A%20%20%20%20datasets%3A%20%5B%0A%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20backgroundColor%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%27%23E23A2E%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%23FCC31E%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%23259645%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%231A73E8%27%2C%0A%20%20%20%20%20%20%20%20%20%20%27%239966FF%27%2C%2C%0A%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20data%3A%20%5B" $S.O1 "%2C%20" $S.O2 "%2C%20" $S.O3 "%2C%20" $S.O4 "%2C%20" $S.H "%5D%2C%0A%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%5D%2C%0A%20%20%7D%2C%0A%20%20options%3A%20%7B%0A%20%20%20%20plugins%3A%20%7B%0A%20%20%20%20%20%20legend%3A%20false%2C%0A%20%20%20%20%20%20outlabels%3A%20%7B%0A%20%20%20%20%20%20%20%20text%3A%20%27%25l%20%25p%27%2C%0A%20%20%20%20%20%20%20%20color%3A%20%27white%27%2C%0A%20%20%20%20%20%20%20%20stretch%3A%2035%2C%0A%20%20%20%20%20%20%20%20font%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20resizable%3A%20true%2C%0A%20%20%20%20%20%20%20%20%20%20minSize%3A%2012%2C%0A%20%20%20%20%20%20%20%20%20%20maxSize%3A%2018%2C%0A%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%7D%2C%0A%20%20%7D%2C%0A%7D")}}
+ 
 {{$Here := false}}
 {{if not $QDB}}
 	{{if .IsButton}}
@@ -88,16 +113,23 @@
 			{{$Here = true}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if $Here}}
 		{{sendResponse nil (complexMessage "content" ($HC.Get "116") "ephemeral" true)}}
 		{{return}}
 	{{end}}
 {{end}}
-
-{{$YQ := or ($I.Get "YQ") "0"}}
-{{$NQ := or ($I.Get "NQ") "0"}}
-
+ 
+{{$YQ := or $I.YQ "0"}}
+{{$NQ := or $I.NQ "0"}}
+ 
+{{$EQ := (sdict "QID" $QID "Q" $Q "H" $H "I" $I "Chart" $Chart "DE" $DE "HC" $HC)}}
+ 
+{{if .ExecData}}
+	{{$NV = execTemplate "EndQ" $EQ}}
+	{{return}}
+{{end}}
+ 
 {{if .IsButton}}
 	{{range (cslice "1" "2" "3" "4" "hint")}}
 		{{if in (cslice (print $ID "answer_1") (print $ID "answer_2") (print $ID "answer_3") (print $ID "answer_4") (print $ID "hint")) $.CustomID}}
@@ -109,33 +141,33 @@
 				{{sendResponse nil (complexMessage "content" (print ($HC.Get "088") "<@&" $NQ ">") "ephemeral" true)}}
 				{{return}}
 			{{end}}
-
+ 
 			{{if eq $.CustomID (print $ID "hint")}}
-				{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "H" "Value" (add 1 (toInt ($S.Get "H"))))}}
-				{{sendResponse nil (complexMessage "embed" (cembed "description" (print ($HC.Get "091") ($H.Get "H")) "color" 0xFFFFFF) "ephemeral" true)}}
+				{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "H" "Value" (add 1 (toInt $S.H)))}}
+				{{sendResponse nil (complexMessage "embed" (cembed "description" (print ($HC.Get "091") $H.H) "color" 0xFFFFFF) "ephemeral" true)}}
 				{{break}}
 			{{end}}
-
+ 
 			{{if eq $.CustomID (print $ID "answer_" .)}}
 				{{if eq . "1"}}
-					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O1" "Value" (add 1 ($S.Get "O1")))}}
+					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O1" "Value" (add 1 $S.O1))}}
 				{{else if eq . "2"}}
-					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O2" "Value" (add 1 ($S.Get "O2")))}}
+					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O2" "Value" (add 1 $S.O2))}}
 				{{else if eq . "3"}}
-					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O3" "Value" (add 1 ($S.Get "O3")))}}
+					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O3" "Value" (add 1 $S.O3))}}
 				{{else if eq . "4"}}
-					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O4" "Value" (add 1 ($S.Get "O4")))}}
+					{{$NV = execTemplate "UpDB" (sdict "ID" $QID "SDB" "S" "Key" "O4" "Value" (add 1 $S.O4))}}
 				{{end}}
-
-				{{if eq (toString ($H.Get "A")) (print (toString .))}}
-					{{sendResponse nil (complexMessage "embed" (cembed "description" (print "-# " ($H.Get "E")) "color" 0x34A853 "author" (sdict "name" ($HC.Get "089"))) "ephemeral" true)}}
+ 
+				{{if eq (toString $H.A) (print (toString .))}}
+					{{sendResponse nil (complexMessage "embed" (cembed "description" (print "-# " $H.E) "color" 0x34A853 "author" (sdict "name" ($HC.Get "089"))) "ephemeral" true)}}
 				{{else}}
-					{{sendResponse nil (complexMessage "embed" (cembed "description" (print "-# " ($H.Get "E")) "color" 0xEA4335 "author" (sdict "name" ($HC.Get "090"))) "ephemeral" true)}}
+					{{sendResponse nil (complexMessage "embed" (cembed "description" (print "-# " $H.E) "color" 0xEA4335 "author" (sdict "name" ($HC.Get "090"))) "ephemeral" true)}}
 				{{end}}
 			{{end}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "settings")}}
 		{{if $MR}}
 			{{sendResponse nil (complexMessage "embed" (cembed "fields" (cslice (sdict "name" ($HC.Get "094") "value" (print ($HC.Get "095")))) "color" 0xFFFFFF "footer" (sdict "text" (print ($HC.Get "008") $QID))) "buttons" (cslice $QuizInfo $QuizStats $delete_quiz $EndQuiz) "ephemeral" true)}}
@@ -143,27 +175,32 @@
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "info")}}
-		{{$InfoEmbed := structToSdict (cembed "color" 0xFFFFFF "title" ($HC.Get "067") "description" (print ($HC.Get "073") "<@" ($I.Get "MB") ">\n" ($HC.Get "074") "<t:" ($I.Get "MO") ":F>\n" ($HC.Get "075") "**" ($I.Get "DE") "**: <:_:" ($DE.Get "rs") "> <:_:" ($DE.Get "ys") "> <:_:" ($DE.Get "gs") "> <:_:" ($DE.Get "bs") ">\n" ($HC.Get "076") "<@" ($I.Get "SB") ">\n" ($HC.Get "077") " <t:" ($I.Get "SO") ":F>\n" ($HC.Get "081") ($H.Get "H") "\n" ($HC.Get "082") ($H.Get "A") "\n" ($HC.Get "083") ($H.Get "E") "\n" ($HC.Get "084") (or ($H.Get "D") "Not Set") "\n" ($HC.Get "085") "`" (($H.Get "I").Get "Has") "`"))}}
-		{{if (($H.Get "I").Get "Has")}}
-			{{$InfoEmbed.Set "image" (sdict "url" (($H.Get "I").Get "URL"))}}
+		{{$EndT := ""}}
+		{{if $H.D}}
+			{{$T := add (getMessage $I.QC $I.QM).Timestamp.Parse.Unix $H.D}}
+			{{$EndT = print "<t:" $T ":d>" "` `" "<t:" $T ":T>" "・" "<t:" $T ":R>"}}
 		{{end}}
-
+		{{$InfoEmbed := structToSdict (cembed "color" 0xFFFFFF "title" ($HC.Get "067") "description" (print ($HC.Get "073") "<@" $I.MB ">\n" ($HC.Get "074") "<t:" $I.MO ":F>\n" ($HC.Get "075") "**" $I.DE "**: <:_:" $DE.rs "> <:_:" $DE.ys "> <:_:" $DE.gs "> <:_:" $DE.bs ">\n" ($HC.Get "076") "<@" $I.SB ">\n" ($HC.Get "077") " <t:" $I.SO ":F>\n" ($HC.Get "081") $H.H "\n" ($HC.Get "082") $H.A "\n" ($HC.Get "083") $H.E "\n" ($HC.Get "084") (or $EndT "Not Set") "\n" ($HC.Get "085") "`" ($H.I).Has "`"))}}
+		{{if ($H.I).Has}}
+			{{$InfoEmbed.Set "image" (sdict "url" ($H.I).URL)}}
+		{{end}}
+ 
 			{{sendResponse nil (complexMessage "embed" $InfoEmbed "ephemeral" true)}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "stats")}}
 		{{if $MR}}
 			{{$StatsEmbed := cembed "color" 0xFFFFFF "image" (sdict "url" $Chart) "fields" (cslice
-				(sdict "name" ($HC.Get "096") "value" (print ($HC.Get "097") (add ($S.Get "O1") ($S.Get "O2") ($S.Get "O3") ($S.Get "O4") ($S.Get "H")) "\n" ($HC.Get "098") ($S.Get "O1") "\n" ($HC.Get "099") ($S.Get "O2") "\n" ($HC.Get "100") ($S.Get "O3") "\n" ($HC.Get "101") ($S.Get "O4") "\n" ($HC.Get "102") ($S.Get "H")))
+				(sdict "name" ($HC.Get "096") "value" (print ($HC.Get "097") (add $S.O1 $S.O2 $S.O3 $S.O4 $S.H) "\n" ($HC.Get "098") $S.O1 "\n" ($HC.Get "099") $S.O2 "\n" ($HC.Get "100") $S.O3 "\n" ($HC.Get "101") $S.O4 "\n" ($HC.Get "102") $S.H))
 				(sdict "name" ($HC.Get "103") "value" "_ _"))}}
 			{{sendResponse nil (complexMessage "embed" $StatsEmbed "ephemeral" true)}}
 		{{else}}
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "delete_quiz")}}
 		{{if $MR}}
 			{{$Modal = sdict "title" ($HC.Get "109") "custom_id" (print $ID "confirmation") "fields" (cslice
@@ -173,30 +210,12 @@
 			{{sendResponse nil $NA}}
 		{{end}}
 	{{end}}
-
+ 
 	{{if eq .CustomID (print $ID "endquiz")}}
-		{{if $MR}}
-			{{$Fields := cslice (sdict "name" ($Q.Get "Q") "value" (print "<:_:" ($DE.Get "rs") ">" ($Q.Get "O1") "\n<:_:" ($DE.Get "ys") ">" ($Q.Get "O2") "\n<:_:" ($DE.Get "gs") ">" ($Q.Get "O3") "\n<:_:" ($DE.Get "bs") ">" ($Q.Get "O4"))) (sdict "name" ($HC.Get "114") "value" (print ($H.Get "A")))}}
-			{{$QuizEmbeds := cslice}}
-			{{if (($H.Get "I").Get "Has")}}
-				{{$QuizEmbeds = $QuizEmbeds.Append (cembed "footer" (sdict "text" (print ($HC.Get "008") ($I.Get "BM"))) "color" 0xFFFFFF "image" (sdict "url" (($H.Get "I").Get "URL")) "fields" $Fields)}}
-				{{$QuizEmbeds = $QuizEmbeds.Append (cembed "color" 0xFFFFFF "image" (sdict "url" $Chart))}}
-			{{else}}
-				{{$QuizEmbeds = $QuizEmbeds.Append (cembed "footer" (sdict "text" (print ($HC.Get "008") ($I.Get "BM"))) "color" 0xFFFFFF "image" (sdict "url" $Chart) "fields" $Fields)}}
-			{{end}}
-
-			{{editMessage ($I.Get "QC") ($I.Get "QM") (complexMessageEdit "buttons" (execTemplate "DisableComponents" (getMessage ($I.Get "QC") ($I.Get "QM")).Components) "embed" $QuizEmbeds)}}
-			{{try}}
-				{{deleteMessage ($I.Get "BC") ($I.Get "BM") 0}}
-			{{catch}}{{end}}
-
-			{{try}}
-				{{dbDel $QID "quiz"}}
-				{{sendResponse nil (complexMessage "content" ($HC.Get "115") "ephemeral" true)}}
-			{{catch}}{{end}}
-
-		{{else}}
-			{{sendResponse nil $NA}}
-		{{end}}
+        {{if $MR}}
+            {{$NV = execTemplate "EndQ" $EQ}}
+        {{else}}
+            {{sendResponse nil $NA}}
+        {{end}}
 	{{end}}
 {{end}}
