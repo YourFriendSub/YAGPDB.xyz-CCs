@@ -19,7 +19,7 @@
         "title" "We all have Secret..."
         "custom_id" (print $ID "panel")
         "fields" (cslice
-            (sdict "label" "Message; Max: 4000 [Letters]" "placeholder" (exec "advice") "max_length" 4000 "style" 2 "required" true)
+            (sdict "label" "Message; Max: 4000 [Letters]" "placeholder" "You're Cool!" "max_length" 4000 "style" 2 "required" true)
             (sdict "label" "MediaLink; Max: 4 [Links]" "placeholder" "Seperated by Spaces" "max_length" 4000 "style" 2 "required" false)
             (sdict "label" "Max Views; Min: 1 [Int]" "placeholder" "18" "max_length" 2 "style" 1 "required" false)
             (sdict "label" "Expiry; In: Humanize [Duration]" "placeholder" "03h27m9s" "max_length" 32 "style" 1 "required" false)
