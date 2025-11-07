@@ -1,4 +1,6 @@
-{{/* Made with 🧠 by @yourfriendsub from scratch */}}
+{{/*
+Made with 🧠 by @yourfriendsub from scratch
+*/}}
 
 {{/* Configuration */}}
 {{$RemoveOnM := true}}
