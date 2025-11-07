@@ -1,0 +1,5 @@
+{{/*
+Made with 🧠 by @yourfriendsub from scratch
+*/}}
+
+{{dbDel .User.ID "MyAFK"}}
