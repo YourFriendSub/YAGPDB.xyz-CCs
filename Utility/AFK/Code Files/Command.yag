@@ -5,8 +5,8 @@ Made with 🧠 by @yourfriendsub from scratch
 {{/* Configuration */}}
 {{$RemoveOnM := true}}
 {{$ByeR := "👋"}}
-{{$ByeM := false}}
-{{$WelcomeR := ""}}
+{{$ByeM := true}}
+{{$WelcomeR := "🙌"}}
 {{$WelcomeM := true}}
 {{$Command := "-afk"}}
 {{$Separator := "&&& "}}
@@ -65,7 +65,6 @@ Made with 🧠 by @yourfriendsub from scratch
   {{return $MyAFK}}
 {{end}}
 
-
 {{$AFK := dbGet .User.ID "MyAFK"}}
 {{$NoM := "`No AFK Message.`"}}
 
@@ -78,7 +77,7 @@ Made with 🧠 by @yourfriendsub from scratch
           {{addReactions $ByeR}}
         {{end}}
         {{if $ByeM}}
-          {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK set " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
+          {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK set; " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
         {{end}}
       {{end}}
     {{end}}
@@ -97,7 +96,7 @@ Made with 🧠 by @yourfriendsub from scratch
               {{addReactions $ByeR}}
             {{end}}
             {{if $ByeM}}
-              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
+              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated; " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
             {{end}}
           {{end}}
         {{end}}
@@ -115,7 +114,7 @@ Made with 🧠 by @yourfriendsub from scratch
               {{addReactions $ByeR}}
             {{end}}
             {{if $ByeM}}
-              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
+              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated; " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
             {{end}}
           {{end}}
         {{end}}
@@ -135,7 +134,7 @@ Made with 🧠 by @yourfriendsub from scratch
         {{addReactions $WelcomeR}}
       {{end}}
       {{if $WelcomeM}}
-        {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# Removed your AFK, you were AFK for:\n " (execTemplate "Until" (toInt64 (add (sub currentTime.Unix $AFK.Value.Seen) currentTime.Unix)))) )}}
+        {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK Removed, you were AFK for:\n " (execTemplate "Until" (toInt64 (add (sub currentTime.Unix $AFK.Value.Seen) currentTime.Unix)))) )}}
       {{end}}
     {{end}}
   {{end}}
