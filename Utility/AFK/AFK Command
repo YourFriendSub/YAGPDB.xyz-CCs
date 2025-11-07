@@ -1,0 +1,196 @@
+{{/* Made with 🧠 by @yourfriendsub from scratch */}}
+
+{{/* Configuration */}}
+{{$RemoveOnM := true}}
+{{$ByeR := "👋"}}
+{{$ByeM := false}}
+{{$WelcomeR := ""}}
+{{$WelcomeM := true}}
+{{$Command := "-afk"}}
+{{$Separator := "&&& "}}
+{{/* Configuration */}}
+
+{{define "Unhuman"}}
+  {{$Humanized := .}}
+  {{$Output := ""}}
+
+  {{range $Word := (split $Humanized " ")}}
+    {{if in (cslice "and" "less" "than") $Word}}
+      {{continue}}
+    {{end}}
+
+    {{$cslice := cslice "years" "year" "weeks" "week" "days" "day" "hours" "hour" "minutes" "minute" "seconds" "second"}}
+
+    {{if inFold $cslice $Word}}
+      {{$Output = print $Output (slice $Word 0 1)}}
+    {{else}}
+      {{$Output = print $Output $Word}}
+    {{end}}
+  {{end}}
+
+  {{return $Output}}
+{{end}}
+
+{{define "Until"}}
+  {{if eq (kindOf .) "int64"}}
+    {{return (execTemplate "Unhuman" (humanizeDurationSeconds ((timestampToTime (add 1 .)).Sub currentTime)))}}
+  {{else}}
+    {{return (print "indefinitely")}}
+  {{end}}
+{{end}}
+
+{{define "SetAFK"}}
+  {{$MyAFK := sdict "Message" .NoM "Until" "" "Seen" currentTime.Unix}}
+  {{$AFKMessage := .NoM}}
+
+  {{if gt (len .CmdArgs) 1}}
+    {{$AFKMessage = split (trimSpace (joinStr " " (slice .CmdArgs 1))) .Separator}}
+  {{end}}
+
+  {{if eq (len $AFKMessage) 1}}
+    {{$MyAFK.Set "Message" (index $AFKMessage 0)}}
+  {{else if eq (len $AFKMessage) 2}}
+    {{$MyAFK.Set "Message" (index $AFKMessage 0)}}
+{{$MyAFK.Set "Until" (currentTime.Add (toDuration (index $AFKMessage 1))).Unix}}
+  {{end}}
+
+  {{if not $MyAFK.Until}}
+    {{dbSet .User.ID "MyAFK" $MyAFK}}
+  {{else}}
+    {{dbSetExpire .User.ID "MyAFK" $MyAFK (sub $MyAFK.Until currentTime.Unix)}}
+  {{end}}
+
+  {{return $MyAFK}}
+{{end}}
+
+
+{{$AFK := dbGet .User.ID "MyAFK"}}
+{{$NoM := "`No AFK Message.`"}}
+
+{{if not $AFK}}
+  {{if .Args}}
+    {{if eq (lower (index .Args 0)) (lower $Command)}}
+      {{$MyAFK := execTemplate "SetAFK" (sdict "User" .User "CmdArgs" .CmdArgs "NoM" $NoM "Separator" $Separator)}}
+      {{if (getMessage .Channel.ID .Message.ID)}}
+        {{if $ByeR}}
+          {{addReactions $ByeR}}
+        {{end}}
+        {{if $ByeM}}
+          {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK set " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
+        {{end}}
+      {{end}}
+    {{end}}
+  {{end}}
+{{else}}
+  {{$Removed := false}}
+  {{if not $RemoveOnM}}
+    {{if .Args}}
+      {{if eq (lower (index .Args 0)) (lower $Command)}}
+        {{if eq (len .CmdArgs) 1}}
+          {{$Removed = true}}
+        {{else if gt (len .CmdArgs) 1}}
+          {{$MyAFK := execTemplate "SetAFK" (sdict "User" .User "CmdArgs" .CmdArgs "NoM" $NoM "Separator" $Separator)}}
+          {{if (getMessage .Channel.ID .Message.ID)}}
+            {{if $ByeR}}
+              {{addReactions $ByeR}}
+            {{end}}
+            {{if $ByeM}}
+              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
+            {{end}}
+          {{end}}
+        {{end}}
+      {{end}}
+    {{end}}
+  {{else}}
+    {{if .Args}}
+      {{if eq (lower (index .Args 0)) (lower $Command)}}
+        {{if eq (len .CmdArgs) 1}}
+          {{$Removed = true}}
+        {{else if gt (len .CmdArgs) 1}}
+          {{$MyAFK := execTemplate "SetAFK" (sdict "User" .User "CmdArgs" .CmdArgs "NoM" $NoM "Separator" $Separator)}}
+          {{if (getMessage .Channel.ID .Message.ID)}}
+            {{if $ByeR}}
+              {{addReactions $ByeR}}
+            {{end}}
+            {{if $ByeM}}
+              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
+            {{end}}
+          {{end}}
+        {{end}}
+      {{else}}
+        {{$Removed = true}}
+      {{end}}
+    {{else}}
+      {{$Removed = true}}
+    {{end}}
+  {{end}}
+
+  {{if $Removed}}
+    {{dbDel .User.ID "MyAFK"}}
+
+    {{if (getMessage .Channel.ID .Message.ID)}}
+      {{if $WelcomeR}}
+        {{addReactions $WelcomeR}}
+      {{end}}
+      {{if $WelcomeM}}
+        {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# Removed your AFK, you were AFK for:\n " (execTemplate "Until" (toInt64 (add (sub currentTime.Unix $AFK.Value.Seen) currentTime.Unix)))) )}}
+      {{end}}
+    {{end}}
+  {{end}}
+{{end}}
+
+{{$UsersInQuestion := cslice}}
+
+{{if not (or .Args .Message.ReferencedMessage)}}
+    {{return}}
+{{end}}
+
+{{if .Args}}
+  {{if ne (lower (index .Args 0)) (lower $Command)}}
+    {{if ($Users := reFindAll `<@!?\d{17,19}>` .Message.Content)}}
+      {{range $User := $Users}}
+        {{if not (in $UsersInQuestion ($User = (toInt64 (reFind `\b\d+\b` $User))))}}
+          {{$UsersInQuestion = $UsersInQuestion.Append $User}}
+        {{end}}
+      {{end}}
+    {{end}}
+  {{end}}
+{{end}}
+
+{{if $ReferenceM := .Message.ReferencedMessage}}
+  {{$User := $ReferenceM.Author}}
+  {{if not (in $UsersInQuestion $User.ID)}}
+    {{$UsersInQuestion = $UsersInQuestion.Append $User.ID}}
+  {{end}}
+{{end}}
+
+{{$InAFK := cslice}}
+{{range $User := $UsersInQuestion}}
+  {{if $UserDB := dbGet $User "MyAFK"}}
+    {{$UserDB = sdict "ID" $UserDB.ID "GuildID" $UserDB.GuildID "UserID" $UserDB.UserID "CreatedAt" $UserDB.CreatedAt "UpdatedAt" $UserDB.UpdatedAt "Key" $UserDB.Key "Value" $UserDB.Value "User" $UserDB.User "ValueSize" $UserDB.ValueSize "ExpiresAt" $UserDB.ExpiresAt}}
+    {{if $UserMember := getMember $UserDB.UserID}}
+        {{$UserDB.Set "User" $UserMember}}
+    {{end}}
+    {{$InAFK = $InAFK.Append $UserDB}}
+  {{end}}
+{{end}}
+
+{{$Output := ""}}
+{{range $Index, $User := $InAFK}}
+  {{$Until := execTemplate "Until" .Value.Until}}
+  {{if ne $Until "indefinitely"}}
+    {{$Until = print "more " $Until}}
+  {{end}}
+  {{$Separator := ""}}
+  {{if and (gt (len $InAFK) 1) (ne $Index (sub (len $InAFK) 1))}}
+    {{$Separator = "~~          ~~\n"}}
+  {{end}}
+  {{if (reFind `\n` .Value.Message)}}
+    {{$Output = print $Output "-# <@" $User.UserID ">'s been AFK for " (execTemplate "Until" (toInt64 (add (sub currentTime.Unix .Value.Seen) currentTime.Unix))) " till " $Until ":\n" (trimSpace .Value.Message) "\n" $Separator}}
+  {{else}}
+    {{$Separator = print "    " $Separator}}
+    {{$Output = print $Output "> -# <@" $User.UserID ">'s been AFK for " (execTemplate "Until" (toInt64 (add (sub currentTime.Unix .Value.Seen) currentTime.Unix))) " till " $Until ":\n " (trimSpace .Value.Message) "\n" $Separator}}
+  {{end}}
+{{end}}
+
+{{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true "parse" cslice) "content" (print (trimSpace $Output)) )}}
