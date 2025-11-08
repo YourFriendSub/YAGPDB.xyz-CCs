@@ -73,9 +73,9 @@
   - If you want to configure your AFK settings, do them as well from the variables under `{{/* Configuration */}}` comments.
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK/Code%20Files/LeaveFeed.yag) and copy the code.
-  - Paste it under the `General Notification > Leave Feed`.
+  - Paste it under the `Notifiactions & Feed > General > User Leave Feed`.
     - It'll delete the AFK of server members who'll leave your server.
-    - 
+
 ---
 ### Support
 - For any assistance regarding my code, You can contact me in my testing Discord Server [Qwerty](https://discord.com/invite/2gjARJxh9V).
