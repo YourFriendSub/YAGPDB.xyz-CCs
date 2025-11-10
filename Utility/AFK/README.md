@@ -7,6 +7,8 @@
 - ✅ Feature 2 - Shows how long it's been for you when you went AFK, and when will you arrive. If you added a duration, it'll show the rest of duration in humanize format and if you didn't add any duration, it'll show "indefinitely".
   - [Click here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK#Demo) to jump to demo Images or just scroll down.
 - ✅ Feature 3 - Command has a bunch of Variables to customisation configure from.
+  - `{{$Command := "-afk"}}`: To choose what you want as the AFK trigger.
+    - If you want, you could also use `-mydogatemyhomeworkandnowihavenothingtoshowtheteacher` as your prefix and command.
   - `{{$RemoveOnM := true}}`: If you want to Remove AFK on message or not.
     - If set `true`, AFK will be removed on any message, weather it's just a images, sticker, or a simple text.
     - If set `false`, AFK will only be remove when you send `-afk` [or what you set for the `$Command` variable].
@@ -17,14 +19,14 @@
   - `{{$ByeM := true}}`: If you want bot to send a message and reply on your AFK add trigger message.
     - If `true`, it'll send a message & reply to your trigger message about AFK add.
     - If `false`, it'll NOT send a message on your trigger message about AFK add.
+  - `{{$NickAFK := "[AFK] "}}`: To add a `[AFK] ` at the starting of the member nickname.
+    - If you don't want to bot to rename the user on AFK Set, just remove the text and make it a empty string, e.g. `""`.
   - `{{$WelcomeR := "🙌"}}`: If you want bot to react on your AFK remove trigger message.
     - If emoji is given, it'll react to trigger message.
     - If no emoji is given [just a empty string (`""`)], it'll not add the reaction on your trigger message.
   - `{{$WelcomeM := true}}`: If you want bot to send a message and reply on your AFK remove trigger message.
     - If `true`, it'll send a message & reply to your trigger message about AFK remove.
     - If `false`, it'll NOT send a message on your trigger message about AFK remove.
-  - `{{$Command := "-afk"}}`: To choose what you want as the AFK trigger.
-    - If you want, you could also use `-mydogatemyhomeworkandnowihavenothingtoshowtheteacher` as your prefix and command.
   - `{{$Separator := "&&& "}}`: To separator `AFK Message` and `Duration`.
     - Some people also like to use `-d `.
 
@@ -71,6 +73,7 @@
     - Trigger Type: `regex`
     - Trigger: `\A` or `.*` [So it could trigger on every possible message in server]
   - If you want to configure your AFK settings, do them as well from the variables under `{{/* Configuration */}}` comments.
+  - I personally recommend you to also add `Redirect errors to selected channel` or disable the `Output errors as command response`, because it's a command that'll run on every single message on the server. If chat is fast, and bot ping goes high. it may flood chat with `Gave up trying to execute custom command #N after 1 minute because there is already one or more instances of it being executed.` error.
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK/Code%20Files/LeaveFeed.yag) and copy the code.
   - Paste it under the `Notifiactions & Feed > General > User Leave Feed`.
