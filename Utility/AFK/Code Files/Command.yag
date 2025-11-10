@@ -6,9 +6,9 @@ Made with 🧠 by @yourfriendsub from scratch
 {{$Command := "-afk"}}
 {{$RemoveOnM := true}}
 {{$ByeR := "👋"}}
-{{$ByeM := false}}
+{{$ByeM := true}}
 {{$NickAFK := "[AFK] "}}
-{{$WelcomeR := ""}}
+{{$WelcomeR := "🙌"}}
 {{$WelcomeM := true}}
 {{$Separator := "&&& "}}
 {{/* Configuration */}}
