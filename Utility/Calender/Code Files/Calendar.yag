@@ -1,0 +1,119 @@
+{{/*
+Made with 🧠 by @yourfriendsub with some logic from internet
+*/}}
+
+{{$Timezone := index (reFindAllSubmatches  `\x60(.+)\x60` (exec "settimezone -u")) 0 1}}
+
+{{if eq $Timezone "Local"}}
+	{{$Timezone = "Asia/Kolkata"}}
+{{end}}
+
+{{$CurrentYear := (toInt64 (currentTime.In (loadLocation $Timezone)).Year)}}
+{{$CurrentMonthName := (toString (currentTime.In (loadLocation $Timezone)).Month)}}
+{{$CurrentMonthDay := (toInt64 (currentTime.In (loadLocation $Timezone)).Day)}}
+{{$CurrentWeekDay := (toString (currentTime.In (loadLocation $Timezone)).Weekday)}}
+
+{{$CY := $CurrentYear}}
+{{$CMN := $CurrentMonthName}}
+{{$CMD := $CurrentMonthDay}}
+{{if lt $CMD 10}}
+    {{$CMD = print "0" $CMD}}
+{{end}}
+{{$CWD := $CurrentWeekDay}}
+
+{{$CurrentWeekDay = print (index (split $CurrentWeekDay "") 0) (index (split $CurrentWeekDay "") 1) (index (split $CurrentWeekDay "") 2)}}
+
+{{define "LeapYear"}}
+	{{$Year := .}}
+	{{$Zero := (toFloat 0)}}
+	{{if and (eq (mod $Year 400) $Zero) (eq (mod $Year 100) $Zero)}}
+		{{return true}}
+	{{else if and (eq (mod $Year 4) $Zero) (ne (mod $Year 100) $Zero)}}
+		{{return true}}
+	{{else}}
+		{{return false}}
+	{{end}}
+{{end}}
+
+{{$MonthDays := 0}}
+{{$February := 28}}
+{{if (execTemplate "LeapYear" $CurrentYear)}}
+{{$February = 29}}
+{{end}}
+{{$DaysInMonth := sdict "January" 31 "February" $February "March" 31 "April" 30 "May" 31 "June" 30 "July" 31 "August" 31 "September" 30 "October" 31 "November" 30 "December" 31}}
+{{range $Name, $Index := $DaysInMonth}}
+{{if eq $CurrentMonthName $Name}}{{$MonthDays = $Index}}
+{{end}}
+{{end}}
+
+{{$CurrentWeekDayIndex := 0}}
+{{$WeekDay := sdict "Mon" 0 "Tue" 1 "Wed" 2 "Thu" 3 "Fri" 4 "Sat" 5 "Sun" 6}}
+
+{{range $Name, $Index := $WeekDay}}
+	{{if eq $CurrentWeekDay $Name}}
+		{{$CurrentWeekDayIndex = $Index}}
+	{{end}}
+{{end}}
+
+
+{{$FirstDayWeekDayIndex := toInt64 (mod (add (mod (sub $CurrentWeekDayIndex (sub $CurrentMonthDay 1)) 7) 7) 7)}}
+
+{{$Calendar := " "}}
+{{$DaysOfWeek := (cslice "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")}}
+{{range $Day := $DaysOfWeek}}
+	{{$Calendar = (print $Calendar $Day "   ")}}
+{{end}}
+{{$Calendar = (print $Calendar "\n ———   ———   ———   ———   ———   ———   ———\n ")}}
+
+{{range seq 0 $FirstDayWeekDayIndex}}
+	{{$Calendar = (print $Calendar "      ")}}
+{{end}}
+
+{{range $Day := seq 1 (add $MonthDays 1)}}
+	{{if lt (len (print $Day)) 2}}
+		{{$Day = (print "0" $Day)}}
+	{{end}}
+
+        {{if eq (toString $Day) (toString $CMD)}}
+            {{$Calendar = (print (slice $Calendar 0 (sub (len $Calendar) 1)) "<" $Day ">   ")}}
+        {{else}}
+	    {{$Calendar = (print $Calendar $Day "    ")}}
+        {{end}}
+
+	{{if eq (toInt64 (mod (add $FirstDayWeekDayIndex $Day) 7)) 0}}
+		{{$Calendar = (print $Calendar "\n ")}}
+	{{end}}
+{{end}}
+{{$Calendar := (print "```py\n" $CY "/" $CMN "/" $CMD "〡" $CWD "``````js\n" $Calendar "``````py\n" (reReplace `_` (reReplace `/` $Timezone "〡") " ") "・" (formatTime (currentTime.In (loadLocation $Timezone)) "15:04:05 MST") "```")}}
+
+{{$CB := componentBuilder}}
+{{$CB.Add "container" (sdict "components" (componentBuilder "text" $Calendar))}}
+
+{{if eq (len .CmdArgs) 1}}
+{{if eq (lower (index .CmdArgs 0)) "moon"}}
+{{$Moons := cslice 
+  (sdict "Phase" "🌑 New Moon" "Min" 0.0 "Max" 1.0 "Unicode" "1f311")
+  (sdict "Phase" "🌒 Waxing Crescent" "Min" 1.0 "Max" 6.382647 "Unicode" "1f312")
+  (sdict "Phase" "🌓 First Quarter" "Min" 6.382647 "Max" 8.382647 "Unicode" "1f313")
+  (sdict "Phase" "🌔 Waxing Gibbous" "Min" 8.382647 "Max" 13.765294 "Unicode" "1f314")
+  (sdict "Phase" "🌕 Full Moon" "Min" 13.765294 "Max" 15.765294 "Unicode" "1f315")
+  (sdict "Phase" "🌖 Waning Gibbous" "Min" 15.765294 "Max" 21.147941 "Unicode" "1f316")
+  (sdict "Phase" "🌗 Last Quarter" "Min" 21.147941 "Max" 23.147941 "Unicode" "1f317")
+  (sdict "Phase" "🌘 Waning Crescent" "Min" 23.147941 "Max" 28.530588 "Unicode" "1f318")
+  (sdict "Phase" "🌑 New Moon" "Min" 28.530588 "Max" 29.530588 "Unicode" "1f311")}}
+
+{{$I := (split (index (split (toString (currentTime.In (loadLocation $Timezone))) " ") 0) "-")}}
+
+{{$D := sub (div (sub (newDate $CurrentYear (toInt (index $I 1)) $CurrentMonthDay 0 0 0).Unix currentTime.Unix) 86400) (div (sub (newDate 2025 02 28 0 0 0).Unix currentTime.Unix) 86400)}}
+{{$N := 29.53058770576}}
+{{$LunarDay := mod $D $N}}
+{{range $Moon := $Moons}}
+    {{if and (gt $LunarDay $Moon.Min) (le $LunarDay $Moon.Max)}}
+
+{{$CB.Add "container" (sdict "components" (componentBuilder "section" (sdict "text" (print "Lunar Day: " $LunarDay "\nLunar Phase: " $Moon.Phase "\nMinimum: " $Moon.Min "\nMaximum: " $Moon.Max) "thumbnail" (sdict "media" (print "https://raw.githubusercontent.com/iamcal/emoji-data/master/img-apple-160/" $Moon.Unicode ".png"))) ))}}
+            {{end}}
+        {{end}}
+    {{end}}
+{{end}}
+
+{{sendMessage .Channel.ID $CB}}
