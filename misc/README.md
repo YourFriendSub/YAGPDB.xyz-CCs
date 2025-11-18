@@ -4,9 +4,9 @@
 > To get another current channel or mentioned channel's Topic and post guidances if forum channel.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: `Command`
 > 
-> Trigger: ChannelTopic
+> Trigger: `ChannelTopic`
 
 <img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/ChannelTopic.png" alt="Channel Topic" width="400">
 
@@ -16,9 +16,9 @@
 > To get some *basic* information about a unicode character.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: `Command` or `Regex`
 > 
-> Trigger: CharacterInfo
+> Trigger: `CharacterInfo` or `\A(?:\-|<@!?204255221017214977>)\s*(?:char|charinfo|unicode|character|characterinfo|unicodeinfo|uniinfo)(?: +|\z)`
 
 <img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/CharacterInfo.png" alt="Character Info" width="400">
 
@@ -28,9 +28,9 @@
 > To get a graph of online & offline server members.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: `Command`
 > 
-> Trigger: MemberGraph
+> Trigger: `MemberGraph`
 
 <img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/MemberCountGraph.png" alt="Member Count Graph" width="400">
 
@@ -40,9 +40,9 @@
 > To get icon of the mentioned word.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: `Command`
 > 
-> Trigger: Icon
+> Trigger: `Icon`
 
 <img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/Icon.png" alt="Icon" width="400">
 
@@ -52,8 +52,8 @@
 > To get current month's Calendar according to your timezone.
 
 **Trigger**
-> Trigger Type: Command
+> Trigger Type: `Command` or `Regex`
 > 
-> Trigger: Calendar
+> Trigger: `Calendar` or `\A(?:\-|<@!?204255221017214977>)\s*(?:date|calendar|day|time)(?: +|\z)`
 
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/Calendar.png" alt="Calendar" width="400">
+<img src="https://raw.githubusercontent.com/YourFriendSub/YAGPDB.xyz-CCs/refs/heads/main/misc/Assets/Screenshot_20251118_120741.jpg" alt="Calendar" width="400">
