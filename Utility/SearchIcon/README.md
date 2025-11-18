@@ -5,6 +5,6 @@
 **Trigger**
 > Trigger Type: `Command`
 > 
-> Trigger: `Icon`
+> Trigger: `SearchIcon`
 
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/SearchIcon/Command_SearchIcon_1.png" alt="Icon" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/SearchIcon/Command_SearchIcon_1.png" alt="SearchIcon" width="400">
