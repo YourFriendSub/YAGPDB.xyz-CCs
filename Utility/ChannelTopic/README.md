@@ -7,4 +7,4 @@
 > 
 > Trigger: `ChannelTopic`
 
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Command_ChannelTopic_1.jpg" alt="Channel Topic" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/ChannelTopic/Command_ChannelTopic_1.png" alt="Channel Topic" width="400">
