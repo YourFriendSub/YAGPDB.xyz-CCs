@@ -40,27 +40,27 @@
 
 <details>
 <summary>1</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK/Assets/20251107_112925.jpg" alt="1" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/AFK/Command_AFK_1.jpg" alt="1" width="400">
 </details>
 
 <details>
 <summary>2</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK/Assets/20251107_105205.jpg" alt="2" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/AFK/Command_AFK_2.jpg" alt="2" width="400">
 </details>
 
 <details>
 <summary>3</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK/Assets/20251107_110313.jpg" alt="3" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/AFK/Command_AFK_3.jpg" alt="3" width="400">
 </details>
 
 <details>
 <summary>4</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK/Assets/20251107_111403.jpg" alt="4" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/AFK/Command_AFK_4.jpg" alt="4" width="400">
 </details>
 
 <details>
 <summary>5</summary>
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Utility/AFK/Assets/20251107_111716.jpg" alt="5" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/AFK/Command_AFK_5.jpg" alt="5" width="400">
 </details>
 
 ---
