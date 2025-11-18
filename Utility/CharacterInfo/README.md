@@ -7,4 +7,4 @@
 > 
 > Trigger: `CharacterInfo` or `\A(?:\-|<@!?204255221017214977>)\s*(?:char|charinfo|unicode|character|characterinfo|unicodeinfo|uniinfo)(?: +|\z)`
 
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/ChannelTopic/Command_CharacterInfo_1.png" alt="Character Info" width="400">
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/CharacterInfo/Command_CharacterInfo_1.png" alt="Character Info" width="400">
