@@ -45,15 +45,3 @@
 > Trigger: `Icon`
 
 <img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/misc/Assets/Icon.png" alt="Icon" width="400">
-
----
-### Calendar
-**Usage:**
-> To get current month's Calendar according to your timezone.
-
-**Trigger**
-> Trigger Type: `Command` or `Regex`
-> 
-> Trigger: `Calendar` or `\A(?:\-|<@!?204255221017214977>)\s*(?:date|calendar|day|time)(?: +|\z)`
-
-<img src="https://raw.githubusercontent.com/YourFriendSub/YAGPDB.xyz-CCs/refs/heads/main/misc/Assets/Screenshot_20251118_120741.jpg" alt="Calendar" width="400">
