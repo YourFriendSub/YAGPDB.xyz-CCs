@@ -83,7 +83,7 @@
 ### Setup
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Ticket.yag) and copy the code.
   - Paste the code under your server's dashboard: `Tools & Utilitie > Ticket System`
-  - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
+  - Replace the `00000` in `{{$PingModRoleID := 00000}}` variable with ID of your Moderator-Role that you want to ping.
     - *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
   - Let `{{$PingModRole := true}}` If you want to ping Moderator role on ticket create.
   - Let `{{$PinTopMessage := true}}` If you want to Pin the first message of the ticket. *Bot should've Manage Messages*
