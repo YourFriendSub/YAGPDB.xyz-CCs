@@ -6,6 +6,7 @@
 {{$TPower := ""}}
 {{$TSubject := ""}}
 {{$TCompose := ""}}
+{{$TRateLimit := ""}}
 {{$TLastReason := ""}}
 {{$TTopMessage := ""}}
 {{$TUsers := (cslice )}}
@@ -19,6 +20,7 @@
 	{{$TPower = $DB.TPower}}
 	{{$TSubject = $DB.TSubject}}
 	{{$TCompose = $DB.TCompose}}
+    {{$TRateLimit = $DB.TRateLimit}}
 	{{$TLastReason = $DB.TLastReason}}
 	{{$TTopMessage = $DB.TTopMessage}}
 	{{$TUsers = $DB.TUsers}}
@@ -35,10 +37,10 @@
 
 {{$NoDBFound := print "I wasn't able to find any Database for this channel!"}}
 
-{{$TicketEmbed := cembed "description" "-# To create a ticket, Click the “📝 Create Ticket” button below. It'll open a private channel for you with server staff." "author" (sdict "name" "Contact Staff - Privately") "color" 0xFFFFFF}}
 {{$Create := cbutton "label" "Create Ticket" "custom_id" (print $ID "create") "emoji" (sdict "name" "📝") "style" "blue"}}
+{{$Intro := cbutton "label" "What's This" "custom_id" (print $ID "intro") "emoji" (sdict "name" "ℹ️") "style" "grey"}}
 {{if eq $Flag "setup"}}
-	{{sendMessage nil (complexMessage "embed" $TicketEmbed "buttons" (cslice $Create))}}
+	{{sendComponentMessage nil (componentBuilder "container" (sdict "components" (componentBuilder "text" (cslice "**Contact Staff - Privately**" "-# To create a ticket, Click the “📝 Create Ticket” button below. It'll open a private channel for you with server staff.") "separator" false "buttons" (cslice $Create $Intro))))}}
 {{else if eq $Flag "top"}}
 	{{if $TChannel}}
 		{{sendMessage nil (complexMessage "embed" (cembed "description" (print "Here You Go: [" .Channel.Name "](<https://discord.com/channels/" .Guild.ID "/" $TChannel "/" $TTopMessage ">)") "color" 0xFFFFFF))}}
@@ -91,5 +93,5 @@
 		{{$NoDBFound}}
 	{{end}}
 {{else}}
-	{{sendMessage nil (complexMessage "embed" (cembed "fields" (cslice (sdict "name" "Ticket Usage" "value" "> `setup`: To send Ticket Creator to current channel.") (sdict "name" "Ticket Only Commands:" "value" "- `top`: To get the link of top message.\n- `owner`: To get the ticket owner.\n- `state`: To get the ticket's state (Open/Close).\n- `power`: To see if ticket is AdminOnly, *staff=~~AdminOnly~~*.\n- `subject`:  To get the link of top message.\n- `compose`:  To get the link of top message.\n- `users`: How many users were added to ticket.")) "color" 0xFF0000))}}
+    {{sendMessage .Channel.ID (componentBuilder "container" (sdict "color" 0xffaaaa "components" (componentBuilder "text" "> `setup`: To send Ticket Creator to current channel." "separator" true "text" "- `top`: To get the link of top message.\n- `owner`: To get the ticket owner\n- `state`: To get the ticket's state (Open/Close).\n- `power`: To see if ticket is AdminOnly,\n*staff≠AdminOnly*.\n- `subject`:  To get the link of top message.\n- `compose`:  To get the link of top message.\n- `users`: How many users were added to ticket.")))}}
 {{end}}
