@@ -2,7 +2,7 @@
 **Usage:**
 > To create a quote using your own text or fetch a random quote from internet.
 
-Special Thanks to https://www.azquotes.com, who's website embed is used in the for fetching random quotes.
+Special Thanks to https://www.azquotes.com, who's website embed is used for fetching random quotes *from internet*.
 
 **Trigger**
 > Trigger Type: `Command` or `Regex`
