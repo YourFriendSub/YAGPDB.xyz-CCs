@@ -1,5 +1,5 @@
 {{/* Configuration */}}
-{{$RequestChannelID := 1376839220316078100}}
+{{$RequestChannelID := 00000}}
 {{$Retry := 3}}
 {{/* Configuration */}}
 
