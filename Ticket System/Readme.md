@@ -118,11 +118,9 @@
   - No, that's not true. You will still able to use inbuilt commands of `-ticket` until you override them from `Dashboard > Commands > Override` of your server.
 
 ### TODO
-> ● Make this folder public.
-<br>
-> ○ Replace old preview image with new images that uses Component Version 2.
-<br>
-> ○ Add an Info button in Settings.
+● Make this folder public.
+○ Replace old preview image with new images that uses Component Version 2.
+○ Add an Info button in Settings.
 
 ### Support
 - For any assistance regarding my code, You can contact me in my testing Discord Server [Qwerty](https://discord.com/invite/2gjARJxh9V).
