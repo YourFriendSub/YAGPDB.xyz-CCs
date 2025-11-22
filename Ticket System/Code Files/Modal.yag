@@ -14,6 +14,7 @@
 	{{$TPower := $DB.TPower}}
 	{{$TSubject := $DB.TSubject}}
 	{{$TCompose := $DB.TCompose}}
+    {{$TRateLimit := $DB.RateLimit}}
 	{{$TLastReason := $DB.TLastReason}}
 	{{$TTopMessage := $DB.TTopMessage}}
 	{{$TUsers := $DB.TUsers}}
@@ -31,7 +32,9 @@
 		{{$TSubject = $Value}}
 	{{else if eq $Action "Compose"}}
 		{{$TCompose = $Value}}
-	{{else if eq $Action "LastReason"}}
+    {{else if eq $Action "RateLimit"}}
+        {{$TRateLimit = $Value}}	
+    {{else if eq $Action "LastReason"}}
 		{{$TLastReason = $Value}}
 	{{else if eq $Action "TopMessage"}}
 		{{$TTopMessage = $Value}}
@@ -41,7 +44,7 @@
 		{{$THadUsers = $Value}}
 	{{end}}
 
-	{{$Data := sdict "TChannel" $TChannel "TOwner" $TOwner "TState" $TState "TPower" $TPower "TSubject" $TSubject "TCompose" $TCompose "TLastReason" $TLastReason "TTopMessage" $TTopMessage "TUsers" $TUsers "THadUsers" $THadUsers}}
+	{{$Data := sdict "TChannel" $TChannel "TOwner" $TOwner "TState" $TState "TPower" $TPower "TSubject" $TSubject "TCompose" $TCompose "TRateLimit" $TRateLimit "TLastReason" $TLastReason "TTopMessage" $TTopMessage "TUsers" $TUsers "THadUsers" $THadUsers}}
 	{{dbSet $TChannel "TicketInfo" $Data}}
 {{end}}
 
@@ -55,6 +58,7 @@
 {{$TPower := ""}}
 {{$TSubject := ""}}
 {{$TCompose := ""}}
+{{$TRateLimit := ""}}
 {{$TLastReason := ""}}
 {{$TTopMessage := ""}}
 {{$TUsers := cslice}}
@@ -68,6 +72,7 @@
 	{{$TPower = $DB.TPower}}
 	{{$TSubject = $DB.TSubject}}
 	{{$TCompose = $DB.TCompose}}
+    {{$TRateLimit = $DB.TRateLimit}}
 	{{$TLastReason = $DB.TLastReason}}
 	{{$TTopMessage = $DB.TTopMessage}}
 	{{$TUsers = $DB.TUsers}}
@@ -76,15 +81,27 @@
 	{{/* Do Nothing */}}
 {{end}}
 
+{{$Create := cbutton "label" "Create" "custom_id" (print $ID "create")}}
+{{$Delete := cbutton "label" "Delete" "custom_id" (print $ID "delete") "style" "red"}}
+{{$Open := cbutton "label" "Open" "custom_id" (print $ID "open") "style" "green"}}
+{{$Close := cbutton "label" "Close" "custom_id" (print $ID "close") "style" "red"}}
+{{$Rename := cbutton "label" "Rename" "custom_id" (print $ID "rename")}}
+{{$AdminOnly := cbutton "label" "AdminOnly" "custom_id" (print $ID "adminonly")}}
+
+{{$Settings := cbutton "label" "Settings" "custom_id" (print $ID "settings") "style" "grey"}}
+
+{{$AddUserMenu := cmenu "type" "user" "placeholder" "Choose a user, you want to ADD." "custom_id" (print $ID "adduserMenu")}}
+{{$RemoveUserMenu := cmenu "type" "user" "placeholder" "Choose a user, you want to REMOVE." "custom_id" (print $ID "removeuserMenu")}}
+
 {{if eq .CustomID (print $ID "create")}}
 	{{try}}
 		{{$Subject := (or (index .Values 0) "`No Subject`")}}
 		{{$Compose := (or (index .Values 1) "`No Compose`")}}
 		{{dbSetExpire .User.ID "TemporaryTicketInfo" (cslice $Subject $Compose) 10}}
 		{{$X = exec "ticket create" $Subject}}
-		{{sendResponse nil (complexMessage "content" "Your Ticket was created." "buttons" (cbutton "label" "Jump To Ticket" "style" "url" "url" (print "https://discord.com/channels/" .Guild.ID "/" (slice ($X = (index (split $X " ") 4)) 2 (sub (len $X) 1)) )) "ephemeral" true)}}
-	{{catch}}
-		{{sendMessage nil (print "Something was wrong, Please tell this to the Moderators of this Server.\n> `" .Error "`")}}
+		{{sendResponse nil (componentBuilder "container" (sdict "components" (componentBuilder "section" (sdict "text" "Your ticket Was Created:" "button" (cbutton "label" "Jump To Ticket" "style" "url" "url" (print "https://discord.com/channels/" .Guild.ID "/" (slice ($X = (index (split $X " ") 4)) 2 (sub (len $X) 1)) )) ))) "ephemeral" true)}}
+    {{catch}}
+		{{sendResponse nil (complexMessage "content" (print "Something was wrong, Please tell this to the Moderators of this Server.\n> `" .Error "`") "ephemeral" true)}}
 	{{end}}
 {{end}}
 
@@ -106,9 +123,25 @@
 {{end}}
 
 {{if eq .CustomID (print $ID "rename")}}
-	{{$X = exec "ticket rename" (index .Values 0)}}
-	{{$TopMessage := getMessage $TChannel $TTopMessage}}
-	{{$EditEmbed := cembed "title" (index .Values 0) "description" (or (index .Values 1) (index $TopMessage.Embeds 0).Description) "fields" (cslice (sdict "name" (index (index $TopMessage.Embeds 0).Fields 0).Name "value" (index (index $TopMessage.Embeds 0).Fields 0).Value)) "color" (index $TopMessage.Embeds 0).Color "footer" (sdict "icon_url" (index $TopMessage.Embeds 0).Footer.IconURL "text" (index $TopMessage.Embeds 0).Footer.Text)}}
-	{{editMessage nil $TTopMessage (complexMessageEdit "embed" $EditEmbed)}}
-	{{sendResponse nil (complexMessage "content" (print "Renamed the ticket to `" (index .Values 0) "`.") "ephemeral" true)}}
+    {{$TopMessage := getMessage $TChannel $TTopMessage}}
+    {{$Renamed := false}}
+    {{if ne (slice (index (index $TopMessage.Components 1).Components 0).Content 3) (index .Values 0)}}
+        {{if ge $TRateLimit currentTime.Unix}}
+            {{sendResponse nil (complexMessage "content" (print "I'm being rate limited by discord, Changed the channel name too many times in a very short period.") "ephemeral" true)}}
+            {{return}}
+        {{end}}
+        {{$X = exec "ticket rename" (index .Values 0)}}
+        {{$Renamed = true}}
+    {{end}}
+        {{$Y = (execTemplate "UpdateDB" (cslice .Channel.ID "Subject" (index .Values 0)))}}
+        {{$Y = (execTemplate "UpdateDB" (cslice .Channel.ID "Compose" (index .Values 1)))}}
+        {{if $Renamed}}
+            {{$Y = (execTemplate "UpdateDB" (cslice .Channel.ID "RateLimit" (add (currentTime.Unix) 300)))}}
+        {{else}}
+            {{$Y = (execTemplate "UpdateDB" (cslice .Channel.ID "RateLimit" currentTime.Unix))}}
+        {{end}}
+
+	    {{$EditComponent := (componentBuilder "container" (sdict "components" (componentBuilder "text" (index (index $TopMessage.Components 0).Components 0).Content )) "container" (sdict "components" (componentBuilder "text" (cslice (print "## " (index .Values 0)) (print (or (index .Values 1) (index (index $TopMessage.Components 1).Components 1).Content )) (index (index $TopMessage.Components 1).Components 2).Content ) "separator" false "buttons" (cslice $Close $Settings))))}}
+	    {{editMessage $TChannel $TTopMessage $EditComponent}}
+            {{sendResponse nil (componentBuilder "container" (sdict "components" (componentBuilder "section" (sdict "text" "Renamed the ticket:" "button" (cbutton "label" "Jump To Top" "style" "url" "url" $TopMessage.Link)))) "ephemeral" true)}}
 {{end}}
