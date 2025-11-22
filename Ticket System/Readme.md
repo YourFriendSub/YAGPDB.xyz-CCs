@@ -119,7 +119,9 @@
 
 ### TODO
 ● Make this folder public.
+<br>
 ○ Replace old preview image with new images that uses Component Version 2.
+<br>
 ○ Add an Info button in Settings.
 
 ### Support
