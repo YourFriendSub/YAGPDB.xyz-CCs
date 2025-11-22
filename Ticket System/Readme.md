@@ -77,7 +77,7 @@
 ## Installation
 
 ### Needs
-- A dedicated Moderator-Role (Or Ticket-Moderator Role?)
+- Dedicated Moderator-Role(s) (Or Ticket-Moderator Role?)
 - A channel, for logging the ticket - *post ticket-deletation logs*
 
 ### Setup
@@ -97,9 +97,9 @@
   - Create a New Custom command with and paste the code:
     - Trigger Type: `Message Component`
     - Trigger: `cticket_`
-  - Replace the `00000` in `{{$ModRole := 00000}}` variable with ID of your Moderator-Role
+  - Replace the `00000` in `{{$ModRole := cslice 00000}}` variable with ID of your Moderator-Role(s). Every Role.ID you'll add here will become a Ticket Moderator.
     - Again, *Don't know how to copy Role-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
-  - This is the commend, where you can customise the permission of Ticket-Owner. Adjust the variables as your needs.
+  - This is the command, where you can customise the permission of Ticket-Owner. Adjust the variables as your needs.
 
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Ticket%20System/Code%20Files/Modal.yag) and copy the code.
   - Create a New Custom command with and paste the code:
@@ -109,11 +109,19 @@
     - *Don't know how to copy Channel-ID? You shouldn't own a server.* Just kidding, you can ask this in official support server or just google it.
 
 - Now, use the command `-cticket setup` to send the Ticket Panel. *From where people will create tickets.*
----
+
+--- 
+### F&Q
+- Are you using it anywhere?
+  - Yes. I'm using it on my 3 servers with 5000+ Members, 1000+ Members and my support & testing server that has 10+ members.
+- After setting this, shall i not able to use inbuilt command of `-ticket`?
+  - No, that's not true. You will still able to use inbuilt commands of `-ticket` until you override them from `Dashboard > Commands > Override` of your server.
+
 ### TODO
 > ● Make this folder public.
-
+> ○ Replace old preview image with new images that uses Component Version 2.
 > ○ Add an Info button in Settings.
+
 ### Support
 - For any assistance regarding my code, You can contact me in my testing Discord Server [Qwerty](https://discord.com/invite/2gjARJxh9V).
 - For any assistance regarding YAGPDB.xyz Bot, You can contact their support team at their Official Discord Server [YAGPDB Community & Support](https://discord.com/invite/Yagpdb).
