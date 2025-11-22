@@ -1,4 +1,4 @@
-{{$PingModRoleID := 1369219167055777792}}
+{{$PingModRoleID := 00000}}
 {{$PingModRole := true}}
 {{$PinTopMessage := true}}
 
