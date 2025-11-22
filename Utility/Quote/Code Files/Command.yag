@@ -1,0 +1,53 @@
+{{/* Configuration */}}
+{{$RequestChannelID := 1376839220316078100}}
+{{$Retry := 3}}
+{{/* Configuration */}}
+
+{{$CurrentChannelID := .Channel.ID}}
+{{$TopLines := "<:LE:1366898967480107018><:QS:1366898868595458129><:LS:1366898816829358141><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439>"}}
+{{$BottomLines := "<:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LM:1366898899947749439><:LE:1366898967480107018><:QE:1366898939340525779><:LS:1366898816829358141>"}}
+
+{{define "FetchQuote"}}
+    {{$RandomNumber := randInt 1 999999}}
+    {{$QuoteLink := print "https://www.azquotes.com/quote/" $RandomNumber}}
+    {{return $QuoteLink}}
+{{end}}
+
+{{$Author := ""}}
+{{$Quote := ""}}
+
+{{if .CmdArgs}}
+    {{$Author = or .Member.Nick .User.Globalname .User.Username}}
+    {{$Quote = .StrippedMsg}}
+    {{sendMessage $CurrentChannelID (componentBuilder "container" (sdict "components" (componentBuilder "text" (print $TopLines "\n" $Quote "\n" $BottomLines "\n\n-# ～ " $Author))))}}
+{{else}}
+    {{$InitialMessageID := sendMessageRetID $CurrentChannelID (componentBuilder "container" (sdict "components" (componentBuilder "text" (print "Please Wait... Fetching a Quote. [1/" $Retry "]"))))}}
+    {{$Success := false}}
+    {{$Error := false}}
+    {{range $Tries := seq 0 $Retry}}
+        {{editMessage $CurrentChannelID $InitialMessageID (componentBuilder "container" (sdict "components" (componentBuilder "text" (print "Please Wait... Fetching a Quote. [" (add $Tries 1) "/" $Retry "]"))))}}
+        {{$RequestMessageID := sendMessageRetID $RequestChannelID (execTemplate "FetchQuote")}}
+        {{sleep 3}}
+
+        {{if ($RequestMessage := getMessage $RequestChannelID $RequestMessageID)}}
+            {{if not $RequestMessage.Embeds}}
+                {{continue}}
+            {{end}}
+            {{if ($RequestEmbed := (index $RequestMessage.Embeds 0))}}
+                {{$Author = (reReplace ` Quote` $RequestEmbed.Title "")}}
+                {{$Quote = $RequestEmbed.Description}}
+                {{$Success = true}}
+            {{end}}
+        {{end}}
+
+        {{if $Success}}
+            {{break}}
+        {{end}}
+    {{end}}
+
+    {{if $Success}}
+        {{editMessage $CurrentChannelID $InitialMessageID (componentBuilder "container" (sdict "components" (componentBuilder "text" (print $TopLines "\n" $Quote "\n" $BottomLines "\n\n-# ～ " $Author))))}}
+    {{else}}
+        {{editMessage $CurrentChannelID $InitialMessageID (componentBuilder "container" (sdict "components" (componentBuilder "text" (print "Sorry for disappointing You. Quote not found Try again."))))}}
+    {{end}}
+{{end}}
