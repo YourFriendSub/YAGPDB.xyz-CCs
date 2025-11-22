@@ -7,5 +7,4 @@
 > 
 > Trigger: `\A` or `.*`
 
-<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/AutomodHelper/AutomodHelper.jpg" alt="Calendar" width="400"
->
+<img src="https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Assets/Assets/Commands/AutomodHelper/AutomodHelper.jpg" alt="Automod Helper" width="400">
