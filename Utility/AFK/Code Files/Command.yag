@@ -247,4 +247,7 @@ Made with 🧠 by @yourfriendsub from scratch
   {{end}}
 {{end}}
 
-{{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true "parse" cslice) "content" (print (trimSpace $Output)) )}}
+{{try}}
+  {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true "parse" cslice) "content" (print (trimSpace $Output)) )}}
+{{catch}}
+{{end}}
