@@ -138,15 +138,14 @@
 
 {{if .IsButton}}
 	{{if eq .CustomID (print $ID "create")}}
-		{{sendModal (sdict "title" "Support Ticket" "custom_id" (print $ID "create") "fields" (cslice
+		{{try}}{{sendModal (sdict "title" "Support Ticket" "custom_id" (print $ID "create") "fields" (cslice
 			(sdict "label" "Subject" "placeholder" "What's the subject?" "required" true "max_length" 72 "min_length" 1 "style" 1)
-			(sdict "label" "Explanation" "placeholder" "Explain, Why you want to create this support ticket?" "required" false "max_length" 2048 "style" 2)))}}
+			(sdict "label" "Explanation" "placeholder" "Explain, Why you want to create this support ticket?" "required" false "max_length" 2048 "style" 2)))}}{{catch}}{{end}}
 
 	{{else if eq .CustomID (print $ID "delete")}}
 		{{if or $IsMod (and $IsOwner $PDelete)}}
-			{{$Modal := sdict "title" "Delete Ticket" "custom_id" (print $ID "delete") "fields" (cslice
-				(sdict "label" "Reason" "placeholder" "Provide reason why are you closing ticket?" "required" true "min_length" 1 "max_length" 1024 "style" 2))}}
-			{{sendModal $Modal}}
+			{{try}}{{sendModal (sdict "title" "Delete Ticket" "custom_id" (print $ID "delete") "fields" (cslice
+				(sdict "label" "Reason" "placeholder" "Provide reason why are you closing ticket?" "required" true "min_length" 1 "max_length" 1024 "style" 2)))}}{{catch}}{{end}}
 		{{else}}
 			{{sendResponse nil $NoPermission}}
 		{{end}}
@@ -160,10 +159,9 @@
 
 	{{else if eq .CustomID (print $ID "rename")}}
 		{{if or $IsMod (and $IsOwner $PRename)}}
-			{{$RenameModal := sdict "title" "Rename Ticket" "custom_id" (print $ID "rename") "fields" (cslice
+			{{try}}{{sendModal (sdict "title" "Rename Ticket" "custom_id" (print $ID "rename") "fields" (cslice
 				(sdict "label" "Subject" "placeholder" "What's the subject?" "required" true "max_length" 72 "min_length" 1 "style" 1 "value" $TSubject)
-				(sdict "label" "Explanation" "placeholder" "Explan, if necessary." "required" false "max_length" 2048 "style" 2 "value" $TCompose))}}
-			{{sendModal $RenameModal}}
+				(sdict "label" "Explanation" "placeholder" "Explan, if necessary." "required" false "max_length" 2048 "style" 2 "value" $TCompose)))}}{{catch}}{{end}}
 		{{else}}
 			{{sendResponse nil $NoPermission}}
 		{{end}}
