@@ -20,7 +20,7 @@
     - If `true`, it'll send a message & reply to your trigger message about AFK add.
     - If `false`, it'll NOT send a message on your trigger message about AFK add.
   - `{{$NickAFK := "[AFK] "}}`: To add a `[AFK] ` at the starting of the member nickname.
-    - If you don't want to bot to rename the user on AFK Set, just remove the text and make it a empty string, e.g. `""`.
+    - If you don't want bot to rename the nickname of the member on AFK Set, just remove the text and make it a empty string, e.g. `""`.
   - `{{$WelcomeR := "🙌"}}`: If you want bot to react on your AFK remove trigger message.
     - If emoji is given, it'll react to trigger message.
     - If no emoji is given [just a empty string (`""`)], it'll not add the reaction on your trigger message.
