@@ -1,0 +1,171 @@
+{{/*
+  What is it?
+  - It counts Positive & Negative reactions of the forum post.
+  - Then Subtracts the negatives from positive reactions.
+  - Based on the remaining reaction counts, it updates the tag of post.
+
+  - Best for forum channels used for Art Sharing, Code Sharing etc.
+    - I use for Art channel.
+
+  Configuration Help:
+  ————————————————————
+  - FORUM_CHANNEL_ID: Forum ChannelID, In which channel you want to turn it ON.
+  - EmojiP: Like or Upvote emoji. P=Positive. If custom emoji: `"EMOJI_NAME:EMOJI_ID"` else `"❤️"`.
+  - EmojiN: Dislike or Downvote emoji. N=Negative. If custom emoji: `"EMOJI_NAME:EMOJI_ID"` else `"💔"`.
+  - SelfRate: If `true`, OP's reaction will be also counted. Else, removed.
+  - Rating: Read Below.
+    - C: On how many reactions (Output) the tag should be changed. N will be removed from P. If N=2, P=5 then Output=3.
+    - T: Name of tag to add when reaching the desired Reaction (Output).
+  ————————————————————
+
+  By Author:
+  - I'M NOT REMOVING MY SET VALUES JUST FOR UNDERSTANDINGS.
+*/}}
+
+{{/*
+Made with 🧠 by @yourfriendsub from scratch
+*/}}
+
+{{/* Configuration Start */}}
+
+{{$Data := dict
+  FORUM_CHANNEL_ID (sdict
+    "EmojiP" "Upvote:1369224301294780488"
+    "EmojiN" "Downvote:1369224337642618931"
+    "SelfRate" false
+    "Rating" (cslice
+      (sdict "C" 0 "T" "Less Than 5")
+      (sdict "C" 5 "T" "5 to 10")
+      (sdict "C" 11 "T" "11 to 15" )
+      (sdict "C" 16 "T" "16 to 20")
+      (sdict "C" 21 "T" "21 to 25")
+      (sdict "C" 25 "T" "More Than 25"))
+)}}
+
+{{/* Configuration End */}}
+
+{{/* Do not edit below, until you know what you're doing */}}
+
+{{define "SelfRate"}}
+  {{$PC := .PC}}
+  {{$E := .E}}
+  {{try}}
+    {{deleteMessageReaction $PC.ID $PC.ID $PC.OwnerID $E}}
+    {{deleteMessage nil (sendMessageRetID nil (print "<@" $PC.OwnerID ">" " Please refain from reacting to your own Post with *Rating* Emoji(s).\n\n-# Autodelete: <t:" (add currentTime.Unix 15) ":R>")) 15}}
+  {{catch}}
+  {{end}}
+{{end}}
+
+{{$PChannel := .Channel}}
+{{$PMessage := getMessage $PChannel.ID $PChannel.ID}}
+{{$PTags := $PChannel.AppliedTags}}
+
+{{$Member := .Member}}
+
+{{$FChannel := getChannelOrThread $PChannel.ParentID}}
+{{$FTags := $FChannel.AvailableTags}}
+
+{{$Value := sdict}}
+{{$Ratings := ""}}
+
+{{$EmojiP := 0}}
+{{$EmojiN := 0}}
+{{$Count := 0}}
+
+{{$NVHandler := ""}}
+{{$Self := false}}
+
+{{$Reaction := .Reaction}}
+{{$ReactAdded := false}}
+{{if .ReactionAdded}}
+  {{$ReactAdded = true}}
+{{end}}
+
+{{$Index := 0}}
+{{range $C, $V := $Data}}
+  {{if eq $C $FChannel.ID}}
+    {{$FChannel = $C}}
+    {{$Value = $V}}
+    {{$Ratings = sort $Value.Rating (sdict "key" "C" "reverse" true)}}
+    {{break}}
+  {{end}}
+  {{$Index = add $Index 1}}
+  {{if eq $Index (len $Data)}}
+    {{/* !Channel in $Data */}}
+    {{return}}
+  {{end}}
+{{end}}
+
+{{if not $PMessage.Reactions}}
+  {{return}}
+{{end}}
+
+{{range $PMessage.Reactions}}
+  {{if eq .Emoji.APIName $Value.EmojiP}}
+    {{if and (not $Value.SelfRate) (eq $PChannel.OwnerID $Member.User.ID)}}
+      {{$Self = $Value.EmojiP}}
+      {{break}}
+    {{end}}
+      {{$EmojiP = .Count}}
+  {{else if eq .Emoji.APIName $Value.EmojiN}}
+    {{if and (not $Value.SelfRate) (eq $PChannel.OwnerID $Member.User.ID)}}
+      {{$Self = $Value.EmojiN}}
+      {{break}}
+    {{end}}
+      {{$EmojiN = .Count}}
+  {{end}}
+{{end}}
+
+{{if and $Self $ReactAdded}}
+  {{$NVHandler = execTemplate "SelfRate" (sdict "PC" $PChannel "E" $Self)}}
+  {{return}}
+{{end}}
+
+{{$Count = sub $EmojiP $EmojiN}}
+
+{{$GTag := false}}
+{{$TTag := cslice}}
+{{$Inner := true}}
+
+{{range $Rating := $Ratings}}
+  {{if and $Inner (ge $Count $Rating.C)}}
+    {{range $FTag := $FTags}}
+      {{if eq $FTag.Name $Rating.T}}
+        {{$GTag = $FTag}}
+        {{$Inner = false}}
+      {{end}}
+    {{end}}
+  {{end}}
+  {{range $FTag := $FTags}}
+    {{if eq $FTag.Name $Rating.T}}
+      {{$TTag = $TTag.Append $FTag}}
+    {{end}}
+  {{end}}
+{{end}}
+
+{{$TTagIDs := cslice}}
+{{range $TTag}}
+  {{$TTagIDs = $TTagIDs.Append (toInt64 .ID)}}
+{{end}}
+
+{{if not $GTag}}
+  {{return}}
+{{end}}
+
+{{if not (in $PTags $GTag.ID)}}
+  {{$NewTags := cslice}}
+  {{range $ID := $PTags}}
+    {{if in $TTagIDs $ID}}
+      {{continue}}
+    {{else}}
+      {{$NewTags = $NewTags.Append .}}
+    {{end}}
+  {{end}}
+
+  {{$NewTags = $NewTags.Append $GTag.ID}}
+
+  {{try}}
+    {{editThread nil "tags" $NewTags}}
+  {{catch}}
+  {{end}}
+{{end}}
