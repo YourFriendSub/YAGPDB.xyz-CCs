@@ -9,6 +9,7 @@ What is it?
     - I use for Art channel.
 
 Configuration Help:
+
   ————————————————————
   - FORUM_CHANNEL_ID: Forum ChannelID, In which channel you want to turn it ON.
   - EmojiP: Like or Upvote emoji. P=Positive. If custom emoji: `"EMOJI_NAME:EMOJI_ID"` else `"❤️"`.
@@ -18,6 +19,7 @@ Configuration Help:
     - C: On how many reactions (Output) the tag should be changed. N will be removed from P. If N=2, P=5 then Output=3.
     - T: Name of tag to add when reaching the desired Reaction (Output).
   ————————————————————
+
 
 By Author:
   - I'M NOT REMOVING MY SET VALUES JUST FOR UNDERSTANDINGS.
