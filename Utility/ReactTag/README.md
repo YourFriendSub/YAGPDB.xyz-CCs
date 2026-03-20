@@ -1,3 +1,5 @@
+# ReactTag
+
 What is it?
   - It counts Positive & Negative reactions of the forum post.
   - Then Subtracts the negatives from positive reactions.
