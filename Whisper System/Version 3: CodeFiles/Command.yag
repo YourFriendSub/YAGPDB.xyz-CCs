@@ -22,4 +22,4 @@
 		"color" 0x87CEFF "components" $CB)}}
 
 {{/* Send the component message to the current channel or interaction */}}
-{{sendComponentMessage nil $Container}}
+{{sendMessage nil $Container}}
