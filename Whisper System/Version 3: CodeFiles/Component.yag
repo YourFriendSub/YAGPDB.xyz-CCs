@@ -2,7 +2,7 @@
 {{$WritingTime := 900}}                            {{/* Time (in seconds) the whisper data stays in DB */}}
 {{$Expiry := "15m"}}                               {{/* Default expiration duration for a whisper */}}
 {{$ChannelID := .Channel.ID}}                      {{/* ID of the current Discord channel */}}
-{{$CCID := 164}}                                   {{/* Command ID, Needed for Sticky Whisper Sender */}}
+{{$CCID := 164}}                                   {{/* Command category ID */}}
 {{$RemoveInvites := true}}                         {{/* Whether to remove Discord invite links */}}
 {{$MaxViews := 100}}                               {{/* Default maximum views allowed per message */}}
 
@@ -15,18 +15,21 @@
 {{if eq $CID (print $ID "panel")}}
 
     {{/* Send the user a modal form to input a whisper */}}
-    {{sendModal (sdict
+    {{$Modal := (sdict
         "title" "We all have Secret..."
         "custom_id" (print $ID "panel")
         "fields" (cslice
-            (sdict "label" "Message; Max: 4000 [Letters]" "placeholder" "You're Cool!" "max_length" 4000 "style" 2 "required" true)
-            (sdict "label" "MediaLink; Max: 4 [Links]" "placeholder" "Seperated by Spaces" "max_length" 4000 "style" 2 "required" false)
-            (sdict "label" "Max Views; Min: 1 [Int]" "placeholder" "18" "max_length" 2 "style" 1 "required" false)
+            (sdict "label" "Message; Max: 4000 [Letter]" "placeholder" "You're Cool!" "max_length" 4000 "style" 2 "required" true)
+            (sdict "label" "MediaLink; Max: 4 [Link]" "placeholder" "Seperated by Spaces" "max_length" 4000 "style" 2 "required" false)
+            (sdict "label" "MaxViews; Min: 1 [Int]" "placeholder" "18" "max_length" 2 "style" 1 "required" false)
             (sdict "label" "Expiry; In: Humanize [Duration]" "placeholder" "03h27m9s" "max_length" 32 "style" 1 "required" false)
         )
     )}}
 
+    {{sendModal $Modal}}
+
     {{/* Temporarily store user input settings and recipient placeholder */}}
+    {{$Values := .Values}}
     {{dbSetExpire .User.ID "WhisperData" (sdict
         "Settings" (sdict "ChannelID" $ChannelID "MessageID" $MessageID "Expiry" $Expiry "CCID" $CCID "RemoveInvites" $RemoveInvites "MaxViews" $MaxViews)
         "Data" (sdict "From" .User.ID "To" .Values))
@@ -57,7 +60,7 @@
 
                 {{$WU := getMember $DFrom}}                     {{/* Fetch sender info */}}
                 {{$WT := $DWhisperText}}                        {{/* Whisper text */}}
-                {{$IL := index $DMediaLinks 0}}                 {{/* Media links */}}
+                {{$ML := index $DMediaLinks 0}}                 {{/* Media links */}}
 
                 {{$UserID := .User.ID}}
 
@@ -66,47 +69,37 @@
                     {{$WT = reReplace `(?:https?://)?(?:www\.)?(discord(?:app)?\.gg(?:/|\\+/+)|discord(?:app)?\.com(?:/|\\+/+)(?:invite/))\w{2,}|(?:https?://)?(?:www\.)?(?:discord(?:app)?\.(?:io|me|li)|invite\.gg|dsc\.gg|top\.gg\/servers|discordservers\.com\/(?:server|bump))(?:/|\\+/+)[A-z+0-9]{2,}` $WT "[Invite Removed](https://example.com/)"}}
                 {{end}}
 
-                {{/* Create embed message for the whisper */}}
-                {{$WE := (sdict
-                    "url" "https://discord.com/"
-                    "author" (sdict
-                        "name" (print (or $WU.Nick $WU.User.Globalname) "・" $WU.User.ID)
-                        "icon_url" ($WU.AvatarURL "256"))
-                    "description" (print $WT)
-                    "color" 0xFFFFFF)}}
-
-                {{$Es := cslice}} {{/* Slice to store embeds */}}
+                {{/* Create component message for the whisper */}}
+                {{$WC := componentBuilder "ephemeral" true}}
+                {{$WV := componentBuilder}}
+                {{$WV.Add "text" $WT}}
+{{/* Slice to store media links */}}
+                {{$Gallery := cslice}}
 
                 {{/* Handle media links if any */}}
-                {{if $IL}}
-                    {{if eq (len $IL) 1}}
-                        {{$WE.Set "image" (sdict "url" (index $IL 0))}}
-                        {{$Es = $Es.Append $WE}}
-                    {{else}}
-                        {{$IC := 0}}
-                        {{range $IL}}
-                            {{if eq $IC 0}}
-                                {{$WE.Set "image" (sdict "url" (index $IL $IC))}}
-                                {{$Es = $Es.Append $WE}}
-                            {{else}}
-                                {{$Es = $Es.Append (sdict
-                                    "url" "https://discord.com/"
-                                    "image" (sdict "url" (index $IL $IC)))}}
-                            {{end}}
-                            {{$IC = add $IC 1}}
-                            {{if eq $IC 4}} {{break}} {{end}} {{/* Limit to 4 media items */}}
-                        {{end}}
+                {{if (index $ML 0)}}
+                    {{$MC := 0}}
+                    {{range $ML}}
+                        {{$Gallery = $Gallery.Append (sdict "media" (index $ML $MC) "description" (index $ML $MC) "spoiler" false)}}
+                        {{$MC = add $MC 1}}
+                        {{if eq $MC 10}}
+                            {{break}}
+                        {{end}} {{/* Limit to 10 media items */}}
                     {{end}}
-                {{else}}
-                    {{$Es = $Es.Append $WE}} {{/* No media: just show text embed */}}
+                    {{$WV.Add "separator" true}}
+                    {{$WV.Add "gallery" $Gallery}}
                 {{end}}
-
+                {{$FromC := componentBuilder "section" (sdict "text" (print (or $WU.Nick $WU.User.Globalname) "・" $WU.User.ID) "thumbnail" (sdict "media" ($WU.AvatarURL "256")) )}}
                 {{/* Handle if user is the sender */}}
                 {{if eq $DFrom .User.ID}}
-                    {{sendResponse nil (complexMessage "embed" ($Es = $Es.Append (sdict "color" 0xFFFFFF "description" "This Whisper Message was sent by You.")) "ephemeral" true)}}
+                    {{$FromC = componentBuilder "section" (sdict "text" (print (or $WU.Nick $WU.User.Globalname) "・" $WU.User.ID "\n\nThis Whisper Message was sent by You.") "thumbnail" (sdict "media" ($WU.AvatarURL "256")) )}}
+                    {{$WC.Add "container" (sdict "color" 0xffffff "components" $FromC)}}
+                    {{$WC.Add "container" (sdict "components" $WV)}}
+                   {{sendResponse nil $WC}}
                     {{return}}
                 {{end}}
-
+                {{$WC.Add "container" (sdict "color" 0xffffff "components" $FromC)}}
+                {{$WC.Merge (componentBuilder "container" (sdict "components" $WV))}}{{$WC.Add "ephemeral" true}}
                 {{/* Check if the user is a valid recipient */}}
                 {{$IsToUser := false}}
                 {{if (index $DTo (toString $UserID))}}
@@ -120,7 +113,7 @@
                     {{end}}
 
                     {{if ge $HasViews 1}}
-                        {{sendResponse nil (complexMessage "embed" $Es "ephemeral" true)}}
+                        {{sendResponse nil $WC}}
 
                         {{/* Decrease remaining views */}}
                         {{$DTo.Set (toString $UserID) (sdict "UserID" $UserID "MaxViews" (sub $HasViews 1))}}
