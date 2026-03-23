@@ -89,9 +89,7 @@
 	{{editComponentMessage $SChannelID $MessageID $CCB}}
 
 	{{/* Rerun original command (likely a refresh or interface command) */}}
-	{{if ne $SCCID 0}}
-		{{execCC $SCCID nil 0 ""}}
-	{{end}}
+	{{execCC $SCCID nil 0 ""}}
 
 	{{/* Delete the original panel message shown to the user */}}
 	{{deleteMessage nil $SMessageID 0}}
