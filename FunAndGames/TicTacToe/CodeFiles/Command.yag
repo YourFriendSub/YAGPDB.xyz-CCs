@@ -1,3 +1,6 @@
+{{$Computer := true}} {{/* If, want play with the bot. Just chooses random place & places O or X */}}
+{{$CCID := 0}} {{/* CCID of the Component.yag file code in your CC dashboard */}}
+
 {{$ID := "tictactoe_"}}
 {{$P1 := ""}}
 {{$P2 := ""}}
@@ -12,8 +15,10 @@
             You Should Not Be A Opponent.
             {{return}}
         {{else if $P2.Bot}}
-            Opponent Should Be A Real User.
-            {{return}}
+            {{if not (and $Computer (eq $P2.ID .BotUser.ID))}}
+                Opponent Should Be A Real User.
+                {{return}}
+            {{end}}
         {{end}}
 
 		{{$blankEmoji := sdict "name" "⬜"}}
@@ -50,8 +55,11 @@
 			(cbutton "emoji" (sdict "name" "✨") "style" "grey" "disabled" true)
 		}}
 		{{$CB := componentBuilder "buttons" $R1 "buttons" $R2 "buttons" $R3 "separator" true "buttons" $R4}}
-		{{$CB.Add "text" (cslice (index (shuffle (cslice $P1.Mention $P2.Mention)) 0))}}
-		{{sendComponentMessage nil (componentBuilder "container" (sdict "color" $Color.Color "components" $CB))}}
+		{{$CB.Add "text" (cslice ($Starter := (index (shuffle (cslice $P1.Mention $P2.Mention)) 0)))}}
+		{{$MessageID := sendMessageRetID nil (componentBuilder "container" (sdict "color" $Color.Color "components" $CB))}}
+        {{if eq $Starter .BotUser.Mention}}
+            {{execCC $CCID nil 3 (sdict "CustomID" (print $ID (randInt 1 9) "_" $P1.ID "_" $P2.ID) "MessageID" $MessageID "UserID" .BotUser.ID)}}
+        {{end}}
     {{else}}
 		User Is Incorrect / Not in Server.
 	{{end}}
