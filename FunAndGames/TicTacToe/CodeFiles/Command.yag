@@ -1,5 +1,5 @@
-{{$Computer := true}} {{/* If, want play with the bot. Just chooses random place & places O or X */}}
-{{$CCID := 0}} {{/* CCID of the Component.yag file code in your CC dashboard */}}
+{{$Computer := false}} {{/* If, want play with the bot. Just chooses random place & places O or X */}}
+{{$CCID := 0}} {{/* CCID of the Component.yag file code in your CC dashboard, only if $Computer is true */}}
 
 {{$ID := "tictactoe_"}}
 {{$P1 := ""}}
