@@ -1,3 +1,7 @@
+{{define "ToInt"}}
+	{{return (toInt64 (reFind `\b\d+\b` .))}}
+{{end}}
+
 {{define "WhoseTurn"}}
 	{{$X := .}}
 	{{$TurnEmoji  := (index (index $X 4).Components 0).Emoji.Name}} {{/* Cslice >> Sdict >> Cslice > Sdict > ActionRow > CButton > Emoji.Name */}}
@@ -35,7 +39,7 @@
 	{{return $NewGS}}
 {{end}}
 
-{{define "AreYouWinningSon"}}
+{{define "GameWon"}}
 	{{$GS := .}}
 	{{$O := ""}}
 
@@ -63,6 +67,14 @@
 {{end}}
 
 {{$CID := .CustomID}}
+{{$Message := .Message}}
+{{$Player := .Member}}
+{{$Computer := .ExecData}}
+{{if $Computer}}
+    {{$CID = $Computer.CustomID}}
+    {{$Message = (getMessage nil $Computer.MessageID)}}
+    {{$Player = (getMember $Computer.UserID)}}
+{{end}}
 {{$SplitCID := split $CID "_"}}
 
 {{$ID := index $SplitCID 0}}
@@ -70,56 +82,70 @@
 {{$P1 := index $SplitCID 2}}
 {{$P2 := index $SplitCID 3}}
 
-{{$Player := .User}}
-
-{{$GS := execTemplate "GameState" (index .Message.Components 0).Components}}
-{{$GW := execTemplate "AreYouWinningSon" $GS}}
-{{$WT := execTemplate "WhoseTurn" (index .Message.Components 0).Components}}
+{{$GS := execTemplate "GameState" (index $Message.Components 0).Components}}
+{{$GW := execTemplate "GameWon" $GS}}
+{{$WT := execTemplate "WhoseTurn" (index $Message.Components 0).Components}}
 {{$TurnEmoji := $WT.TurnEmoji}}
 {{$TurnUser := $WT.TurnUser}}
 
 {{$CIndex := ""}}
-{{if eq .CustomID (print $ID "_" 1 "_" $P1 "_" $P2)}}
+{{if eq $CID (print $ID "_" 1 "_" $P1 "_" $P2)}}
 	{{$CIndex = 0}}
-{{else if eq .CustomID (print $ID "_" 2 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 2 "_" $P1 "_" $P2)}}
 	{{$CIndex = 1}}
-{{else if eq .CustomID (print $ID "_" 3 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 3 "_" $P1 "_" $P2)}}
 	{{$CIndex = 2}}
-{{else if eq .CustomID (print $ID "_" 4 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 4 "_" $P1 "_" $P2)}}
 	{{$CIndex = 3}}
-{{else if eq .CustomID (print $ID "_" 5 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 5 "_" $P1 "_" $P2)}}
 	{{$CIndex = 4}}
-{{else if eq .CustomID (print $ID "_" 6 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 6 "_" $P1 "_" $P2)}}
 	{{$CIndex = 5}}
-{{else if eq .CustomID (print $ID "_" 7 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 7 "_" $P1 "_" $P2)}}
 	{{$CIndex = 6}}
-{{else if eq .CustomID (print $ID "_" 8 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 8 "_" $P1 "_" $P2)}}
 	{{$CIndex = 7}}
-{{else if eq .CustomID (print $ID "_" 9 "_" $P1 "_" $P2)}}
+{{else if eq $CID (print $ID "_" 9 "_" $P1 "_" $P2)}}
 	{{$CIndex = 8}}
 {{end}}
 
 {{$IsPlayer := false}}
-{{if in (cslice $P1 $P2) (toString $Player.ID)}}
+{{if in (cslice $P1 $P2) (toString $Player.User.ID)}}
 	{{$IsPlayer = true}}
 {{end}}
 {{if not $IsPlayer}}
-	You're not a player in this game.
-	{{ephemeralResponse}}
-	{{return}}
+    {{if not $Computer}}
+	    You're not a player in this game.
+	    {{ephemeralResponse}}
+	    {{return}}
+    {{end}}
 {{end}}
 
-{{if ne $Player.Mention $TurnUser}}
-	It's Not Your Turn.
-	{{ephemeralResponse}}
-	{{return}}
+{{if ne $Player.User.ID (execTemplate "ToInt" $TurnUser)}}
+    {{if not $Computer}}
+        It's Not Your Turn.
+	    {{ephemeralResponse}}
+	    {{return}}
+    {{end}}
 {{end}}
 
-{{$GS = execTemplate "ChangeState" (sdict "GS" $GS "Index" $CIndex "Turn" $TurnEmoji)}}
-{{if not $GS}}
-	Already Occupied, Can't choose That.{{ephemeralResponse}}{{return}}
+{{if $Computer}}
+    {{range (shuffle (seq 0 8))}}
+        {{$TGS := execTemplate "ChangeState" (sdict "GS" $GS "Index" . "Turn" $TurnEmoji)}}
+        {{if $TGS}}
+            {{$GS = $TGS}}
+            {{break}}
+        {{end}}
+    {{end}}
+{{else}}
+    {{$GS = execTemplate "ChangeState" (sdict "GS" $GS "Index" $CIndex "Turn" $TurnEmoji)}}
+    {{if not $GS}}
+        Already Occupied, Can't choose That.{{ephemeralResponse}}
+        {{return}}
+    {{end}}
 {{end}}
-{{$GW = execTemplate "AreYouWinningSon" $GS}}
+
+{{$GW = execTemplate "GameWon" $GS}}
 
 {{if eq $TurnEmoji "❌"}}
 	{{$TurnEmoji = "⭕"}}
@@ -144,9 +170,9 @@
 
 {{$Win := sdict "Disable" false "TurnEmoji" $TurnEmoji}}
 {{if eq $GW "❌"}}
-	{{$Win = sdict "Disable" true "TurnEmoji" "❌" "Title" "Winner" "Winner" $Player.Mention "WinEmoji" "`❌`" "WinText" " Won The Match!" "Avatar" ($Player.AvatarURL "256")}}
+	{{$Win = sdict "Disable" true "TurnEmoji" "❌" "Title" "Winner" "Winner" $Player.User.Mention "WinEmoji" "`❌`" "WinText" " Won The Match!" "Avatar" ($Player.User.AvatarURL "256")}}
 {{else if eq $GW "⭕"}}
-	{{$Win = sdict "Disable" true "TurnEmoji" "⭕" "Title" "Winner" "Winner" $Player.Mention "WinEmoji" "`⭕`"  "WinText" " Won The Match!" "Avatar" ($Player.AvatarURL "256")}}
+	{{$Win = sdict "Disable" true "TurnEmoji" "⭕" "Title" "Winner" "Winner" $Player.User.Mention "WinEmoji" "`⭕`"  "WinText" " Won The Match!" "Avatar" ($Player.User.AvatarURL "256")}}
 {{else if eq $GW "⬜"}}
 	{{$Win = sdict "Disable" true "TurnEmoji" "⬜" "Title" "Draw" "Winner" "`Nobody Won...`" "WinEmoji" "`⬜`" "WinText" " Draw Match!" "Avatar" ($Guild.IconURL "256")}}
 {{end}}
@@ -208,8 +234,14 @@
 {{return $CB}}
 {{end}}
 
-{{/* sendResponse nil (complexMessage "content" "Sending this, because i'm dum..." "ephemeral" true) */}}
-
 {{$Components := execTemplate "GetComponents" (sdict "TurnEmoji" $TurnEmoji "TurnUser" $TurnUser "GW" $GW "GS" $GS "ID" $ID "P1" $P1 "P2" $P2 "Player" $Player "Guild" .Guild)}}
 
-{{editComponentMessage .Channel.ID .Message.ID (componentBuilder "container" $Components)}}
+{{if $Computer}}
+   {{editMessage $Message.ChannelID $Message.ID (componentBuilder "container" $Components)}}
+{{else}}
+    {{updateMessage (componentBuilder "container" $Components)}}
+    {{if and (not $GW) (in (cslice $P1 $P2) (toString .BotUser.ID))}}
+        {{sleep 3}}
+        {{execCC .CCID nil 0 (sdict "CustomID" (print $ID "_" 0 "_" $P2 "_" $P1) "MessageID" .Message.ID "UserID" .BotUser.ID)}}
+    {{end}}
+{{end}}
