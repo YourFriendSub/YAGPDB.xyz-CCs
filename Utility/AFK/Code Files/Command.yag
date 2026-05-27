@@ -61,12 +61,22 @@ Made with 🧠 by @yourfriendsub from scratch
     {{$AFKMessage = split (trimSpace (joinStr " " (slice .CmdArgs 1))) .Separator}}
   {{end}}
 
+  {{$Attachment := ""}}
+  {{if $A := .MO.Attachments}}
+      {{$Attachment = print "[󠄴]( https://cdn.discordapp.com/attachments/" .MO.ChannelID "/" (index $A 0).ID "/" (index $A 0).Filename " )"}}
+  {{end}}
+
   {{if eq (len $AFKMessage) 1}}
     {{$MyAFK.Set "Message" (index $AFKMessage 0)}}
   {{else if eq (len $AFKMessage) 2}}
     {{$MyAFK.Set "Message" (index $AFKMessage 0)}}
 {{$MyAFK.Set "Until" (currentTime.Add (toDuration (index $AFKMessage 1))).Unix}}
   {{end}}
+
+  {{if $Attachment}}
+    {{$MyAFK.Set "Message" (print $Attachment $MyAFK.Message)}}
+  {{end}}
+
 
   {{if not $MyAFK.Until}}
     {{dbSet (toInt .Member.User.ID) "MyAFK" $MyAFK}}
@@ -83,7 +93,7 @@ Made with 🧠 by @yourfriendsub from scratch
 {{if not $AFK}}
   {{if .Args}}
     {{if eq (lower (index .Args 0)) (lower $Command)}}
-      {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "NoM" $NoM "Separator" $Separator)}}
+      {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "MO" .Message "NoM" $NoM "Separator" $Separator)}}
       {{if (getMessage .Channel.ID .Message.ID)}}
         {{if $ByeR}}
           {{addReactions $ByeR}}
@@ -108,7 +118,7 @@ Made with 🧠 by @yourfriendsub from scratch
         {{if eq (len .CmdArgs) 1}}
           {{$Removed = true}}
         {{else if gt (len .CmdArgs) 1}}
-          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "NoM" $NoM "Separator" $Separator)}}
+          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "MO" .Message "NoM" $NoM "Separator" $Separator)}}
           {{if (getMessage .Channel.ID .Message.ID)}}
             {{if $ByeR}}
               {{addReactions $ByeR}}
@@ -132,13 +142,14 @@ Made with 🧠 by @yourfriendsub from scratch
         {{if eq (len .CmdArgs) 1}}
           {{$Removed = true}}
         {{else if gt (len .CmdArgs) 1}}
-          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "NoM" $NoM "Separator" $Separator)}}
+          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "MO" .Message "NoM" $NoM "Separator" $Separator)}}
           {{if (getMessage .Channel.ID .Message.ID)}}
             {{if $ByeR}}
               {{addReactions $ByeR}}
             {{end}}
             {{if $ByeM}}
-              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated; " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}
+              {{try}}
+              {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK updated; " (execTemplate "Until" $MyAFK.Until) ":\n " $MyAFK.Message) )}}{{catch}}{{end}}
             {{end}}
           {{end}}
           {{if $NickAFK}}
@@ -164,7 +175,8 @@ Made with 🧠 by @yourfriendsub from scratch
         {{addReactions $WelcomeR}}
       {{end}}
       {{if $WelcomeM}}
-        {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK Removed, you were AFK for:\n " (execTemplate "Until" (toInt64 (add (sub currentTime.Unix $AFK.Value.Seen) currentTime.Unix)))) )}}
+        {{try}}
+        {{sendMessage nil (complexMessage "reply" .Message.ID "allowed_mentions" (sdict "replied_user" true) "content" (print "> -# AFK Removed, you were AFK for:\n " (execTemplate "Until" (toInt64 (add (sub currentTime.Unix $AFK.Value.Seen) currentTime.Unix)))) )}}{{catch}}{{end}}
       {{end}}
     {{end}}
     {{if $NickAFK}}
