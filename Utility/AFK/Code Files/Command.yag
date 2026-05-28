@@ -6,9 +6,9 @@ Made with 🧠 by @yourfriendsub from scratch
 {{$Command := "-afk"}}
 {{$RemoveOnM := true}}
 {{$ByeR := "👋"}}
-{{$ByeM := false}}
+{{$ByeM := true}}
 {{$NickAFK := "[AFK] "}}
-{{$WelcomeR := ""}}
+{{$WelcomeR := "🙌"}}
 {{$WelcomeM := true}}
 {{$Separator := "&&& "}}
 {{/* Configuration */}}
@@ -57,8 +57,8 @@ Made with 🧠 by @yourfriendsub from scratch
   {{$MyAFK := sdict "Message" .NoM "Until" "" "Seen" currentTime.Unix "Nick" $Nick}}
   {{$AFKMessage := .NoM}}
 
-  {{if gt (len .CmdArgs) 1}}
-    {{$AFKMessage = split (trimSpace (joinStr " " (slice .CmdArgs 1))) .Separator}}
+  {{if gt (len .Args) 1}}
+    {{$AFKMessage = split (trimSpace (joinStr " " (slice .Args 1))) .Separator}}
   {{end}}
 
   {{$Attachment := ""}}
@@ -93,7 +93,7 @@ Made with 🧠 by @yourfriendsub from scratch
 {{if not $AFK}}
   {{if .Args}}
     {{if eq (lower (index .Args 0)) (lower $Command)}}
-      {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "MO" .Message "NoM" $NoM "Separator" $Separator)}}
+      {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "Args" .Args "MO" .Message "NoM" $NoM "Separator" $Separator)}}
       {{if (getMessage .Channel.ID .Message.ID)}}
         {{if $ByeR}}
           {{addReactions $ByeR}}
@@ -115,10 +115,10 @@ Made with 🧠 by @yourfriendsub from scratch
   {{if not $RemoveOnM}}
     {{if .Args}}
       {{if eq (lower (index .Args 0)) (lower $Command)}}
-        {{if eq (len .CmdArgs) 1}}
+        {{if eq (len .Args) 1}}
           {{$Removed = true}}
-        {{else if gt (len .CmdArgs) 1}}
-          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "MO" .Message "NoM" $NoM "Separator" $Separator)}}
+        {{else if gt (len .Args) 1}}
+          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "Args" .Args "MO" .Message "NoM" $NoM "Separator" $Separator)}}
           {{if (getMessage .Channel.ID .Message.ID)}}
             {{if $ByeR}}
               {{addReactions $ByeR}}
@@ -139,10 +139,10 @@ Made with 🧠 by @yourfriendsub from scratch
   {{else}}
     {{if .Args}}
       {{if eq (lower (index .Args 0)) (lower $Command)}}
-        {{if eq (len .CmdArgs) 1}}
+        {{if eq (len .Args) 1}}
           {{$Removed = true}}
-        {{else if gt (len .CmdArgs) 1}}
-          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "CmdArgs" .CmdArgs "MO" .Message "NoM" $NoM "Separator" $Separator)}}
+        {{else if gt (len .Args) 1}}
+          {{$MyAFK := execTemplate "SetAFK" (sdict "Member" .Member "Args" .Args "MO" .Message "NoM" $NoM "Separator" $Separator)}}
           {{if (getMessage .Channel.ID .Message.ID)}}
             {{if $ByeR}}
               {{addReactions $ByeR}}
