@@ -101,10 +101,14 @@
 
 {{$MentionUsers := ""}}
 {{$IDUsers      := cslice}}
+{{$CatchClone := cslice}}
 {{range $DToUsersID}}
-	{{if $Member := (getMember .)}}
-		{{$MentionUsers = print $MentionUsers "<@" $Member.User.ID "> "}}
-		{{$IDUsers = $IDUsers.Append $Member.User.ID}}
+	{{if not (in $CatchClone .)}}
+		{{$CatchClone = $CatchClone.Append .}}
+		{{if $Member := (getMember .)}}
+			{{$MentionUsers = print $MentionUsers "<@" $Member.User.ID "> "}}
+			{{$IDUsers = $IDUsers.Append $Member.User.ID}}
+		{{end}}
 	{{end}}
 {{end}}
 
