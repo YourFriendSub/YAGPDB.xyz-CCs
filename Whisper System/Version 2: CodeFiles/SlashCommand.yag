@@ -1,0 +1,216 @@
+{{/* Made with 🧠 by @yourfriendsub from scratch */}}
+{{/*
+	Expiry         — Default whisper duration
+	ChannelID      — Target channel to send whispers in
+	RemoveInvites  — Strip Discord invite links from whisper content
+	MaxViews       — Per-recipient view limit (unlimited for sender)
+	Anonymous
+		Roles      — Roles allowed to whisper anonymously
+		Perms      — Permissions allowed to whisper anonymously
+	Logs
+		Channel    — Channel ID to send logs to
+		Log        — Log filter: "Anonymous", "Unanonymous", or "All"
+*/}}
+
+{{$Expiry        := "15m"}}
+{{$ChannelID     := .Channel.ID}}
+{{$RemoveInvites := true}}
+{{$MaxViews      := 100}}
+{{$Anonymous     := sdict
+	"Roles"       (cslice)
+	"Permissions" (bitwiseOr .Permissions.Administrator .Permissions.ManageGuild)
+}}
+{{$Logs := sdict
+	"Channel" 1515723521962147910	
+"Log"     "All"
+}}
+
+{{/* End Of Configratuon */}}
+
+{{$Incognito     := false}}
+{{$IncognitoText := "Unanonymous: Not permitted to be Anonymous."}}
+{{if .Options.anonymous}}
+	{{$Incognito = hasPermissions $Anonymous.Permissions}}
+	{{if $Incognito}}
+		{{$IncognitoText = "Anonymous: Has Permissions."}}
+	{{else}}
+		{{$IncognitoText = "Unanonymous: Doesn't have Permissions."}}
+		{{if $Anonymous.Roles}}
+			{{range .Member.Roles}}
+				{{if in $Anonymous.Roles .}}
+					{{$Incognito = true}}
+					{{$IncognitoText = "Anonymous: Has Anonymous Role."}}
+					{{break}}
+				{{end}}
+			{{end}}
+		{{end}}
+	{{end}}
+{{else}}
+	{{$IncognitoText = "Unanonymous: Didn't chose to be Anonymous."}}
+{{end}}
+
+{{$ID := "whisper_"}}
+
+{{$DToUsersID := reFindAll `\b\d+\b` .Options.users}}
+
+{{$MWhisperText := ""}}
+{{$MMediaLinks  := ""}}
+{{$MMaxViews    := 0}}
+{{$MExpiry      := 0}}
+
+{{if .Options.channel}}
+	{{$ChannelID = .Options.channel.ID}}
+{{end}}
+{{if .Options.message}}
+	{{$MWhisperText = .Options.message}}
+{{end}}
+{{if .Options.medialinks}}
+	{{$MMediaLinks = split (trimSpace .Options.medialinks) " "}}
+{{end}}
+{{if .Options.maxviews}}
+	{{$MMaxViews = .Options.maxviews}}
+{{end}}
+{{if .Options.expiry}}
+	{{$MExpiry = sub (currentTime.Add (toDuration .Options.expiry)).Unix currentTime.Unix}}
+{{end}}
+
+{{$DefaultExpiry := sub (currentTime.Add (toDuration $Expiry)).Unix currentTime.Unix}}
+{{$FinalExpiry   := 0}}
+{{if $MExpiry}}
+	{{$FinalExpiry = toInt $MExpiry}}
+{{else}}
+	{{$FinalExpiry = toInt $DefaultExpiry}}
+{{end}}
+{{if le $FinalExpiry 0}}
+	{{$FinalExpiry = $DefaultExpiry}}
+{{end}}
+
+{{$ViewsContent := ""}}
+{{$Views        := 0}}
+{{if $MMaxViews}}
+	{{$Views = toInt $MMaxViews}}
+	{{$ViewsContent = $MMaxViews}}
+{{else}}
+	{{$Views = toInt $MaxViews}}
+	{{$ViewsContent = $MaxViews}}
+{{end}}
+{{if le $Views 0}}
+	{{$Views = 1}}
+	{{$ViewsContent = $Views}}
+{{end}}
+
+{{$MentionUsers := ""}}
+{{$IDUsers      := cslice}}
+{{range $DToUsersID}}
+	{{if $Member := (getMember .)}}
+		{{$MentionUsers = print $MentionUsers "<@" $Member.User.ID "> "}}
+		{{$IDUsers = $IDUsers.Append $Member.User.ID}}
+	{{end}}
+{{end}}
+
+{{$DTo := sdict}}
+{{range $ToUserID := $IDUsers}}
+	{{$DTo.Set (toString $ToUserID) (sdict "UserID" $ToUserID "MaxViews" $Views)}}
+{{end}}
+
+{{if not $MentionUsers}}
+	{{sendResponse nil (complexMessage "content" "Couldn't find any user to send whisper to." "ephemeral" true)}}
+	{{return}}
+{{end}}
+
+{{$MessageID := sendMessageNoEscapeRetID $ChannelID $MentionUsers}}
+
+{{$CB := componentBuilder}}
+{{$CB.Add "text" $MentionUsers}}
+{{$CB.Add "separator" true}}
+{{$CB.Add "text" "-# Someone sent you a whisper message, click below button to see it."}}
+{{$CB.Add "text" (print "-# Expiry: <t:" (add currentTime.Unix $FinalExpiry) ":R>")}}
+{{$CB.Add "buttons" (cslice
+	(cbutton "emoji" (sdict "id" "1347138028820365374") "custom_id" (print $ID "see_" $MessageID))
+	(cbutton "emoji" (sdict "id" "1273316850566172776") "custom_id" (print $ID "delete_" $MessageID) "style" "red")
+)}}
+
+{{$CCB := componentBuilder}}
+{{$CCB.Add "container" (sdict "color" 0xFFFFFF "components" $CB)}}
+
+{{editComponentMessage $ChannelID $MessageID $CCB}}
+
+{{dbSetExpire $MessageID "WhisperData" (sdict
+	"Settings" (sdict
+		"ChannelID"     $ChannelID
+		"MessageID"     $MessageID
+		"Expiry"        $FinalExpiry
+		"RemoveInvites" $RemoveInvites
+		"MaxViews"      $Views
+		"Anonymous"     $Anonymous
+		"Logs"          $Logs)
+	"Data" (sdict
+		"WhisperText" $MWhisperText
+		"MediaLinks"  $MMediaLinks
+		"From"        .User.ID
+		"To"          $DTo
+		"Incognito"   $Incognito))
+	$FinalExpiry}}
+
+{{$Avatar := .User.AvatarURL "1024"}}
+{{if .Member.Avatar}}
+	{{$Avatar = .Member.AvatarURL "1024"}}
+{{end}}
+
+{{$ResponseM := componentBuilder
+	"allowed_mentions" (sdict "parse" cslice)
+	"ephemeral" true
+	"container" (sdict "components" (componentBuilder
+		"text" (print "**Whisper | #" (len $DTo) "**")
+		"separator" false
+		"section" (sdict
+			"text" (cslice
+				(print "` BY ` | " .User.Mention "\n` ID ` | `" .User.ID "`")
+				(print "> Remove Invites: " $RemoveInvites "\n> MaxViews: " $Views "\n> Expiry: <t:" (add currentTime.Unix $FinalExpiry) ":R>" "\n-# " $IncognitoText))
+			"thumbnail" (sdict "media" $Avatar))
+		"separator" false
+		"text" (cslice "**To**" (joinStr "\n" (split $MentionUsers " ")))
+		"buttons" (cbutton
+			"emoji" (sdict "id" "1272652974979678249")
+			"label" (printf "%s %*s" "Jump to Whisper" (sub 79 (len "Jump to Whisper")) "...")
+			"style" "url"
+			"url" (print "https://discord.com/channels/" .Guild.ID "/" $ChannelID "/" $MessageID))
+	))
+}}
+{{sendResponse nil $ResponseM}}
+
+{{$LoggingsM := componentBuilder
+	"allowed_mentions" (sdict "parse" cslice)
+	"container" (sdict "components" (componentBuilder
+		"text" (print "**Whisper | #" (len $DTo) "**")
+		"separator" false
+		"section" (sdict
+			"text" (cslice
+				(print "` BY ` | " .User.Mention "\n` ID ` | `" .User.ID "`")
+				(print "> Channel: <#" $ChannelID ">\n> Remove Invites: " $RemoveInvites "\n> MaxViews: " $Views "\n> Expiry: <t:" (add currentTime.Unix $FinalExpiry) ":R>" "\n-# " $IncognitoText))
+			"thumbnail" (sdict "media" $Avatar))
+		"separator" false
+		"text" (cslice "**To**" (joinStr "\n" (split $MentionUsers " ")))
+		"buttons" (cbutton
+			"emoji" (sdict "id" "1272652974979678249")
+			"label" (printf "%s %*s" "Jump to Whisper" (sub 79 (len "Jump to Whisper")) "...")
+			"style" "url"
+			"url" (print "https://discord.com/channels/" .Guild.ID "/" $ChannelID "/" $MessageID))
+	))
+}}
+
+{{if $Logs.Channel}}
+	{{if eq (lower $Logs.Log) "all"}}
+		{{sendMessage $Logs.Channel $LoggingsM}}
+	{{else if eq (lower $Logs.Log) "anonymous"}}
+		{{if $Incognito}}
+			{{sendMessage $Logs.Channel $LoggingsM}}
+		{{end}}
+	{{else if eq (lower $Logs.Log) "unanonymous"}}
+		{{if not $Incognito}}
+			{{sendMessage $Logs.Channel $LoggingsM}}
+		{{end}}
+	{{else}}
+		{{sendMessage $Logs.Channel (print "Logging failed! In CC #" .CCID `, see if the key "Log" for $Logs is correct.`)}}
+	{{end}}
+{{end}}
