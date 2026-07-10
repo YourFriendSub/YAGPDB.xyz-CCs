@@ -1,0 +1,159 @@
+{{$ID := "whisper_"}}
+{{$CID := .CustomID}}
+{{$MessageID := .Message.ID}}
+
+{{if eq $CID (print $ID "see_" $MessageID)}}
+	{{if ($DB := (dbGet $MessageID "WhisperData"))}}
+		{{$DBExpiry := sub $DB.ExpiresAt.Unix currentTime.Unix}}
+		{{$DB = $DB.Value}}
+
+		{{if eq (kindOf $DB) "ptr"}}
+			{{if and ($DB.HasKey "Settings") ($DB.HasKey "Data")}}
+
+				{{$SChannelID     := $DB.Settings.ChannelID}}
+				{{$SMessageID     := $DB.Settings.MessageID}}
+				{{$SExpiry        := $DB.Settings.Expiry}}
+				{{$SCCID          := $DB.Settings.CCID}}
+				{{$SRemoveInvites := $DB.Settings.RemoveInvites}}
+				{{$SMaxViews      := $DB.Settings.MaxViews}}
+
+				{{$DWhisperText := $DB.Data.WhisperText}}
+				{{$DFrom        := $DB.Data.From}}
+				{{$DTo          := $DB.Data.To}}
+				{{$DMediaLinks  := $DB.Data.MediaLinks}}
+				{{$DIncognito   := $DB.Data.Incognito}}
+
+				{{$WU := getMember $DFrom}}
+				{{$WT := $DWhisperText}}
+				{{$ML := $DMediaLinks}}
+
+				{{$UserID := .User.ID}}
+
+				{{if $SRemoveInvites}}
+					{{$WT = reReplace `(?:https?://)?(?:www\.)?(discord(?:app)?\.gg(?:/|\\+/+)|discord(?:app)?\.com(?:/|\\+/+)(?:invite/))\w{2,}|(?:https?://)?(?:www\.)?(?:discord(?:app)?\.(?:io|me|li)|invite\.gg|dsc\.gg|top\.gg\/servers|discordservers\.com\/(?:server|bump))(?:/|\\+/+)[A-z+0-9]{2,}` $WT "[Invite Removed](https://example.com/)"}}
+				{{end}}
+
+				{{$WC := componentBuilder "ephemeral" true}}
+				{{$WV := componentBuilder}}
+				{{$WV.Add "text" $WT}}
+
+				{{$Gallery := cslice}}
+				{{if $ML}}
+					{{$MC := 0}}
+					{{range $ML}}
+						{{$Gallery = $Gallery.Append (sdict "media" (index $ML $MC) "description" (index $ML $MC) "spoiler" false)}}
+						{{$MC = add $MC 1}}
+						{{if eq $MC 10}}
+							{{break}}
+						{{end}}
+					{{end}}
+					{{$WV.Add "separator" true}}
+					{{$WV.Add "gallery" $Gallery}}
+				{{end}}
+
+				{{$FromC := componentBuilder "section" (sdict
+						"text"      (print "` BY ` | " $WU.User.Mention "\n` ID ` | `" $WU.User.ID "`")
+						"thumbnail" (sdict "media" ($WU.AvatarURL "256")))}}
+
+				{{if eq $DFrom .User.ID}}
+					{{$FromC = componentBuilder "section" (sdict
+						"text"      (print "` BY ` | " $WU.User.Mention "\n` ID ` | `" $WU.User.ID "`\n\nYou are the Sender.")
+						"thumbnail" (sdict "media" ($WU.AvatarURL "256")))}}
+
+					{{if not $DIncognito}}
+						{{$WC.Add "container" (sdict "color" 0xffffff "components" $FromC)}}
+					{{end}}
+					{{$WC.Add "container" (sdict "components" $WV)}}
+					{{sendResponse nil $WC}}
+					{{return}}
+				{{end}}
+
+				{{if not $DIncognito}}
+					{{$WC.Add "container" (sdict "color" 0xffffff "components" $FromC)}}
+				{{end}}
+
+				{{$WC.Merge (componentBuilder "container" (sdict "components" $WV))}}
+				{{$WC.Add "ephemeral" true}}
+
+				{{$IsToUser := false}}
+				{{if (index $DTo (toString $UserID))}}
+					{{$IsToUser = true}}
+				{{end}}
+
+				{{if $IsToUser}}
+					{{$HasViews := 0}}
+					{{if gt (index $DTo (toString $UserID)).MaxViews 0}}
+						{{$HasViews = (index $DTo (toString $UserID)).MaxViews}}
+					{{end}}
+
+					{{if ge $HasViews 1}}
+						{{sendResponse nil $WC}}
+						{{$DTo.Set (toString $UserID) (sdict "UserID" $UserID "MaxViews" (sub $HasViews 1))}}
+						{{dbSetExpire $SMessageID "WhisperData" (sdict
+							"Settings" (sdict
+								"ChannelID"     $SChannelID
+								"MessageID"     $SMessageID
+								"Expiry"        $SExpiry
+								"CCID"          $SCCID
+								"RemoveInvites" $SRemoveInvites
+								"MaxViews"      $SMaxViews)
+							"Data" (sdict
+								"WhisperText" $DWhisperText
+								"MediaLinks"  $DMediaLinks
+								"From"        $DFrom
+								"To"          $DTo
+                                "Incognito"   $DIncognito))
+							$DBExpiry}}
+					{{else}}
+						You've no views left for this whisper, you had {{$SMaxViews}}.
+						{{ephemeralResponse}}
+					{{end}}
+				{{else}}
+					Message is not for you.
+					{{ephemeralResponse}}
+				{{end}}
+
+			{{else}}
+				Database entry was corrupted.
+				{{ephemeralResponse}}
+			{{end}}
+		{{else}}
+			Database entry was corrupted, Really hard.
+			{{ephemeralResponse}}
+		{{end}}
+	{{else}}
+		Database entry was expired / deleted.
+		{{ephemeralResponse}}
+	{{end}}
+
+{{else if eq $CID (print $ID "delete_" $MessageID)}}
+	{{if ($DB := (dbGet $MessageID "WhisperData"))}}
+		{{$DB = $DB.Value}}
+
+		{{if eq (kindOf $DB) "ptr"}}
+			{{if and ($DB.HasKey "Settings") ($DB.HasKey "Data")}}
+				{{if eq $DB.Data.From .User.ID}}
+					{{dbDel $MessageID "WhisperData"}}
+					{{try}}
+						{{deleteMessage $DB.Settings.ChannelID $DB.Settings.MessageID 10}}
+						{{editMessage $DB.Settings.ChannelID $DB.Settings.MessageID (componentBuilder "container" (sdict "components" (componentBuilder "text" (print "**WHISPER WAS DELETED BY SENDER**\n\n-# Autodelete: <t:" (add currentTime.Unix 10) ":R>"))))}}
+						Your whisper has been deleted.
+						{{ephemeralResponse}}
+					{{catch}}{{end}}
+				{{else}}
+					Only the sender can delete whispers.
+					{{ephemeralResponse}}
+				{{end}}
+			{{else}}
+				Database entry was corrupted.
+				{{ephemeralResponse}}
+			{{end}}
+		{{else}}
+			Database entry was corrupted, Really hard.
+			{{ephemeralResponse}}
+		{{end}}
+	{{else}}
+		Database entry was expired / deleted.
+		{{ephemeralResponse}}
+	{{end}}
+{{end}}
