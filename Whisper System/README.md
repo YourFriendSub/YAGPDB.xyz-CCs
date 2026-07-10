@@ -12,7 +12,7 @@ There are Four Versions for now, i'd suggest to use the the 4th version, because
 
 ### Brief Description:
 ## Version 1:
-Let's say `User-A` wants to tell `User-B` something privately, but they don't have enough time to send a direct message. So, `User-A` can use the command `-whisper @User-B || Private message ||`. The bot will delete `User-A`'s message and will send its own message with a button. If `User-B` clicks on the button, they can see the private text. However, if someone else, like `User-C`, clicks the button, the bot will prevent them from seeing the message and will show a message saying `"This message is not for you."` Also, the private message will expire `900` seconds later, whether `User-B` has seen it or not.
+Let's say `User-A` wants to tell `User-B` something privately, but they don't have enough time to send a direct message. So, `User-A` can use the command `-whisper @User-B || Private message ||`. Making the text spoiler isn't requied, that is just used so others can't read it quickly. The bot will delete `User-A`'s message and will send its own message with a button. If `User-B` clicks on the button, they can see the private text. However, if someone else, like `User-C`, clicks the button, the bot will prevent them from seeing the message and will show a message saying `"This message is not for you."` Also, the private message will expire `900` seconds later, whether `User-B` has seen it or not.
 
 
 ### Installation
@@ -33,7 +33,7 @@ Let's say `User-A` wants to tell `User-B` something privately, but they don't ha
     - Trigger: `whisper_`
 
 ## Version 2:
-Let's say `User-A` wants to tell `User-B`, `User-C`, `User-D` and/or `User-E` something privately, but they don't have enough time to send a direct message. So, `User-A` can use the command `-whisper @User-B User-B User-C User-D User-E & || Private message ||`. The bot will delete `User-A`'s message and will send its own message with a button. If `User-B` clicks on the button, they can see the private text. However, if someone else, like `User-F` or `User-G`, clicks the button, the bot will prevent them from seeing the message and will show a message saying `"This message is not for you."` Also, the private message will expire `900` seconds later, whether `User-B`, `User-C`, `User-D` or `User-E` has seen it or not.
+Let's say `User-A` wants to tell `User-B`, `User-C`, `User-D` and/or `User-E` something privately, but they don't have enough time to send a direct message. So, `User-A` can use the command `-whisper @User-B User-B User-C User-D User-E & || Private message ||`. Where the `&` separates Users and Text, also the making of text spoiler isn't requied, that is just used so others can't read it quickly. The bot will delete `User-A`'s message and will send its own message with a button. If `User-B` clicks on the button, they can see the private text. However, if someone else, like `User-F` or `User-G`, clicks the button, the bot will prevent them from seeing the message and will show a message saying `"This message is not for you."` Also, the private message will expire `900` seconds later, whether `User-B`, `User-C`, `User-D` or `User-E` has seen it or not.
 
 
 ### Installation
