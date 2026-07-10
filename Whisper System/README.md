@@ -1,6 +1,11 @@
 # Whisper System
+
 > A way to talk to anyone privately, without Direct Messageing (DMing) them.
-- [Jump To Installation](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/README.md#installation) or Just Scroll Down.
+- [Jump To Installation For Verion: 1](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/README.md#installation).
+- [Jump To Installation For Verion: 2](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/README.md#installation).
+- [Jump To Installation For Verion: 3](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/README.md#installation).
+- [Jump To Installation For Verion: 4](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/README.md#installation).
+-  or Just Scroll Down
 
 There are Three Versions for now, i'd suggest to use the the 3rd version, because people with modded discord will not be abale to see the message since i'll be sent via modal. 
 
