@@ -94,8 +94,26 @@ Afer giving all the values, `User-A` can click the submit button in modal. On cl
     - Trigger: `whispersystem_`
 
 ## Version 4:
-- Let's say User-A wants to tell User-B something privately, but they don't have enough time to send a direct message. So, User-A can use the command `-whisper @User-B || Private message ||`. The bot will delete User-A's message and will send its own message with a button. If User-B clicks on the button, they can see the private text. However, if someone else, like User-C, clicks the button, the bot will prevent them from seeing the message and will show a message saying "This message is not for you." Also, the private message will expire 15 minutes later, whether User-B has seen it or not.
 
+Let's say `User-A` wants to tell up to 5 users something privately, but they don't have enough time to send a direct message. So, `User-A` can use the slash command `/whisper`, giving:
+
+- `users`: The users to whisper to. *(Upto 5 mentions.)*
+- `message`: The private text to show in the whisper.
+- `medialinks`: Upto 10 Direct Image/Video links to show in the whisper.
+  - If not given or in the case of a wrong value, it does not show media in the whisper message.
+- `maxviews`: Max amount of times, each receiver User can see the Whisper. When a User uses all their views for that whisper, the bot will not let them see the whisper anymore.
+  - Effects individually, for each User.
+  - If not given, uses the default value set on the Custom Command code by guild managers.
+- `expiry`: Duration for the whisper to expire after. Requires real durations e.g. `1h23m19s`.
+  - Effects all the users.
+  - If not given, uses the default value set on the Custom Command code by guild managers.
+- `anonymous`: Whether to hide `User-A`'s identity from whisper recipients.
+  - Only works if `User-A` has a Role/Permission allowlisted by guild managers, otherwise it's ignored.
+- `channel`: Which channel to send the whisper in.
+  - If not given, uses the default channel set on the Custom Command code by guild managers.
+
+> Only `users` and `message` are required values. Other values `medialinks`, `maxviews`, `expiry`, `anonymous` & `channel` are optional.
+> On running the command, the bot sends a message mentioning all the users `User-A` chose, with a button to see the whisper message, and gives `User-A` an ephemeral confirmation showing the whisper's settings and a jump link to it. If a mentioned user clicks the button, they can see the private text (and media, if any) — but each time they view it, one of their `maxviews` is used up; once they run out, the bot tells them they have no views left. However, if someone not mentioned, like `User-F`, clicks the button, the bot prevents them from seeing the message and shows `"This message is not for you."` `User-A` themself has unlimited views and is always shown as the sender, and unless `anonymous` was used successfully, everyone else who views it sees who sent it too. `User-A` can also press a second button to delete the whisper early, which removes it for everyone regardless of expiry. Otherwise, the whisper expires based on the duration given, whether recipients have seen it or not. Optionally, all of this can be logged to a channel set by guild managers.
 
 ### Installation
 **Needs**
@@ -153,20 +171,16 @@ Afer giving all the values, `User-A` can click the submit button in modal. On cl
       - Description: `Channel to send Whispers in`
       - Required: `false`
   - In the code, you can configure more if you want:
-```go
-{{/*
-	Expiry         — Default whisper duration
-	ChannelID      — Target channel to send whispers in
-	RemoveInvites  — Strip Discord invite links from whisper content
-	MaxViews       — Per-recipient view limit (unlimited for sender)
-	Anonymous
-		Roles      — Roles allowed to whisper anonymously
-		Perms      — Permissions allowed to whisper anonymously
-	Logs
-		Channel    — Channel ID to send logs to
-		Log        — Log filter: "Anonymous", "Unanonymous", or "All"
-*/}}
-```
+    - `{{$Expiry := "15m"}}`: Default whisper duration, used if the `expiry` option isn't given.
+    - `{{$ChannelID := .Channel.ID}}`: Default channel to send whispers in, used if the `channel` option isn't given.
+    - `{{$RemoveInvites := true}}`: Whether to strip Discord invite links out of the `message` option's text or not.
+    - `{{$MaxViews := 100}}`: Default maximum views allowed per whisper, per recipient, used if the `maxviews` option isn't given. *(Sender always has unlimited views.)*
+    - `{{$Anonymous := sdict ...}}`: Who's allowed to use the `anonymous` option.
+      - `"Roles" (cslice ... ... ...)`: Role-IDs allowed to whisper anonymously. [Leave empty if you don't want role-based access]
+      - `"Permissions"`: Permissions allowed to whisper anonymously. *(Defaults to `Administrator` or `Manage Server`.)*
+    - `{{$Logs := sdict ...}}`: Where and what to log.
+      - `"Channel" 0`: Channel-ID to send whisper logs to. [set to `0` to disable logging]
+      - `"Log" "All"`: Which whispers get logged — `"All"`, `"Anonymous"` *(only anonymous ones)*, or `"Unanonymous"` *(only non-anonymous ones)*.
 - [Click Here](https://github.com/YourFriendSub/YAGPDB.xyz-CCs/blob/main/Whisper%20System/Version%204%3A%20CodeFiles/Component.yag) and copy the `Component` code.
   - Create a New Custom command with:
     - Trigger Type: `Message Component`
