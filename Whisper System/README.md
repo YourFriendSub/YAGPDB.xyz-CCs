@@ -65,6 +65,7 @@ Let's say `User-A` wants to tell `User-B`, `User-C`, `User-D` and/or `User-E` so
   - Effects all the users.
   - If not given or in the case of wrong value, uses default values set on Custom Command code by guild managers.
 > In modal, only the `Text` is a required value. Other values `MediaLink`, `MaxViews` & `Expiry` are optinal.
+
 Afer giving all the values, `User-A` can click the submit button in modal. On clicking the submit button, bot sends a message mentioning all the users that `User-A` chose in select menu with and Button to see the whisper message. If users mentined in message click on the button, they can see the private text. However, if someone else, that is not mentioned on the message clicks the button, the bot will prevent them from seeing the message and will show a message saying `"This message is not for you."` Also, the private message will expire based on the duration given, whether mentioned users have seen it or not. it also deletes the last whisperpanel and sends a new one so the whisperpanel stays on the bottom for better UX.
 
 
@@ -112,6 +113,7 @@ Let's say `User-A` wants to tell up to 5 users something privately, but they don
   - If not given, uses the default channel set on the Custom Command code by guild managers.
 
 > Only `users` and `message` are required values. Other values `medialinks`, `maxviews`, `expiry`, `anonymous` & `channel` are optional.
+
 On running the command, the bot sends a message mentioning all the users `User-A` chose, with a button to see the whisper message, and gives `User-A` an ephemeral confirmation showing the whisper's settings and a jump link to it. If a mentioned user clicks the button, they can see the private text (and media, if any) — but each time they view it, one of their `maxviews` is used up; once they run out, the bot tells them they have no views left. However, if someone not mentioned, like `User-F`, clicks the button, the bot prevents them from seeing the message and shows `"This message is not for you."` `User-A` themself has unlimited views and is always shown as the sender, and unless `anonymous` was used successfully, everyone else who views it sees who sent it too. `User-A` can also press a second button to delete the whisper early, which removes it for everyone regardless of expiry. Otherwise, the whisper expires based on the duration given, whether recipients have seen it or not. Optionally, all of this can be logged to a channel set by guild managers.
 
 ### Installation
