@@ -1,0 +1,187 @@
+{{$SRB := sdict
+	"ID" "cselfrole_"
+	"ModRoles" (cslice 1517437185236799498)
+	"Icons" (sdict
+		"RoleIndex" (cslice
+			"1519573235178537021" "1519573912520753254" "1519573942329671760" "1519573967357083698" "1519573994825580694"
+			"1519574023241990264" "1519574056129790074" "1519574096856350762" "1519574137461542972" "1519574171066044528"
+			"1519574241488535682" "1519574426335580311" "1519574464537432074" "1519574502420254720" "1519574543134490645"
+			"1519574581856305262" "1519574617415483462" "1519574655395168256" "1519574695425474591" "1519574733581189251"
+			"1519574777398956173" "1519574816481607760" "1519574876028145784" "1519574949021356073" "1519575048330154096")
+		"Added" "1449736154319421520" "Removed" "1449736095070687336" "Holding" "1449736128839159858"
+		"ButtonType" "1519651357185802342" "SelectMenuType" "1519651415432364215"
+		"Allow" "1519653966315524188" "Deny" "1519653939803586580"
+		"Style" "1333698233683410954" "Send" "1272652974979678249"
+		)
+	}}
+
+{{$IsMod := false}}
+{{range .Member.Roles}}
+	{{if in $SRB.ModRoles .}}
+		{{$IsMod = true}}
+		{{break}}
+	{{end}}
+{{end}}
+{{if eq .User.ID .Guild.OwnerID}}
+	{{$IsMod = true}}
+{{end}}
+
+{{if not $IsMod}}
+	{{deleteMessage nil (sendMessageRetID nil (complexMessage "reply" .Message.ID "content" "You do not have a moderator role, so you cannot manage SelfRole panels.")) 15}}
+	{{deleteTrigger 15}}
+	{{return}}
+{{end}}
+
+{{define "Preview"}}
+	{{$Args := .}}
+	{{$AccentColor := 0xffffaa}}
+	{{$RoleLines := ""}}
+	{{$Buttons := cslice}}
+	{{$Options := cslice}}
+
+	{{range $I, $Role := $Args.Roles}}
+		{{$RoleLines = print $RoleLines "` " (printf "%0*d" 2 (add $I 1)) " ` | <@&" $Role ">\n"}}
+
+		{{if $Args.Indexing}}
+			{{if eq $Args.Type "Buttons"}}
+				{{$Buttons = $Buttons.Append (cbutton "emoji" (sdict "id" (index $Args.Settings.Icons.RoleIndex $I)) "custom_id" (print $Args.ID "panelbtn_" $Role) "style" "blurple")}}
+			{{else if eq $Args.Type "Select Menu"}}
+				{{$RoleObj := getRole $Role}}
+				{{$RoleName := "Unknown Role"}}
+				{{if $RoleObj}}
+					{{$RoleName = $RoleObj.Name}}
+				{{end}}
+				{{$Options = $Options.Append (sdict "emoji" (sdict "id" (index $Args.Settings.Icons.RoleIndex $I)) "label" $RoleName "value" (toString $Role))}}
+			{{end}}
+		{{end}}
+	{{end}}
+
+	{{$Heading := print "## " (or $Args.Label "Preview")}}
+	{{$Fallback := "_Please select roles, upto 25 to show them here!_"}}
+	{{$Body := trimSpace $RoleLines}}
+
+	{{if not $Args.Indexing}}
+		{{return (sdict "color" $AccentColor "components" (componentBuilder "text" $Heading "separator" false "text" (or $Body $Fallback)))}}
+	{{else if eq $Args.Type "Buttons"}}
+		{{return (componentBuilder "container" (sdict "color" $AccentColor "components" (componentBuilder "text" $Heading "separator" false "text" (or $Body $Fallback))) "separator" false "buttons" $Buttons)}}
+	{{else}}
+		{{$Menu := sdict "type" "string" "custom_id" (print $Args.ID "panelmenu") "placeholder" "Select your roles..." "min_values" 0 "max_values" $Args.Mode "options" $Options}}
+		{{return (componentBuilder "container" (sdict "color" $AccentColor "components" (componentBuilder "text" $Heading "separator" false "text" (or $Body $Fallback))) "separator" false "menus" $Menu)}}
+	{{end}}
+{{end}}
+
+{{define "Controller"}}
+	{{$Args := .}}
+	{{$ID := $Args.ID}}
+
+	{{$RoleDefaults := cslice}}
+	{{range $Role := $Args.Roles}}
+		{{$RoleDefaults = $RoleDefaults.Append (sdict "id" (toString $Role) "type" "role")}}
+	{{end}}
+
+	{{$ChannelDefaults := cslice}}
+	{{if $Args.ChannelID}}
+		{{$ChannelDefaults = $ChannelDefaults.Append (sdict "id" (toString $Args.ChannelID) "type" "channel")}}
+	{{end}}
+
+	{{$RestrictRolesDefaults := cslice}}
+	{{range $RestrictRole := $Args.RestrictRoles.Roles}}
+		{{$RestrictRolesDefaults = $RestrictRolesDefaults.Append (sdict "id" (toString $RestrictRole) "type" "role")}}
+	{{end}}
+
+	{{$RolesSelect := sdict "type" "role" "placeholder" "Select Self Roles..." "custom_id" (print $ID "roleselect") "max_values" 25 "min_values" 1 "default_values" $RoleDefaults}}
+	{{$ChannelSelect := sdict "type" "channel" "channel_types" (cslice 0 2 5 10 11 12 13) "placeholder" "Channel to send Self-Roles RoleMenu" "custom_id" (print $ID "channelselect") "max_values" 1 "default_values" $ChannelDefaults}}
+	{{$RestrictRolesSelect := sdict "type" "role" "placeholder" (print "Restrict Roles (" $Args.RestrictRoles.Type ")") "custom_id" (print $ID "restrictselect") "max_values" 25 "min_values" 0 "default_values" $RestrictRolesDefaults}}
+
+	{{$RestrictIcon := $Args.Settings.Icons.Deny}}
+	{{if eq $Args.RestrictRoles.Type "Allow"}}
+		{{$RestrictIcon = $Args.Settings.Icons.Allow}}
+	{{end}}
+
+	{{$PanelTypeIcon := $Args.Settings.Icons.SelectMenuType}}
+	{{if eq $Args.Type "Buttons"}}
+		{{$PanelTypeIcon = $Args.Settings.Icons.ButtonType}}
+	{{end}}
+
+	{{$RestrictToggleButton := sdict "emoji" (sdict "id" $RestrictIcon) "style" "grey" "custom_id" (print $ID "restrictbutton")}}
+	{{$PanelTypeToggleButton := sdict "emoji" (sdict "id" $PanelTypeIcon) "style" "grey" "custom_id" (print $ID "panelbutton")}}
+	{{$StyleButton := sdict "emoji" (sdict "id" $Args.Settings.Icons.Style) "style" "grey" "custom_id" (print $ID "stylebutton")}}
+	{{$SendButton := sdict "emoji" (sdict "id" $Args.Settings.Icons.Send) "style" "green" "custom_id" (print $ID "sendbutton")}}
+
+	{{return (sdict "color" 0xffffaa "components" (componentBuilder "text" $Args.InfoText "separator" false "menus" $RolesSelect "menus" $ChannelSelect "menus" $RestrictRolesSelect "text" (print "Send before acting DB gets deleted:\n-# " $Args.ExpiresText) "buttons" (cslice $RestrictToggleButton $PanelTypeToggleButton $StyleButton $SendButton)))}}
+{{end}}
+
+{{if eq (len .Args) 1}}
+		{{deleteMessage nil (sendMessageRetID nil (complexMessage "reply" .Message.ID "content" "`SETUP`: Sends a SelfRoleBuilder to set up a new SelfRolePanel.\n\n`RESAVE`: Resaves / edits an existing SelfRolePanel With new database values / edited role names | if any.\n\n`DELETE`: Deletes both the database entry and the panel message.")) 30}}
+		{{deleteTrigger 30}}
+{{else if eq (len .Args) 2}}
+	{{$SubCommand := lower (index .Args 1)}}
+
+	{{if eq $SubCommand "setup"}}
+		{{dbSet .Guild.ID "SelfRoleBuilder" $SRB}}
+
+		{{$ExpireUnix := add currentTime.Unix 900}}
+		{{$ExpiresText := print "<t:" $ExpireUnix ":d>" "` `" "<t:" $ExpireUnix ":T>" "・" "<t:" $ExpireUnix ":R>"}}
+
+		{{$Mode := 1}}
+		{{$ModeText := "Single"}}
+		{{$Type := "Select Menu"}}
+		{{$RestrictRoles := sdict "Type" "Deny" "Roles" cslice}}
+
+		{{$InfoText := print "` Channel  ` | <#" .Channel.ID ">" "\n" "` Mode     ` | " $ModeText " : " $Mode "\n" "` Type     ` | " $Type "\n" "` Restrict ` | " $RestrictRoles.Type " : 0 role(s)"}}
+
+		{{$BuilderMessageID := sendMessageRetID nil (componentBuilder "container" (execTemplate "Preview" (sdict "Label" "" "Roles" cslice)) "container" (execTemplate "Controller" (sdict "ID" $SRB.ID "InfoText" $InfoText "ExpiresText" $ExpiresText "ChannelID" .Channel.ID "Roles" cslice "RestrictRoles" $RestrictRoles "Settings" $SRB "Type" $Type)))}}
+
+		{{dbSetExpire $BuilderMessageID "SelfRoleBuilder" (sdict "Label" "" "Mode" $Mode "Type" $Type "Roles" cslice "RestrictRoles" $RestrictRoles "ChannelID" .Channel.ID "UserID" .User.ID) 900}}
+	{{else if or (eq $SubCommand "resave") (eq $SubCommand "delete")}}
+		{{try}}
+			{{deleteMessage nil (sendMessageRetID nil (complexMessage "reply" .Message.ID "content" "Panel Message ID is required.")) 10}}
+			{{deleteTrigger 10}}
+		{{catch}}{{end}}
+	{{else}}
+		{{print "Unknown subcommand `" $SubCommand "`. Valid options are `setup`, `resave`, and `delete`."}}
+	{{end}}
+{{else if eq (len .Args) 3}}
+	{{$SubCommand := lower (index .Args 1)}}
+	
+	{{$SRP := (dbGet (toInt64 (index .Args 2)) "SelfRolePanel").Value}}
+	{{if not $SRP}}
+		{{"Database Deleted/Missing."}}{{return}}
+	{{end}}
+
+	{{if not (getMessage $SRP.ChannelID $SRP.MessageID)}}
+		{{"Message Deleted/Missing."}}
+		{{return}}
+	{{end}}
+
+	{{if eq $SubCommand "resave"}}
+		{{if or (not $SRP.Label) (not $SRP.Roles) (not $SRP.RestrictRoles) (not $SRP.ChannelID)}}
+			{{print "Database entry is corrupted or missing required values, delete with command or edit the database manually."}}
+		{{else if and (eq $SRP.RestrictRoles.Type "Allow") (not $SRP.RestrictRoles.Roles)}}
+			{{"Restrict is set to `Allow` but no roles were selected. Select at least one role to `allow`, or switch Restrict to `Deny`."}}
+		{{else}}
+			{{try}}
+				{{editMessage $SRP.ChannelID $SRP.MessageID (execTemplate "Preview" (sdict "ID" $SRB.ID "Label" $SRP.Label "Roles" $SRP.Roles "Indexing" true "Type" $SRP.Type "Mode" $SRP.Mode "Settings" $SRB))}}
+				{{sendMessage nil (componentBuilder "container" (sdict "color" 0xffffaa "components" (componentBuilder "text" (print "Panel `" $SRP.Label "` was resaved successfully.") "buttons" (cbutton "emoji" (sdict "id" $SRB.Icons.Send) "label" (printf "%s %*s" "Jump to Panel" (sub 79 (len "Jump to Panel")) "...") "style" "url" "url" (print "https://discord.com/channels/" .Guild.ID "/" $SRP.ChannelID "/" $SRP.MessageID)))))}}
+			{{catch}}
+				{{if in .Error (print "Must be " $SRP.Mode " or more in length.")}}
+					{{"The number of selected roles doesn't match the required mode count."}}
+				{{else}}
+					{{print "Error: " .Error}}
+				{{end}}
+			{{end}}
+		{{end}}
+	{{else if eq $SubCommand "delete"}}
+		{{dbDel $SRP.MessageID "SelfRolePanel"}}
+		{{$MessageDeleted := false}}
+		{{try}}
+			{{deleteMessage $SRP.ChannelID $SRP.MessageID 0}}
+			{{$MessageDeleted = true}}
+		{{catch}}{{end}}
+		{{if $MessageDeleted}}
+			{{print "Database & Message of Panel `" (or $SRP.Label "Unnamed") "` was deleted."}}
+		{{else}}
+			{{print "Database of Panel `" (or $SRP.Label "Unnamed") "` was deleted, but not the Message."}}
+		{{end}}
+	{{end}}
+{{end}}

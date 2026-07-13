@@ -1,0 +1,117 @@
+{{$SRB := (dbGet .Guild.ID "SelfRoleBuilder").Value}}
+{{if not $SRB}}
+	{{return}}
+{{end}}
+
+{{if ne .CustomID (print $SRB.ID "stylemodal")}}
+	{{return}}
+{{end}}
+
+{{$SS := (dbGet .Message.ID "SelfRoleBuilder").Value}}
+
+{{if not $SS}}
+	{{ephemeralResponse | print "This builder session has expired. Please run the setup command again."}}
+	{{return}}
+{{end}}
+
+{{if ne .User.ID $SS.UserID}}
+	{{ephemeralResponse | print "Only the moderator who started this builder session can use it."}}
+	{{return}}
+{{end}}
+
+{{define "Preview"}}
+	{{$Args := .}}
+	{{$RoleLines := ""}}
+
+	{{range $I, $Role := $Args.Roles}}
+		{{$RoleLines = print $RoleLines "` " (printf "%0*d" 2 (add $I 1)) " ` | <@&" $Role ">\n"}}
+	{{end}}
+
+	{{$Heading := print "## " (or $Args.Label "Preview")}}
+	{{$Fallback := "_Please select roles, upto 25 to show them here!_"}}
+	{{$Body := trimSpace $RoleLines}}
+
+	{{return (sdict "color" 0xffffaa "components" (componentBuilder "text" $Heading "separator" false "text" (or $Body $Fallback)))}}
+{{end}}
+
+{{define "Controller"}}
+	{{$Args := .}}
+	{{$ID := $Args.ID}}
+
+	{{$RoleDefaults := cslice}}
+	{{range $Role := $Args.Roles}}
+		{{$RoleDefaults = $RoleDefaults.Append (sdict "id" (toString $Role) "type" "role")}}
+	{{end}}
+
+	{{$ChannelDefaults := cslice}}
+	{{if $Args.ChannelID}}
+		{{$ChannelDefaults = $ChannelDefaults.Append (sdict "id" (toString $Args.ChannelID) "type" "channel")}}
+	{{end}}
+
+	{{$RestrictRolesDefaults := cslice}}
+	{{range $RestrictRole := $Args.RestrictRoles.Roles}}
+		{{$RestrictRolesDefaults = $RestrictRolesDefaults.Append (sdict "id" (toString $RestrictRole) "type" "role")}}
+	{{end}}
+
+	{{$RolesSelect := sdict "type" "role" "placeholder" "Select Self Roles..." "custom_id" (print $ID "roleselect") "max_values" 25 "min_values" 1 "default_values" $RoleDefaults}}
+	{{$ChannelSelect := sdict "type" "channel" "channel_types" (cslice 0 2 5 10 11 12 13) "placeholder" "Channel to send Self-Roles RoleMenu" "custom_id" (print $ID "channelselect") "max_values" 1 "default_values" $ChannelDefaults}}
+	{{$RestrictRolesSelect := sdict "type" "role" "placeholder" (print "Restrict Roles (" $Args.RestrictRoles.Type ")") "custom_id" (print $ID "restrictselect") "max_values" 25 "min_values" 0 "default_values" $RestrictRolesDefaults}}
+
+	{{$RestrictIcon := $Args.Settings.Icons.Deny}}
+	{{if eq $Args.RestrictRoles.Type "Allow"}}
+		{{$RestrictIcon = $Args.Settings.Icons.Allow}}
+	{{end}}
+
+	{{$PanelTypeIcon := $Args.Settings.Icons.SelectMenuType}}
+	{{if eq $Args.Type "Buttons"}}
+		{{$PanelTypeIcon = $Args.Settings.Icons.ButtonType}}
+	{{end}}
+
+	{{$RestrictToggleButton := sdict "emoji" (sdict "id" $RestrictIcon) "style" "grey" "custom_id" (print $ID "restrictbutton")}}
+	{{$PanelTypeToggleButton := sdict "emoji" (sdict "id" $PanelTypeIcon) "style" "grey" "custom_id" (print $ID "panelbutton")}}
+	{{$StyleButton := sdict "emoji" (sdict "id" $Args.Settings.Icons.Style) "style" "grey" "custom_id" (print $ID "stylebutton")}}
+	{{$SendButton := sdict "emoji" (sdict "id" $Args.Settings.Icons.Send) "style" "green" "custom_id" (print $ID "sendbutton")}}
+
+	{{return (sdict "color" 0xffffaa "components" (componentBuilder "text" $Args.InfoText "separator" false "menus" $RolesSelect "menus" $ChannelSelect "menus" $RestrictRolesSelect "text" (print "Send before acting DB gets deleted:\n-# " $Args.ExpiresText) "buttons" (cslice $RestrictToggleButton $PanelTypeToggleButton $StyleButton $SendButton)))}}
+{{end}}
+
+{{$Label := .ModalValues.Label.value}}
+{{$Mode := toInt .ModalValues.Mode.value}}
+{{$Type := $SS.Type}}
+
+{{if lt $Mode 1}}
+	{{$Mode = 1}}
+{{end}}
+
+{{if $SS.Roles}}
+	{{if gt $Mode (len $SS.Roles)}}
+		{{$Mode = len $SS.Roles}}
+	{{end}}
+{{else}}
+	{{$Mode = 1}}
+{{end}}
+
+{{$ModeText := "Single"}}
+{{if gt $Mode 1}}
+	{{$ModeText = "Limited"}}
+{{end}}
+{{if and $SS.Roles (eq $Mode (len $SS.Roles))}}
+	{{$ModeText = "Multiple"}}
+{{end}}
+
+{{$RestrictRoles := $SS.RestrictRoles}}
+{{if not $RestrictRoles}}
+	{{$RestrictRoles = sdict "Type" "Deny" "Roles" cslice}}
+{{end}}
+{{if not $RestrictRoles.Roles}}
+	{{$RestrictRoles = sdict "Type" $RestrictRoles.Type "Roles" cslice}}
+{{end}}
+
+{{$ExpireUnix := add currentTime.Unix 900}}
+{{$ExpiresText := print "<t:" $ExpireUnix ":d>" "` `" "<t:" $ExpireUnix ":T>" "・" "<t:" $ExpireUnix ":R>"}}
+
+{{$InfoText := print "` Channel  ` | <#" $SS.ChannelID ">" "\n" "` Mode     ` | " $ModeText " : " $Mode "\n" "` Type     ` | " $Type "\n" "` Restrict ` | " $RestrictRoles.Type " : " (len $RestrictRoles.Roles) " role(s)"}}
+
+{{updateMessage (componentBuilder "container" (execTemplate "Preview" (sdict "Label" $Label "Roles" $SS.Roles)) "container" (execTemplate "Controller" (sdict "ID" $SRB.ID "InfoText" $InfoText "ExpiresText" $ExpiresText "Roles" $SS.Roles "RestrictRoles" $RestrictRoles "ChannelID" $SS.ChannelID "Settings" $SRB "Type" $Type)))}}
+
+{{dbSetExpire .Message.ID "SelfRoleBuilder" (sdict "Label" $Label "Mode" $Mode "Type" $Type "Roles" $SS.Roles "RestrictRoles" $RestrictRoles "ChannelID" $SS.ChannelID "UserID" $SS.UserID) 900}}

@@ -1,0 +1,215 @@
+{{$SRB := (dbGet .Guild.ID "SelfRoleBuilder").Value}}
+
+{{$ErrorColor := 0xFF5A33}}
+{{if not $SRB}}
+	{{$ErrorMessage := sdict "color" $ErrorColor "components" (componentBuilder
+		"text" "**Self-roles unavailable**\nThis server's self-role system could not be found. Please contact a server admin."
+	)}}
+	{{sendResponse nil (componentBuilder "ephemeral" true "container" $ErrorMessage)}}
+	{{return}}
+{{end}}
+
+{{$CustomID := .CustomID}}
+{{$MenuID := print $SRB.ID "panelmenu"}}
+
+{{$IDParts := split $CustomID "_"}}
+{{$PartCount := len $IDParts}}
+
+{{$IsButtonClick := false}}
+{{$RoleID := ""}}
+{{if ge $PartCount 2}}
+	{{$CandidateRoleID := index $IDParts (sub $PartCount 1)}}
+	{{if eq $CustomID (print $SRB.ID "panelbtn_" $CandidateRoleID)}}
+		{{$IsButtonClick = true}}
+		{{$RoleID = $CandidateRoleID}}
+	{{end}}
+{{end}}
+
+{{$IsMenuClick := eq $CustomID $MenuID}}
+
+{{if and (not $IsButtonClick) (not $IsMenuClick)}}
+	{{return}}
+{{end}}
+
+{{$SPP := (dbGet .Message.ID "SelfRolePanel").Value}}
+{{if not $SPP}}
+	{{$ErrorMessage := sdict "color" $ErrorColor "components" (componentBuilder
+		"text" "**Panel data missing**\nThis self-role panel's data could not be found. Please contact a server admin."
+	)}}
+	{{sendResponse nil (componentBuilder "ephemeral" true "container" $ErrorMessage)}}
+	{{return}}
+{{end}}
+
+{{$RestrictType := "Deny"}}
+{{$RestrictRoleIDs := cslice}}
+{{if $SPP.RestrictRoles}}
+	{{$RestrictType = $SPP.RestrictRoles.Type}}
+	{{$RestrictRoleIDs = $SPP.RestrictRoles.Roles}}
+{{end}}
+
+{{$HasRestrictRole := false}}
+{{range $RestrictRoleID := $RestrictRoleIDs}}
+	{{if hasRoleID $RestrictRoleID}}
+		{{$HasRestrictRole = true}}
+		{{break}}
+	{{end}}
+{{end}}
+
+{{$IsBlocked := false}}
+{{if eq $RestrictType "Allow"}}
+	{{if and $RestrictRoleIDs (not $HasRestrictRole)}}
+		{{$IsBlocked = true}}
+	{{end}}
+{{else if eq $RestrictType "Deny"}}
+	{{if $HasRestrictRole}}
+		{{$IsBlocked = true}}
+	{{end}}
+{{end}}
+
+{{if $IsBlocked}}
+	{{$Reason := ""}}
+	{{if eq $RestrictType "Allow"}}
+		{{$NeededText := ""}}
+		{{range $RestrictRoleID := $RestrictRoleIDs}}
+			{{$NeededText = print $NeededText "<@&" $RestrictRoleID ">\n"}}
+		{{end}}
+		{{$Reason = print "You need one of the following roles to use this panel:\n" (or (trimSpace $NeededText) "_None_")}}
+	{{else}}
+		{{$BlockingText := ""}}
+		{{range $RestrictRoleID := $RestrictRoleIDs}}
+			{{if hasRoleID $RestrictRoleID}}
+				{{$BlockingText = print $BlockingText "<@&" $RestrictRoleID ">\n"}}
+			{{end}}
+		{{end}}
+		{{$Reason = print "You hold a role that is blocked from using this panel:\n" (or (trimSpace $BlockingText) "_None_")}}
+	{{end}}
+
+	{{$BlockMessage := sdict "color" $ErrorColor "components" (componentBuilder
+		"text" (print "**Access restricted**\n" $Reason)
+	)}}
+	{{sendResponse nil (componentBuilder "ephemeral" true "container" $BlockMessage)}}
+	{{return}}
+{{end}}
+
+{{$Limit := toInt $SPP.Mode}}
+{{$TotalRoles := len $SPP.Roles}}
+
+{{$HeldRoles := cslice}}
+{{range $Role := $SPP.Roles}}
+	{{if hasRoleID $Role}}
+		{{$HeldRoles = $HeldRoles.Append $Role}}
+	{{end}}
+{{end}}
+
+{{$AddedRoles := cslice}}
+{{$RemovedRoles := cslice}}
+
+{{if and .IsButton $IsButtonClick}}
+	{{if hasRoleID $RoleID}}
+		{{removeRole $RoleID}}
+		{{$RemovedRoles = $RemovedRoles.Append $RoleID}}
+	{{else}}
+		{{if lt (len $HeldRoles) $Limit}}
+			{{addRole $RoleID}}
+			{{$AddedRoles = $AddedRoles.Append $RoleID}}
+		{{else if eq $Limit 1}}
+			{{range $HeldRole := $HeldRoles}}
+				{{removeRole $HeldRole}}
+				{{$RemovedRoles = $RemovedRoles.Append $HeldRole}}
+			{{end}}
+			{{addRole $RoleID}}
+			{{$AddedRoles = $AddedRoles.Append $RoleID}}
+		{{else}}
+			{{$HeldText := ""}}
+			{{range $HeldRole := $HeldRoles}}
+				{{$HeldText = print $HeldText "<@&" $HeldRole ">" "\n"}}
+			{{end}}
+
+			{{$LimitSummary := sdict "color" $ErrorColor "components" (componentBuilder
+				"text" (print "**Limit reached `" (len $HeldRoles) "/" $Limit "`**\nYou already hold:\n" (or (trimSpace $HeldText) "_None_"))
+				"separator" false
+				"text" "Remove one of these first, then try again."
+			)}}
+
+			{{sendResponse nil (componentBuilder "ephemeral" true "container" $LimitSummary)}}
+			{{return}}
+		{{end}}
+	{{end}}
+{{else if and .IsMenu $IsMenuClick}}
+	{{$SelectedValues := cslice}}
+	{{range .Values}}
+		{{$SelectedValues = $SelectedValues.Append .}}
+	{{end}}
+
+	{{range $Role := $SPP.Roles}}
+		{{$IsWanted := false}}
+		{{range $Value := $SelectedValues}}
+			{{if eq $Value (toString $Role)}}
+				{{$IsWanted = true}}
+				{{break}}
+			{{end}}
+		{{end}}
+
+		{{$IsHeld := false}}
+		{{range $HeldRole := $HeldRoles}}
+			{{if eq $HeldRole $Role}}
+				{{$IsHeld = true}}
+				{{break}}
+			{{end}}
+		{{end}}
+
+		{{if $IsWanted}}
+			{{if not $IsHeld}}
+				{{addRole $Role}}
+				{{$AddedRoles = $AddedRoles.Append $Role}}
+			{{end}}
+		{{else if $IsHeld}}
+			{{removeRole $Role}}
+			{{$RemovedRoles = $RemovedRoles.Append $Role}}
+		{{end}}
+	{{end}}
+{{else}}
+	{{return}}
+{{end}}
+
+{{$HeldRolesAfter := cslice}}
+{{range $HeldRole := $HeldRoles}}
+	{{$WasRemoved := false}}
+	{{range $RemovedRole := $RemovedRoles}}
+		{{if eq $RemovedRole $HeldRole}}
+			{{$WasRemoved = true}}
+			{{break}}
+		{{end}}
+	{{end}}
+	{{if not $WasRemoved}}
+		{{$HeldRolesAfter = $HeldRolesAfter.Append $HeldRole}}
+	{{end}}
+{{end}}
+{{range $AddedRole := $AddedRoles}}
+	{{$HeldRolesAfter = $HeldRolesAfter.Append $AddedRole}}
+{{end}}
+
+{{$HeldAfterText := ""}}
+{{range $Role := $HeldRolesAfter}}
+	{{$HeldAfterText = print $HeldAfterText "-# " "<@&" $Role ">" "\n"}}
+{{end}}
+
+{{$AddedText := ""}}
+{{range $Role := $AddedRoles}}
+	{{$AddedText = print $AddedText "-# " "<@&" $Role ">" "\n"}}
+{{end}}
+
+{{$RemovedText := ""}}
+{{range $Role := $RemovedRoles}}
+	{{$RemovedText = print $RemovedText "-# " "<@&" $Role ">" "\n"}}
+{{end}}
+
+{{$Summary := sdict "color" 0xffffaa "components" (componentBuilder
+	"text" (print "**Limit: " (len $HeldRolesAfter) "/" $Limit " | Total: " $TotalRoles "**")
+	"separator" false
+	"text" (print "<:_:" $SRB.Icons.Added "> | **Added**\n" (or (trimSpace $AddedText) "`None`"))
+	"text" (print "<:_:" $SRB.Icons.Removed "> | **Removed**\n" (or (trimSpace $RemovedText) "`None`"))
+	"text" (print "<:_:" $SRB.Icons.Holding "> | **Holding**\n" (or (trimSpace $HeldAfterText) "`None`"))
+)}}
+
+{{sendResponse nil (componentBuilder "ephemeral" true "container" $Summary)}}

@@ -1,0 +1,218 @@
+{{$SRB := (dbGet .Guild.ID "SelfRoleBuilder").Value}}
+{{if not $SRB}}
+	{{return}}
+{{end}}
+
+{{$CustomID := .CustomID}}
+
+{{if not (in (cslice (print $SRB.ID "sendbutton") (print $SRB.ID "stylebutton") (print $SRB.ID "restrictbutton") (print $SRB.ID "panelbutton") (print $SRB.ID "roleselect") (print $SRB.ID "channelselect") (print $SRB.ID "restrictselect") ) $CustomID)}}
+	{{return}}
+{{end}}
+
+{{$SS := (dbGet .Message.ID "SelfRoleBuilder").Value}}
+
+{{if not $SS}}
+	{{ephemeralResponse | print "This builder session has expired. Please run the setup command again."}}
+	{{return}}
+{{end}}
+
+{{if ne .User.ID $SS.UserID}}
+	{{ephemeralResponse | print "Only the moderator who started this builder session can use it."}}
+	{{return}}
+{{end}}
+
+{{$Roles := $SS.Roles}}
+{{$ChannelID := $SS.ChannelID}}
+
+{{$RestrictRoles := $SS.RestrictRoles}}
+{{if not $RestrictRoles}}
+	{{$RestrictRoles = sdict "Type" "Deny" "Roles" cslice}}
+{{end}}
+{{if not $RestrictRoles.Roles}}
+	{{$RestrictRoles = sdict "Type" $RestrictRoles.Type "Roles" cslice}}
+{{end}}
+
+{{if .IsMenu}}
+	{{if eq $CustomID (print $SRB.ID "roleselect")}}
+		{{$Roles = cslice}}
+		{{range .Values}}
+			{{$Roles = $Roles.Append .}}
+		{{end}}
+	{{else if eq $CustomID (print $SRB.ID "channelselect")}}
+		{{$ChannelID = index .Values 0}}
+	{{else if eq $CustomID (print $SRB.ID "restrictselect")}}
+		{{$NewRestrictRoleIDs := cslice}}
+		{{range .Values}}
+			{{$NewRestrictRoleIDs = $NewRestrictRoleIDs.Append .}}
+		{{end}}
+		{{$RestrictRoles = sdict "Type" $RestrictRoles.Type "Roles" $NewRestrictRoleIDs}}
+	{{end}}
+{{end}}
+
+{{$Mode := toInt $SS.Mode}}
+
+{{if lt $Mode 1}}
+	{{$Mode = 1}}
+{{end}}
+
+{{if $Roles}}
+	{{if gt $Mode (len $Roles)}}
+		{{$Mode = len $Roles}}
+	{{end}}
+{{else}}
+	{{$Mode = 1}}
+{{end}}
+
+{{$ModeText := "Single"}}
+{{if gt $Mode 1}}
+	{{$ModeText = "Limited"}}
+{{end}}
+{{if and $Roles (eq $Mode (len $Roles))}}
+	{{$ModeText = "Multiple"}}
+{{end}}
+
+{{$Type := $SS.Type}}
+
+{{define "Preview"}}
+	{{$Args := .}}
+	{{$AccentColor := 0xffffaa}}
+	{{$RoleLines := ""}}
+	{{$Buttons := cslice}}
+	{{$Options := cslice}}
+
+	{{range $I, $Role := $Args.Roles}}
+		{{$RoleLines = print $RoleLines "` " (printf "%0*d" 2 (add $I 1)) " ` | <@&" $Role ">\n"}}
+
+		{{if $Args.Indexing}}
+			{{if eq $Args.Type "Buttons"}}
+				{{$Buttons = $Buttons.Append (cbutton "emoji" (sdict "id" (index $Args.Settings.Icons.RoleIndex $I)) "custom_id" (print $Args.ID "panelbtn_" $Role) "style" "blurple")}}
+			{{else if eq $Args.Type "Select Menu"}}
+				{{$RoleObj := getRole $Role}}
+				{{$RoleName := "Unknown Role"}}
+				{{if $RoleObj}}
+					{{$RoleName = $RoleObj.Name}}
+				{{end}}
+				{{$Options = $Options.Append (sdict "emoji" (sdict "id" (index $Args.Settings.Icons.RoleIndex $I)) "label" $RoleName "value" (toString $Role))}}
+			{{end}}
+		{{end}}
+	{{end}}
+
+	{{$Heading := print "## " (or $Args.Label "Preview")}}
+	{{$Fallback := "_Please select roles, upto 25 to show them here!_"}}
+	{{$Body := trimSpace $RoleLines}}
+
+	{{if not $Args.Indexing}}
+		{{return (sdict "color" $AccentColor "components" (componentBuilder "text" $Heading "separator" false "text" (or $Body $Fallback)))}}
+	{{else if eq $Args.Type "Buttons"}}
+		{{return (componentBuilder "container" (sdict "color" $AccentColor "components" (componentBuilder "text" $Heading "separator" false "text" (or $Body $Fallback))) "separator" false "buttons" $Buttons)}}
+	{{else}}
+		{{$Menu := sdict "type" "string" "custom_id" (print $Args.ID "panelmenu") "placeholder" "Select your roles..." "min_values" 0 "max_values" $Args.Mode "options" $Options}}
+		{{return (componentBuilder "container" (sdict "color" $AccentColor "components" (componentBuilder "text" $Heading "separator" false "text" (or $Body $Fallback))) "separator" false "menus" $Menu)}}
+	{{end}}
+{{end}}
+
+{{define "Controller"}}
+	{{$Args := .}}
+	{{$ID := $Args.ID}}
+
+	{{$RoleDefaults := cslice}}
+	{{range $Role := $Args.Roles}}
+		{{$RoleDefaults = $RoleDefaults.Append (sdict "id" (toString $Role) "type" "role")}}
+	{{end}}
+
+	{{$ChannelDefaults := cslice}}
+	{{if $Args.ChannelID}}
+		{{$ChannelDefaults = $ChannelDefaults.Append (sdict "id" (toString $Args.ChannelID) "type" "channel")}}
+	{{end}}
+
+	{{$RestrictRolesDefaults := cslice}}
+	{{range $RestrictRole := $Args.RestrictRoles.Roles}}
+		{{$RestrictRolesDefaults = $RestrictRolesDefaults.Append (sdict "id" (toString $RestrictRole) "type" "role")}}
+	{{end}}
+
+	{{$RolesSelect := sdict "type" "role" "placeholder" "Select Self Roles..." "custom_id" (print $ID "roleselect") "max_values" 25 "min_values" 1 "default_values" $RoleDefaults}}
+	{{$ChannelSelect := sdict "type" "channel" "channel_types" (cslice 0 2 5 10 11 12 13) "placeholder" "Channel to send Self-Roles RoleMenu" "custom_id" (print $ID "channelselect") "max_values" 1 "default_values" $ChannelDefaults}}
+	{{$RestrictRolesSelect := sdict "type" "role" "placeholder" (print "Restrict Roles (" $Args.RestrictRoles.Type ")") "custom_id" (print $ID "restrictselect") "max_values" 25 "min_values" 0 "default_values" $RestrictRolesDefaults}}
+
+	{{$RestrictIcon := $Args.Settings.Icons.Deny}}
+	{{if eq $Args.RestrictRoles.Type "Allow"}}
+		{{$RestrictIcon = $Args.Settings.Icons.Allow}}
+	{{end}}
+
+	{{$PanelTypeIcon := $Args.Settings.Icons.SelectMenuType}}
+	{{if eq $Args.Type "Buttons"}}
+		{{$PanelTypeIcon = $Args.Settings.Icons.ButtonType}}
+	{{end}}
+
+	{{$RestrictToggleButton := sdict "emoji" (sdict "id" $RestrictIcon) "style" "grey" "custom_id" (print $ID "restrictbutton")}}
+	{{$PanelTypeToggleButton := sdict "emoji" (sdict "id" $PanelTypeIcon) "style" "grey" "custom_id" (print $ID "panelbutton")}}
+	{{$StyleButton := sdict "emoji" (sdict "id" $Args.Settings.Icons.Style) "style" "grey" "custom_id" (print $ID "stylebutton")}}
+	{{$SendButton := sdict "emoji" (sdict "id" $Args.Settings.Icons.Send) "style" "green" "custom_id" (print $ID "sendbutton")}}
+
+	{{return (sdict "color" 0xffffaa "components" (componentBuilder "text" $Args.InfoText "separator" false "menus" $RolesSelect "menus" $ChannelSelect "menus" $RestrictRolesSelect "text" (print "Send before acting DB gets deleted:\n-# " $Args.ExpiresText) "buttons" (cslice $RestrictToggleButton $PanelTypeToggleButton $StyleButton $SendButton)))}}
+{{end}}
+
+{{if .IsButton}}
+	{{if eq $CustomID (print $SRB.ID "sendbutton")}}
+		{{if or (not $SS.Label) (not $Roles) (not $ChannelID)}}
+			{{ephemeralResponse | print "Please set a Label, select at least one role, and choose a channel before sending."}}
+		{{else if and (eq $RestrictRoles.Type "Allow") (not $RestrictRoles.Roles)}}
+			{{ephemeralResponse | print "Restrict is set to Allow but no roles were selected — this would lock everyone out. Select at least one role to allow, or switch Restrict to Deny."}}
+		{{else}}
+			{{try}}
+				{{$PanelMessageID := sendMessageRetID $ChannelID (execTemplate "Preview" (sdict "ID" $SRB.ID "Label" $SS.Label "Roles" $Roles "Indexing" true "Type" $Type "Mode" $Mode "Settings" $SRB))}}
+				{{dbSet $PanelMessageID "SelfRolePanel" (sdict "Label" $SS.Label "ChannelID" $ChannelID "MessageID" $PanelMessageID "Roles" $Roles "Mode" $Mode "Type" $Type "RestrictRoles" $RestrictRoles)}}
+
+				{{$JumpLabel := "Jump to Panel"}}
+				{{updateMessage (componentBuilder "container" (sdict "color" 0xffffaa "components" (componentBuilder "text" (print "Panel `" $SS.Label "` was sent in <#" $ChannelID ">.") "buttons" (cbutton "emoji" (sdict "id" $SRB.Icons.Send) "label" (printf "%s %*s" $JumpLabel (sub 79 (len $JumpLabel)) "...") "style" "url" "url" (print "https://discord.com/channels/" .Guild.ID "/" $ChannelID "/" $PanelMessageID)))))}}
+			{{catch}}
+				{{if in .Error (print "Must be " $SS.Mode " or more in length.")}}
+					{{ephemeralResponse | print "The number of selected roles doesn't match the required mode count."}}
+				{{else}}
+					{{ephemeralResponse | print "Error: " .Error}}
+				{{end}}
+			{{end}}
+		{{end}}
+		{{return}}
+	{{else if eq $CustomID (print $SRB.ID "stylebutton")}}
+		{{sendModal (modalBuilder
+			(print $SRB.ID "stylemodal")
+			(or $SS.Label "Preview")
+			(clabel
+				"label" "Label"
+				"component" (ctextInput
+					"custom_id" "Label" "style" 1 "min_length" 1 "max_length" 40 "required" true "placeholder" "C O L O R S" "value" $SS.Label
+				)
+			)
+			(clabel
+				"label" "Max Roles"
+				"description" "How many roles can a member hold at once?"
+				"component" (ctextInput
+					"custom_id" "Mode" "style" 1 "min_length" 1 "max_length" 2 "required" true "value" (toString $Mode)
+				)
+			)
+		)}}
+		{{return}}
+	{{else if eq $CustomID (print $SRB.ID "restrictbutton")}}
+		{{if eq $RestrictRoles.Type "Allow"}}
+			{{$RestrictRoles = sdict "Type" "Deny" "Roles" $RestrictRoles.Roles}}
+		{{else}}
+			{{$RestrictRoles = sdict "Type" "Allow" "Roles" $RestrictRoles.Roles}}
+		{{end}}
+	{{else if eq $CustomID (print $SRB.ID "panelbutton")}}
+		{{if eq $Type "Buttons"}}
+			{{$Type = "Select Menu"}}
+		{{else}}
+			{{$Type = "Buttons"}}
+		{{end}}
+	{{end}}
+{{end}}
+
+{{$ExpireUnix := add currentTime.Unix 900}}
+{{$ExpiresText := print "<t:" $ExpireUnix ":d>" "` `" "<t:" $ExpireUnix ":T>" "・" "<t:" $ExpireUnix ":R>"}}
+
+{{$InfoText := print "` Channel  ` | <#" $ChannelID ">" "\n" "` Mode     ` | " $ModeText " : " $Mode "\n" "` Type     ` | " $Type "\n" "` Restrict ` | " $RestrictRoles.Type " : " (len $RestrictRoles.Roles) " role(s)"}}
+
+{{updateMessage (componentBuilder "container" (execTemplate "Preview" (sdict "Label" $SS.Label "Roles" $Roles)) "container" (execTemplate "Controller" (sdict "ID" $SRB.ID "InfoText" $InfoText "ExpiresText" $ExpiresText "Roles" $Roles "RestrictRoles" $RestrictRoles "ChannelID" $ChannelID "Settings" $SRB "Type" $Type)))}}
+
+{{dbSetExpire .Message.ID "SelfRoleBuilder" (sdict "Label" $SS.Label "Mode" $Mode "Type" $Type "Roles" $Roles "RestrictRoles" $RestrictRoles "ChannelID" $ChannelID "UserID" $SS.UserID) 900}}
